@@ -1,0 +1,86 @@
+﻿@using Pasteleria.Models.Models
+@model Cliente
+@{
+    ViewData["Title"] = "Agregar Cliente";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header text-white" style="background-color: var(--primary-color);">
+                <h4><i class="fas fa-user-plus"></i> Nuevo Cliente</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="CrearCliente" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="NombreCliente" class="form-label">Nombre Completo</label>
+                        <input asp-for="NombreCliente" class="form-control" placeholder="Ej: Juan Pérez González" />
+                        <span asp-validation-for="NombreCliente" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Cedula" class="form-label">Cédula</label>
+                                <input asp-for="Cedula" class="form-control" placeholder="Ej: 1-2345-6789" />
+                                <span asp-validation-for="Cedula" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Telefono" class="form-label">Teléfono</label>
+                                <input asp-for="Telefono" class="form-control" placeholder="Ej: 8888-8888" />
+                                <span asp-validation-for="Telefono" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Correo" class="form-label">Correo Electrónico</label>
+                        <input asp-for="Correo" type="email" class="form-control" placeholder="ejemplo@correo.com" />
+                        <span asp-validation-for="Correo" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Direccion" class="form-label">Dirección</label>
+                        <textarea asp-for="Direccion" class="form-control" rows="2" placeholder="Dirección completa del cliente..."></textarea>
+                        <span asp-validation-for="Direccion" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Contrasenna" class="form-label">Contraseña</label>
+                        <input asp-for="Contrasenna" type="password" class="form-control" placeholder="Contraseña de acceso" />
+                        <span asp-validation-for="Contrasenna" class="text-danger"></span>
+                        <small class="form-text text-muted">Mínimo 6 caracteres</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Estado" class="form-label">Estado</label>
+                        <select asp-for="Estado" class="form-select">
+                            <option value="Activo" selected>Activo</option>
+                            <option value="Inactivo">Inactivo</option>
+                        </select>
+                        <span asp-validation-for="Estado" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

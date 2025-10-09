@@ -1,0 +1,44 @@
+﻿<!-- Modal Detalles Cliente -->
+<div class="modal fade" id="modalDetalles" tabindex="-1" aria-labelledby="modalDetallesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="modalDetallesLabel">
+                    <i class="fas fa-user"></i> Detalles del Cliente
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 id="detalles-nombre"></h5>
+                        <hr>
+                        <p><strong>ID:</strong> <span id="detalles-id"></span></p>
+                        <p><strong>Cédula:</strong> <span id="detalles-cedula"></span></p>
+                        <p><strong>Correo:</strong> <span id="detalles-correo"></span></p>
+                        <p><strong>Teléfono:</strong> <span id="detalles-telefono"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Dirección</h6>
+                        <p class="text-muted" id="detalles-direccion"></p>
+
+                        <h6>Estado</h6>
+                        <p>
+                            <span id="detalles-estado-badge" class="badge"></span>
+                        </p>
+
+                        <h6>Información Adicional</h6>
+                        <p class="text-muted small">
+                            Cliente registrado en el sistema
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

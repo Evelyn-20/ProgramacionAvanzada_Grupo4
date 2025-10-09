@@ -1,0 +1,77 @@
+﻿<!-- Modal Editar Cliente -->
+<div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="modalEditarLabel">
+                    <i class="fas fa-edit"></i> Editar Cliente
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formEditar" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="editar-id" name="IdCliente" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <div class="mb-3">
+                        <label for="editar-nombre" class="form-label">Nombre Completo</label>
+                        <input type="text" class="form-control" id="editar-nombre" name="NombreCliente" required />
+                        <span class="text-danger" data-valmsg-for="NombreCliente"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="editar-cedula" class="form-label">Cédula</label>
+                                <input type="text" class="form-control" id="editar-cedula" name="Cedula" required />
+                                <span class="text-danger" data-valmsg-for="Cedula"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="editar-telefono" class="form-label">Teléfono</label>
+                                <input type="tel" class="form-control" id="editar-telefono" name="Telefono" required />
+                                <span class="text-danger" data-valmsg-for="Telefono"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editar-correo" class="form-label">Correo Electrónico</label>
+                        <input type="email" class="form-control" id="editar-correo" name="Correo" required />
+                        <span class="text-danger" data-valmsg-for="Correo"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editar-direccion" class="form-label">Dirección</label>
+                        <textarea class="form-control" id="editar-direccion" name="Direccion" rows="2" required></textarea>
+                        <span class="text-danger" data-valmsg-for="Direccion"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editar-contrasenna" class="form-label">Contraseña (dejar en blanco para no cambiar)</label>
+                        <input type="password" class="form-control" id="editar-contrasenna" name="Contrasenna" />
+                        <span class="text-danger" data-valmsg-for="Contrasenna"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editar-estado" class="form-label">Estado</label>
+                        <select class="form-select" id="editar-estado" name="Estado" required>
+                            <option value="Activo">Activo</option>
+                            <option value="Inactivo">Inactivo</option>
+                        </select>
+                        <span class="text-danger" data-valmsg-for="Estado"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save"></i> Actualizar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

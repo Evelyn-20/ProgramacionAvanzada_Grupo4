@@ -1,0 +1,207 @@
+﻿@using Pasteleria.Models.Models
+@model Cliente
+@{
+    ViewData["Title"] = "Gestión de Clientes - Pastelería Dulce Encanto";
+}
+
+<div class="text-center mb-4">
+    <h2>Gestión de Clientes</h2>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-8">
+                <label for="busqueda" class="form-label">Buscar</label>
+                <input type="text" class="form-control" id="busqueda" name="busqueda"
+                       value="@Model.Busqueda" placeholder="Buscar por nombre, cédula, correo, teléfono...">
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+                <a href="@Url.Action("Index")" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Limpiar
+                </a>
+            </div>
+            <input type="hidden" name="pagina" value="1" />
+        </form>
+    </div>
+</div>
+
+<!-- Botones de acción -->
+<div class="mb-3 d-flex gap-2">
+    <form method="post" action="@Url.Action("ExportToCsv")" class="d-inline">
+        <input type="hidden" name="busqueda" value="@Model.Busqueda" />
+        <button type="submit" class="btn btn-outline-primary">
+            <i class="fas fa-download"></i> Exportar CSV
+        </button>
+    </form>
+    <a href="@Url.Action("CrearCliente")" class="btn btn-primary">
+        <i class="fas fa-user-plus"></i> Nuevo Cliente
+    </a>
+</div>
+
+<!-- Tabla de Clientes -->
+<div class="card">
+    <div class="card-body">
+        @if (Model.Clientes.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead style="background-color: var(--primary-color); color: var(--white);">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Cédula</th>
+                            <th>Correo</th>
+                            <th>Teléfono</th>
+                            <th>Dirección</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var cliente in Model.Clientes)
+                        {
+                            <tr>
+                                <td>@cliente.IdCliente</td>
+                                <td><strong>@cliente.NombreCliente</strong></td>
+                                <td>@cliente.Cedula</td>
+                                <td>@cliente.Correo</td>
+                                <td>@cliente.Telefono</td>
+                                <td>@(cliente.Direccion?.Substring(0, Math.Min(cliente.Direccion.Length, 30)) + (cliente.Direccion?.Length > 30 ? "..." : ""))</td>
+                                <td>
+                                    <span class="badge bg-@(cliente.Estado == "Activo" ? "success" : "danger")">
+                                        @cliente.Estado
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-info"
+                                                onclick="mostrarDetalles(@cliente.IdCliente, '@cliente.NombreCliente', '@cliente.Cedula', '@cliente.Correo', '@cliente.Telefono', '@Html.Raw(cliente.Direccion?.Replace("'", "\\'"))', '@cliente.Estado')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-warning"
+                                                onclick="mostrarEditar(@cliente.IdCliente, '@cliente.NombreCliente', '@cliente.Cedula', '@cliente.Correo', '@cliente.Telefono', '@Html.Raw(cliente.Direccion?.Replace("'", "\\'"))', '@cliente.Estado')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger"
+                                                onclick="mostrarEliminar(@cliente.IdCliente, '@cliente.NombreCliente', '@cliente.Cedula', '@cliente.Correo', '@cliente.Telefono', '@cliente.Estado')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            @if (Model.TotalPaginas > 1)
+            {
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        @if (Model.Pagina > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { pagina = Model.Pagina - 1, maxPagina = Model.MaxPagina, busqueda = Model.Busqueda })">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                        }
+
+                        @for (int i = Math.Max(1, Model.Pagina - 2); i <= Math.Min(Model.TotalPaginas, Model.Pagina + 2); i++)
+                        {
+                            <li class="page-item @(i == Model.Pagina ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { pagina = i, maxPagina = Model.MaxPagina, busqueda = Model.Busqueda })">
+                                    @i
+                                </a>
+                            </li>
+                        }
+
+                        @if (Model.Pagina < Model.TotalPaginas)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { pagina = Model.Pagina + 1, maxPagina = Model.MaxPagina, busqueda = Model.Busqueda })">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h5>No se encontraron clientes</h5>
+                <p class="text-muted">Intenta con otros términos de búsqueda o <a href="@Url.Action("CrearCliente")">registra un nuevo cliente</a>.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="mt-3">
+    <small class="text-muted">
+        Mostrando @Model.Clientes.Count() de @Model.Total resultados
+    </small>
+</div>
+
+<!-- Incluir los modales desde archivos parciales -->
+@await Html.PartialAsync("_ModalDetallesCliente")
+@await Html.PartialAsync("_ModalEditarCliente")
+@await Html.PartialAsync("_ModalEliminarCliente")
+
+@section Scripts {
+    <script>
+        function mostrarDetalles(id, nombre, cedula, correo, telefono, direccion, estado) {
+            document.getElementById('detalles-id').textContent = id;
+            document.getElementById('detalles-nombre').textContent = nombre;
+            document.getElementById('detalles-cedula').textContent = cedula;
+            document.getElementById('detalles-correo').textContent = correo;
+            document.getElementById('detalles-telefono').textContent = telefono;
+            document.getElementById('detalles-direccion').textContent = direccion || 'Sin dirección';
+
+            const estadoBadge = document.getElementById('detalles-estado-badge');
+            estadoBadge.textContent = estado;
+            estadoBadge.className = estado === 'Activo' ? 'badge bg-success' : 'badge bg-danger';
+
+            var modal = new bootstrap.Modal(document.getElementById('modalDetalles'));
+            modal.show();
+        }
+
+        function mostrarEditar(id, nombre, cedula, correo, telefono, direccion, estado) {
+            document.getElementById('editar-id').value = id;
+            document.getElementById('editar-nombre').value = nombre;
+            document.getElementById('editar-cedula').value = cedula;
+            document.getElementById('editar-correo').value = correo;
+            document.getElementById('editar-telefono').value = telefono;
+            document.getElementById('editar-direccion').value = direccion || '';
+            document.getElementById('editar-estado').value = estado;
+            document.getElementById('editar-contrasenna').value = '';
+
+            document.getElementById('formEditar').action = '@Url.Action("EditarCliente", "Cliente")';
+
+            var modal = new bootstrap.Modal(document.getElementById('modalEditar'));
+            modal.show();
+        }
+
+        function mostrarEliminar(id, nombre, cedula, correo, telefono, estado) {
+            document.getElementById('eliminar-id').value = id;
+            document.getElementById('eliminar-nombre').textContent = nombre;
+            document.getElementById('eliminar-cedula').textContent = cedula;
+            document.getElementById('eliminar-correo').textContent = correo;
+            document.getElementById('eliminar-telefono').textContent = telefono;
+            document.getElementById('eliminar-estado').textContent = estado;
+
+            document.getElementById('formEliminar').action = '@Url.Action("EliminarCliente", "Cliente")';
+
+            var modal = new bootstrap.Modal(document.getElementById('modalEliminar'));
+            modal.show();
+        }
+    </script>
+}
