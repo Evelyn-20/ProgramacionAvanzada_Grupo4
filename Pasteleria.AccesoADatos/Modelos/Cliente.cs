@@ -34,4 +34,4 @@ namespace Pasteleria.AccesoADatos.Modelos
         [Column("Estado")]
         public bool Estado { get; set; }
     }
-}
+} 

@@ -8,6 +8,5 @@ namespace Pasteleria.AccesoADatos.Productos
 {
     public class EliminarProducto
     {
-
     }
 }

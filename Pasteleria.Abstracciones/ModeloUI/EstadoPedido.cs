@@ -22,5 +22,5 @@ namespace Pasteleria.Abstracciones.ModeloUI
         Completado = 3,
         Cancelado = 4,
         Entregado = 5
-    }
+    } 
 }

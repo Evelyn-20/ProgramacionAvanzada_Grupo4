@@ -14,5 +14,5 @@ namespace Pasteleria.Abstracciones.ModeloUI
         [DisplayName("Nombre del rol")]
         public string NombreRol { get; set; }
         public bool Estado { get; set; }
-    }
+    } 
 }

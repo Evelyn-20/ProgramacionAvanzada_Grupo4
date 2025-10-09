@@ -12,7 +12,6 @@ namespace Pasteleria.AccesoADatos
     {
         public Contexto() : base("name=Contexto")
         {
-            
         }
 
         public DbSet<Categoria> Categoria { get; set; }

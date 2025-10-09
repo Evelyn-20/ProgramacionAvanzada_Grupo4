@@ -27,5 +27,5 @@ namespace Pasteleria.Abstracciones.ModeloUI
         public byte[] Imagen { get; set; }
         public bool Estado { get; set; }
         // public HttpPostedFileBase archivo { get; set; }
-    }
+    } 
 }

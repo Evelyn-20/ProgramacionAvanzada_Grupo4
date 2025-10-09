@@ -22,6 +22,6 @@ namespace Pasteleria.Abstracciones.ModeloUI
         [DisplayName("Total")]
         public decimal Total { get; set; }
         [DisplayName("Estado")]
-        public string Estado { get; set; }
+        public string Estado { get; set; } 
     }
 }

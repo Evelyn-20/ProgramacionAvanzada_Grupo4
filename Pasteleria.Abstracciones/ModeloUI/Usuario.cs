@@ -21,4 +21,4 @@ namespace Pasteleria.Abstracciones.ModeloUI
         public int IdRol { get; set; }
         public bool Estado { get; set; }
     }
-}
+} 

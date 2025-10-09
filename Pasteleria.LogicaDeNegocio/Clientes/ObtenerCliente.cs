@@ -8,6 +8,5 @@ namespace Pasteleria.LogicaDeNegocio.Clientes
 {
     public class ObtenerCliente
     {
-
     }
 }

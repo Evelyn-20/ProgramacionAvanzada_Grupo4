@@ -15,4 +15,4 @@ namespace Pasteleria.Abstracciones.ModeloUI
         public string NombreCategoria { get; set; }
         public bool Estado { get; set; }
     }
-}
+} 

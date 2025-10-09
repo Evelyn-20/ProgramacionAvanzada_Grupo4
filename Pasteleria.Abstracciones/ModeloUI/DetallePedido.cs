@@ -24,4 +24,4 @@ namespace Pasteleria.Abstracciones.ModeloUI
         [DisplayName("Subtotal")]
         public decimal Subtotal { get; set; }
     }
-}
+} 

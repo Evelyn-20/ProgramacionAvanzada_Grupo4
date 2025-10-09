@@ -8,6 +8,5 @@ namespace Pasteleria.AccesoADatos.Clientes
 {
     public class ListarClientes
     {
-
     }
 }

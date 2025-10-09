@@ -8,6 +8,5 @@ namespace Pasteleria.LogicaDeNegocio.Productos
 {
     public class ActualizarProducto
     {
-
     }
 }

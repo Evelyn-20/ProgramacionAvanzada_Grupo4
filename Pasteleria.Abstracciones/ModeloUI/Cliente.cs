@@ -25,4 +25,4 @@ namespace Pasteleria.Abstracciones.ModeloUI
         public string Contrasenna { get; set; }
         public bool Estado { get; set; }
     }
-}
+} 

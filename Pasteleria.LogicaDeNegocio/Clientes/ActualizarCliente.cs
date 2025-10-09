@@ -8,6 +8,5 @@ namespace Pasteleria.LogicaDeNegocios.Clientes
 {
     public class ActualizarCliente
     {
-
     }
 }

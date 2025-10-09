@@ -31,4 +31,4 @@ namespace Pasteleria.AccesoADatos.Modelos
         [Column("Subtotal")]
         public decimal Subtotal { get; set; }
     }
-}
+} 

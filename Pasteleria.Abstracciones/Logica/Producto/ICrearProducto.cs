@@ -8,6 +8,5 @@ namespace Pasteleria.Abstracciones.Logica.Producto
 {
     public interface ICrearProducto
     {
-
     }
 }
