@@ -8,5 +8,6 @@ namespace Pasteleria.LogicaDeNegocio.Productos
 {
     public class ObtenerProducto
     {
+
     }
 }
