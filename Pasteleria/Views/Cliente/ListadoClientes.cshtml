@@ -1,0 +1,539 @@
+﻿@{
+    ViewBag.Title = "Listado de Clientes";
+}
+
+<!-- Banner Hero -->
+<section class="hero" style="padding: 3rem 0;">
+    <div class="hero-content">
+        <h1 class="hero-title">Listado de Clientes</h1>
+        <p class="hero-subtitle">Administra y visualiza toda la información de tus clientes</p>
+    </div>
+</section>
+
+<div class="container" style="padding: 3rem 20px; max-width: 1400px;">
+    <!-- Barra de búsqueda y botón agregar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap;">
+        <div style="position: relative; flex: 1; min-width: 300px;">
+            <i class="fas fa-search" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--primary-color);"></i>
+            <input type="text"
+                   id="searchInput"
+                   placeholder="Buscar por nombre, cédula, correo o teléfono..."
+                   style="width: 100%; padding: 1rem 1rem 1rem 50px; border: 2px solid var(--secondary-color); border-radius: 50px; font-size: 1rem; background: var(--white); transition: all 0.3s;">
+        </div>
+        <a href="@Url.Action("CrearCliente")" class="btn btn-primary" style="white-space: nowrap;">+ Agregar Cliente</a>
+    </div>
+
+    <!-- Tabla con estilo mejorado -->
+    <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); overflow: hidden;">
+        <div class="table-responsive">
+            <table id="laTablaDeClientes" style="margin-bottom: 0; width: 100%; border-collapse: collapse;">
+                <thead style="background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%);">
+                    <tr>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">#</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Cédula</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Nombre</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Correo electrónico</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Teléfono</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Estado</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Dirección</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none; text-align: center;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Cliente 1 -->
+                    <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
+                        onmouseover="this.style.background='var(--light-color)'"
+                        onmouseout="this.style.background='transparent'">
+                        <td style="padding: 1.2rem; color: var(--text-color);">1</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">118520647</td>
+                        <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">María González Pérez</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">maria.gonzalez@email.com</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">8456-7890</td>
+                        <td style="padding: 1.2rem;">
+                            <span style="background: #27ae60; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Activo</span>
+                        </td>
+                        <td style="padding: 1.2rem; color: var(--text-color); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">San José, Escazú, 200m norte del Parque</td>
+                        <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
+                            <button type="button" class="btn btn-sm btn-editar" data-id="1"
+                                    style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                    style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalDetallesCliente">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                    style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalEliminarCliente">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Cliente 2 -->
+                    <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
+                        onmouseover="this.style.background='var(--light-color)'"
+                        onmouseout="this.style.background='transparent'">
+                        <td style="padding: 1.2rem; color: var(--text-color);">2</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">205340891</td>
+                        <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">Carlos Rodríguez Mora</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">carlos.rod@email.com</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">7234-5678</td>
+                        <td style="padding: 1.2rem;">
+                            <span style="background: #27ae60; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Activo</span>
+                        </td>
+                        <td style="padding: 1.2rem; color: var(--text-color); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Cartago, Centro, frente a la Basílica</td>
+                        <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
+                            <button type="button" class="btn btn-sm btn-editar" data-id="2"
+                                    style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                    style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalDetallesCliente">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                    style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalEliminarCliente">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Cliente 3 -->
+                    <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
+                        onmouseover="this.style.background='var(--light-color)'"
+                        onmouseout="this.style.background='transparent'">
+                        <td style="padding: 1.2rem; color: var(--text-color);">3</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">304560123</td>
+                        <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">Ana Jiménez Castro</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">ana.jimenez@email.com</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">6789-0123</td>
+                        <td style="padding: 1.2rem;">
+                            <span style="background: #e74c3c; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Inactivo</span>
+                        </td>
+                        <td style="padding: 1.2rem; color: var(--text-color); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Heredia, San Francisco, 100m sur del Mall</td>
+                        <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
+                            <button type="button" class="btn btn-sm btn-editar" data-id="3"
+                                    style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                    style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalDetallesCliente">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                    style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalEliminarCliente">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Cliente 4 -->
+                    <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
+                        onmouseover="this.style.background='var(--light-color)'"
+                        onmouseout="this.style.background='transparent'">
+                        <td style="padding: 1.2rem; color: var(--text-color);">4</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">107890456</td>
+                        <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">Luis Ramírez Solís</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">luis.ramirez@email.com</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">8901-2345</td>
+                        <td style="padding: 1.2rem;">
+                            <span style="background: #27ae60; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Activo</span>
+                        </td>
+                        <td style="padding: 1.2rem; color: var(--text-color); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Alajuela, Centro, 50m este del Parque Central</td>
+                        <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
+                            <button type="button" class="btn btn-sm btn-editar" data-id="4"
+                                    style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                    style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalDetallesCliente">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                    style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalEliminarCliente">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Cliente 5 -->
+                    <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
+                        onmouseover="this.style.background='var(--light-color)'"
+                        onmouseout="this.style.background='transparent'">
+                        <td style="padding: 1.2rem; color: var(--text-color);">5</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">501230987</td>
+                        <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">Patricia Vargas López</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">patricia.vargas@email.com</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">2456-7890</td>
+                        <td style="padding: 1.2rem;">
+                            <span style="background: #27ae60; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Activo</span>
+                        </td>
+                        <td style="padding: 1.2rem; color: var(--text-color); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Puntarenas, Esparza, 300m norte de la Cruz Roja</td>
+                        <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
+                            <button type="button" class="btn btn-sm btn-editar" data-id="5"
+                                    style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                    style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalDetallesCliente">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                    style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalEliminarCliente">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Cliente 6 -->
+                    <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
+                        onmouseover="this.style.background='var(--light-color)'"
+                        onmouseout="this.style.background='transparent'">
+                        <td style="padding: 1.2rem; color: var(--text-color);">6</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">603450789</td>
+                        <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">Roberto Méndez Quesada</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">roberto.mendez@email.com</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">8567-4321</td>
+                        <td style="padding: 1.2rem;">
+                            <span style="background: #27ae60; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Activo</span>
+                        </td>
+                        <td style="padding: 1.2rem; color: var(--text-color); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Limón, Centro, 25m este del Mercado Municipal</td>
+                        <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
+                            <button type="button" class="btn btn-sm btn-editar" data-id="6"
+                                    style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                    style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalDetallesCliente">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                    style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalEliminarCliente">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Cliente 7 -->
+                    <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
+                        onmouseover="this.style.background='var(--light-color)'"
+                        onmouseout="this.style.background='transparent'">
+                        <td style="padding: 1.2rem; color: var(--text-color);">7</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">402340567</td>
+                        <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">Sofía Fernández Arias</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">sofia.fernandez@email.com</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">7890-1234</td>
+                        <td style="padding: 1.2rem;">
+                            <span style="background: #e74c3c; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Inactivo</span>
+                        </td>
+                        <td style="padding: 1.2rem; color: var(--text-color); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Guanacaste, Liberia, 150m sur del Hospital</td>
+                        <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
+                            <button type="button" class="btn btn-sm btn-editar" data-id="7"
+                                    style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                    style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalDetallesCliente">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                    style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalEliminarCliente">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Cliente 8 -->
+                    <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
+                        onmouseover="this.style.background='var(--light-color)'"
+                        onmouseout="this.style.background='transparent'">
+                        <td style="padding: 1.2rem; color: var(--text-color);">8</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">206780234</td>
+                        <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">Javier Castro Núñez</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">javier.castro@email.com</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">6234-5678</td>
+                        <td style="padding: 1.2rem;">
+                            <span style="background: #27ae60; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Activo</span>
+                        </td>
+                        <td style="padding: 1.2rem; color: var(--text-color); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">San José, Desamparados, 75m oeste de la Iglesia</td>
+                        <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
+                            <button type="button" class="btn btn-sm btn-editar" data-id="8"
+                                    style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                    style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalDetallesCliente">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                    style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalEliminarCliente">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Cliente 9 -->
+                    <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
+                        onmouseover="this.style.background='var(--light-color)'"
+                        onmouseout="this.style.background='transparent'">
+                        <td style="padding: 1.2rem; color: var(--text-color);">9</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">305670123</td>
+                        <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">Daniela Rojas Salas</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">daniela.rojas@email.com</td>
+                        <td style="padding: 1.2rem; color: var(--text-color);">8345-6789</td>
+                        <td style="padding: 1.2rem;">
+                            <span style="background: #27ae60; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Activo</span>
+                        </td>
+                        <td style="padding: 1.2rem; color: var(--text-color); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Heredia, Santo Domingo, Residencial Las Flores #45</td>
+                        <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
+                            <button type="button" class="btn btn-sm btn-editar" data-id="9"
+                                    style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                    style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalDetallesCliente">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                    style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalEliminarCliente">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer de paginación -->
+        <div style="padding: 1.5rem; background: var(--light-color); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--secondary-color); flex-wrap: wrap; gap: 1rem;">
+            <div style="color: var(--text-color); font-size: 0.95rem;">
+                Mostrando <strong><span id="startRecord">1</span>-<span id="endRecord">10</span></strong> de <strong id="totalRecords">12</strong> clientes
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button id="btnAnterior" class="btn btn-secondary" onclick="paginaAnterior()">
+                    &lt; Anterior
+                </button>
+                <button id="btnSiguiente" class="btn btn-primary" onclick="paginaSiguiente()">
+                    Siguiente &gt;
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<partial name="_ModalDetallesCliente" />
+<partial name="_ModalEliminarCliente" />
+
+@section Scripts {
+    <script>
+        // Variables de paginación
+        var paginaActual = 1;
+        var registrosPorPagina = 5;
+        var todasLasFilas = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var table = document.getElementById('laTablaDeClientes');
+            todasLasFilas = Array.from(table.getElementsByTagName('tbody')[0].getElementsByTagName('tr'));
+            mostrarPagina(paginaActual);
+        });
+
+        function mostrarPagina(pagina) {
+            var inicio = (pagina - 1) * registrosPorPagina;
+            var fin = inicio + registrosPorPagina;
+
+            // Ocultar todas las filas
+            todasLasFilas.forEach(function(row) {
+                row.style.display = 'none';
+            });
+
+            // Mostrar solo las filas de la página actual
+            for (var i = inicio; i < fin && i < todasLasFilas.length; i++) {
+                todasLasFilas[i].style.display = '';
+            }
+
+            // Actualizar contador
+            var totalRegistros = todasLasFilas.length;
+            var registroInicio = inicio + 1;
+            var registroFin = Math.min(fin, totalRegistros);
+
+            document.getElementById('startRecord').textContent = registroInicio;
+            document.getElementById('endRecord').textContent = registroFin;
+            document.getElementById('totalRecords').textContent = totalRegistros;
+
+            // Habilitar/deshabilitar botones
+            document.getElementById('btnAnterior').disabled = pagina === 1;
+            document.getElementById('btnSiguiente').disabled = fin >= totalRegistros;
+
+            // Cambiar estilo de botones deshabilitados
+            if (pagina === 1) {
+                document.getElementById('btnAnterior').style.opacity = '0.5';
+                document.getElementById('btnAnterior').style.cursor = 'not-allowed';
+            } else {
+                document.getElementById('btnAnterior').style.opacity = '1';
+                document.getElementById('btnAnterior').style.cursor = 'pointer';
+            }
+
+            if (fin >= totalRegistros) {
+                document.getElementById('btnSiguiente').style.opacity = '0.5';
+                document.getElementById('btnSiguiente').style.cursor = 'not-allowed';
+            } else {
+                document.getElementById('btnSiguiente').style.opacity = '1';
+                document.getElementById('btnSiguiente').style.cursor = 'pointer';
+            }
+        }
+
+        function paginaAnterior() {
+            if (paginaActual > 1) {
+                paginaActual--;
+                mostrarPagina(paginaActual);
+            }
+        }
+
+        function paginaSiguiente() {
+            var totalPaginas = Math.ceil(todasLasFilas.length / registrosPorPagina);
+            if (paginaActual < totalPaginas) {
+                paginaActual++;
+                mostrarPagina(paginaActual);
+            }
+        }
+
+        // Funcionalidad de búsqueda
+        /*document.getElementById('searchInput').addEventListener('keyup', function() {
+            var input = this.value.toLowerCase();
+            var table = document.getElementById('laTablaDeClientes');
+            var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            var visibleCount = 0;
+
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                var text = row.textContent.toLowerCase();
+
+                if (text.indexOf(input) > -1) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+
+            // Si hay búsqueda activa, ocultar paginación y mostrar todos los resultados
+            if (input !== '') {
+                document.getElementById('startRecord').textContent = '1';
+                document.getElementById('endRecord').textContent = visibleCount;
+                document.getElementById('totalRecords').textContent = visibleCount;
+            } else {
+                // Si no hay búsqueda, volver a la paginación normal
+                paginaActual = 1;
+                todasLasFilas = Array.from(rows);
+                mostrarPagina(paginaActual);
+            }
+        });
+
+        // Hover effects para el input de búsqueda
+        var searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('focus', function() {
+            this.style.borderColor = 'var(--primary-color)';
+            this.style.boxShadow = '0 4px 12px rgba(212, 130, 92, 0.2)';
+        });
+        searchInput.addEventListener('blur', function() {
+            this.style.borderColor = 'var(--secondary-color)';
+            this.style.boxShadow = 'none';
+        });
+
+                document.addEventListener('DOMContentLoaded', function() {
+            // Manejar botones de editar
+            var botonesEditar = document.querySelectorAll('.btn-editar');
+            botonesEditar.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var clienteId = this.getAttribute('data-id');
+                    window.location.href = '/Cliente/EditarCliente/' + clienteId;
+                });
+            });
+
+            // Manejar botones de ver detalles
+            var botonesDetalles = document.querySelectorAll('[data-bs-target="#modalDetallesCliente"]');
+            botonesDetalles.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    // Aquí puedes obtener datos de la fila si necesitas
+                    var fila = this.closest('tr');
+                    var id = fila.cells[0].textContent;
+                    var cedula = fila.cells[1].textContent;
+                    var nombre = fila.cells[2].textContent;
+                    var correo = fila.cells[3].textContent;
+                    var telefono = fila.cells[4].textContent;
+                    var estado = fila.cells[5].textContent.trim();
+                    var direccion = fila.cells[6].textContent;
+
+                    // Llenar el modal con los datos
+                    document.getElementById('detalles-id').textContent = id;
+                    document.getElementById('detalles-cedula').textContent = cedula;
+                    document.getElementById('detalles-nombre').textContent = nombre;
+                    document.getElementById('detalles-correo').textContent = correo;
+                    document.getElementById('detalles-telefono').textContent = telefono;
+                    document.getElementById('detalles-direccion').textContent = direccion;
+
+                    var estadoBadge = document.getElementById('detalles-estado-badge');
+                    estadoBadge.textContent = estado;
+                    if (estado === 'Activo') {
+                        estadoBadge.className = 'badge bg-success';
+                    } else {
+                        estadoBadge.className = 'badge bg-danger';
+                    }
+                });
+            });*/
+
+            // Manejar botones de eliminar
+            var botonesEliminar = document.querySelectorAll('[data-bs-target="#modalEliminarCliente"]');
+            botonesEliminar.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    // Obtener datos de la fila
+                    var fila = this.closest('tr');
+                    var id = fila.cells[0].textContent;
+                    var cedula = fila.cells[1].textContent;
+                    var nombre = fila.cells[2].textContent;
+                    var correo = fila.cells[3].textContent;
+                    var telefono = fila.cells[4].textContent;
+                    var estado = fila.cells[5].textContent.trim();
+
+                    // Llenar el modal con los datos
+                    document.getElementById('eliminar-id').value = id;
+                    document.getElementById('eliminar-id-display').textContent = id;
+                    document.getElementById('eliminar-nombre').textContent = nombre;
+                    document.getElementById('eliminar-cedula').textContent = cedula;
+                    document.getElementById('eliminar-correo').textContent = correo;
+                    document.getElementById('eliminar-telefono').textContent = telefono;
+
+                    var estadoBadge = document.getElementById('eliminar-estado-badge');
+                    estadoBadge.textContent = estado;
+                    if (estado === 'Activo') {
+                        estadoBadge.className = 'badge bg-success';
+                    } else {
+                        estadoBadge.className = 'badge bg-danger';
+                    }
+
+                    // Configurar la acción del formulario
+                    var form = document.getElementById('formEliminarCliente');
+                    form.action = '/Cliente/EliminarCliente';
+                });
+            });
+        });
+    </script>
+}

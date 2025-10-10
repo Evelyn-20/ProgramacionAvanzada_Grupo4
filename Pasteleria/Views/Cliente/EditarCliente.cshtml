@@ -1,27 +1,28 @@
 ﻿@model Pasteleria.Abstracciones.ModeloUI.Cliente
 
 @{
-    ViewBag.Title = "Agregar Cliente";
+    ViewBag.Title = "Editar Cliente";
 }
 
 <!-- Banner Hero -->
 <section class="hero" style="padding: 3rem 0;">
     <div class="hero-content">
-        <h1 class="hero-title">Agregar Cliente</h1>
-        <p class="hero-subtitle">Registra un nuevo cliente en el sistema</p>
+        <h1 class="hero-title">Editar Cliente</h1>
+        <p class="hero-subtitle">Actualiza la información del cliente</p>
     </div>
 </section>
 
 <div class="container" style="padding: 3rem 20px; max-width: 800px;">
-    @using (Html.BeginForm("CrearCliente", "Cliente", FormMethod.Post))
+    @using (Html.BeginForm("EditarCliente", "Cliente", FormMethod.Post))
     {
         @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.IdCliente)
 
         <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); overflow: hidden;">
             <!-- Header del formulario -->
             <div style="background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%); padding: 1.5rem 2rem;">
                 <h4 style="color: var(--dark-color); margin: 0; font-weight: 600;">
-                    <i class="fas fa-user-plus" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
+                    <i class="fas fa-user-edit" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
                     Datos del Cliente
                 </h4>
             </div>
@@ -32,40 +33,51 @@
 
                 <div style="margin-bottom: 1.5rem;">
                     @Html.LabelFor(model => model.NombreCliente, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
-                    @Html.EditorFor(model => model.NombreCliente, new { htmlAttributes = new { @class = "form-control", placeholder = "Ej: Juan Pérez González", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
+                    @Html.EditorFor(model => model.NombreCliente, new { htmlAttributes = new { @class = "form-control", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
                     @Html.ValidationMessageFor(model => model.NombreCliente, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
                 </div>
 
                 <div style="margin-bottom: 1.5rem;">
                     @Html.LabelFor(model => model.Cedula, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
-                    @Html.EditorFor(model => model.Cedula, new { htmlAttributes = new { @class = "form-control", placeholder = "Ej: 1-2345-6789", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
+                    @Html.EditorFor(model => model.Cedula, new { htmlAttributes = new { @class = "form-control", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
                     @Html.ValidationMessageFor(model => model.Cedula, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
                 </div>
 
                 <div style="margin-bottom: 1.5rem;">
                     @Html.LabelFor(model => model.Correo, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
-                    @Html.EditorFor(model => model.Correo, new { htmlAttributes = new { @class = "form-control", type = "email", placeholder = "ejemplo@correo.com", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
+                    @Html.EditorFor(model => model.Correo, new { htmlAttributes = new { @class = "form-control", type = "email", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
                     @Html.ValidationMessageFor(model => model.Correo, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
                 </div>
 
                 <div style="margin-bottom: 1.5rem;">
                     @Html.LabelFor(model => model.Telefono, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
-                    @Html.EditorFor(model => model.Telefono, new { htmlAttributes = new { @class = "form-control", placeholder = "Ej: 8888-8888", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
+                    @Html.EditorFor(model => model.Telefono, new { htmlAttributes = new { @class = "form-control", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
                     @Html.ValidationMessageFor(model => model.Telefono, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
                 </div>
 
                 <div style="margin-bottom: 1.5rem;">
                     @Html.LabelFor(model => model.Direccion, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
-                    @Html.TextAreaFor(model => model.Direccion, new { @class = "form-control", rows = "3", placeholder = "Dirección completa del cliente...", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s; resize: vertical;" })
+                    @Html.TextAreaFor(model => model.Direccion, new { @class = "form-control", rows = "3", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s; resize: vertical;" })
                     @Html.ValidationMessageFor(model => model.Direccion, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
                 </div>
 
                 <div style="margin-bottom: 1.5rem;">
                     @Html.LabelFor(model => model.Contrasenna, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
-                    @Html.PasswordFor(model => model.Contrasenna, new { @class = "form-control", placeholder = "Contraseña de acceso", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" })
+                    @Html.PasswordFor(model => model.Contrasenna, new { @class = "form-control", placeholder = "Dejar en blanco para no cambiar", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" })
                     @Html.ValidationMessageFor(model => model.Contrasenna, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
                     <small style="color: var(--text-color); font-size: 0.85rem; margin-top: 0.3rem; display: block;">
-                        <i class="fas fa-info-circle" style="color: var(--primary-color);"></i> Mínimo 6 caracteres
+                        <i class="fas fa-info-circle" style="color: var(--primary-color);"></i> Deja este campo vacío si no deseas cambiar la contraseña
+                    </small>
+                </div>
+
+                <div style="margin-bottom: 1.5rem; padding: 1rem; background: var(--light-color); border-radius: 10px; border: 2px solid var(--secondary-color);">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        @Html.EditorFor(model => model.Estado, new { htmlAttributes = new { @class = "form-check-input", id = "estadoCheckbox", style = "width: 50px; height: 25px; cursor: pointer;" } })
+                        @Html.LabelFor(model => model.Estado, "Estado del Cliente (Activo/Inactivo)", new { @class = "form-check-label", style = "color: var(--dark-color); font-weight: 500; cursor: pointer; margin: 0;" })
+                    </div>
+                    @Html.ValidationMessageFor(model => model.Estado, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
+                    <small style="color: var(--text-color); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                        <i class="fas fa-toggle-on" style="color: var(--primary-color);"></i> Activa o desactiva el acceso del cliente al sistema
                     </small>
                 </div>
             </div>
@@ -73,8 +85,8 @@
             <!-- Footer del formulario -->
             <div style="padding: 1.5rem 2rem; background: var(--light-color); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--secondary-color); gap: 1rem; flex-wrap: wrap;">
                 @Html.ActionLink("Cancelar", "ListarClientes", null, new { @class = "btn btn-secondary" })
-                <button type="submit" class="btn btn-primary" style="display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="fas fa-save"></i> Agregar Cliente
+                <button type="submit" class="btn btn-primary" style="display: flex; align-items: center; gap: 0.5rem; background: #27ae60;">
+                    <i class="fas fa-check"></i> Guardar Cambios
                 </button>
             </div>
         </div>
