@@ -8,5 +8,6 @@ namespace Pasteleria.Abstracciones.Logica.Cliente
 {
     public interface IEliminarCliente
     {
+        bool Eliminar(int idCliente);
     }
 }
