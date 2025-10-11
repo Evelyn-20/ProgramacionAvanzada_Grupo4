@@ -72,7 +72,9 @@
 
             <!-- Footer del formulario -->
             <div style="padding: 1.5rem 2rem; background: var(--light-color); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--secondary-color); gap: 1rem; flex-wrap: wrap;">
-                @Html.ActionLink("Cancelar", "ListarClientes", null, new { @class = "btn btn-secondary" })
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='@Url.Action("ListadoClientes", "Cliente")'" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
                 <button type="submit" class="btn btn-primary" style="display: flex; align-items: center; gap: 0.5rem;">
                     <i class="fas fa-save"></i> Agregar Cliente
                 </button>

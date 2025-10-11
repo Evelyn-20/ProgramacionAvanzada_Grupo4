@@ -1,11 +1,11 @@
-﻿<!-- Modal Detalles Cliente -->
-<div class="modal fade" id="modalDetallesCliente" tabindex="-1" aria-labelledby="modalDetallesClienteLabel" aria-hidden="true">
+﻿<!-- Modal Detalles Producto -->
+<div class="modal fade" id="modalDetallesProducto" tabindex="-1" aria-labelledby="modalDetallesProductoLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content" style="border: none; border-radius: 15px; overflow: hidden; box-shadow: var(--shadow-lg);">
             <!-- Header -->
             <div class="modal-header" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: var(--white); border: none; padding: 1.5rem 2rem;">
-                <h5 class="modal-title" id="modalDetallesClienteLabel" style="font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="fas fa-user-circle"></i> Detalles del Cliente
+                <h5 class="modal-title" id="modalDetallesProductoLabel" style="font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-box-open"></i> Detalles del Producto
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -28,23 +28,23 @@
 
                         <div style="margin-bottom: 1.2rem;">
                             <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
-                                <i class="fas fa-id-card" style="color: var(--primary-color); width: 20px;"></i> Cédula
+                                <i class="fas fa-tag" style="color: var(--primary-color); width: 20px;"></i> Categoría
                             </label>
-                            <p id="detalles-cedula" style="color: var(--dark-color); font-size: 1.1rem; margin: 0; padding-left: 26px;"></p>
+                            <p id="detalles-categoria" style="color: var(--dark-color); font-size: 1.1rem; margin: 0; padding-left: 26px;"></p>
                         </div>
 
                         <div style="margin-bottom: 1.2rem;">
                             <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
-                                <i class="fas fa-envelope" style="color: var(--primary-color); width: 20px;"></i> Correo
+                                <i class="fas fa-dollar-sign" style="color: var(--primary-color); width: 20px;"></i> Precio
                             </label>
-                            <p id="detalles-correo" style="color: var(--dark-color); font-size: 1.1rem; margin: 0; padding-left: 26px; word-break: break-word;"></p>
+                            <p id="detalles-precio" style="color: var(--primary-color); font-size: 1.3rem; font-weight: 700; margin: 0; padding-left: 26px;"></p>
                         </div>
 
                         <div style="margin-bottom: 1.2rem;">
                             <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
-                                <i class="fas fa-phone" style="color: var(--primary-color); width: 20px;"></i> Teléfono
+                                <i class="fas fa-percentage" style="color: var(--primary-color); width: 20px;"></i> Impuesto
                             </label>
-                            <p id="detalles-telefono" style="color: var(--dark-color); font-size: 1.1rem; margin: 0; padding-left: 26px;"></p>
+                            <p id="detalles-impuesto" style="color: var(--dark-color); font-size: 1.1rem; margin: 0; padding-left: 26px;"></p>
                         </div>
                     </div>
 
@@ -52,9 +52,9 @@
                     <div>
                         <div style="margin-bottom: 1.2rem;">
                             <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
-                                <i class="fas fa-map-marker-alt" style="color: var(--primary-color); width: 20px;"></i> Dirección
+                                <i class="fas fa-boxes" style="color: var(--primary-color); width: 20px;"></i> Cantidad
                             </label>
-                            <p id="detalles-direccion" style="color: var(--dark-color); font-size: 1rem; margin: 0; padding-left: 26px; line-height: 1.6;"></p>
+                            <p id="detalles-cantidad" style="color: var(--dark-color); font-size: 1.1rem; margin: 0; padding-left: 26px;"></p>
                         </div>
 
                         <div style="margin-bottom: 1.2rem;">
@@ -64,6 +64,13 @@
                             <div style="padding-left: 26px;">
                                 <span id="detalles-estado-badge" class="badge" style="font-size: 0.9rem; padding: 0.5rem 1rem;"></span>
                             </div>
+                        </div>
+
+                        <div style="margin-bottom: 1.2rem;">
+                            <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
+                                <i class="fas fa-align-left" style="color: var(--primary-color); width: 20px;"></i> Descripción
+                            </label>
+                            <p id="detalles-descripcion" style="color: var(--dark-color); font-size: 1rem; margin: 0; padding-left: 26px; line-height: 1.6;"></p>
                         </div>
 
                     </div>

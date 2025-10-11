@@ -1,0 +1,100 @@
+﻿<!-- Modal Eliminar Producto -->
+<div class="modal fade" id="modalEliminarProducto" tabindex="-1" aria-labelledby="modalEliminarProductoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border: none; border-radius: 15px; overflow: hidden; box-shadow: var(--shadow-lg);">
+            <!-- Header -->
+            <div class="modal-header" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: var(--white); border: none; padding: 1.5rem 2rem;">
+                <h5 class="modal-title" id="modalEliminarProductoLabel" style="font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body" style="padding: 2rem; background: var(--white);">
+                <!-- Alerta de advertencia -->
+                <div style="background: linear-gradient(135deg, #fee 0%, #fdd 100%); padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem; border-left: 4px solid #e74c3c;">
+                    <p style="margin: 0; color: #c0392b; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 1.2rem;"></i>
+                        <span><strong>¡ATENCIÓN!</strong> ¿Está seguro que desea <strong>ELIMINAR</strong> este producto de forma permanente?</span>
+                    </p>
+                </div>
+
+                <!-- Información del producto -->
+                <div style="background: var(--light-color); padding: 1.5rem; border-radius: 10px; border: 2px solid var(--secondary-color);">
+                    <h6 style="color: var(--dark-color); margin-bottom: 1.5rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-box-open" style="color: var(--primary-color);"></i> Detalles del Producto a Eliminar
+                    </h6>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.2rem;">
+                        <div>
+                            <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
+                                <i class="fas fa-hashtag" style="color: var(--primary-color); width: 20px;"></i> ID
+                            </label>
+                            <p id="eliminar-id-display" style="color: var(--dark-color); font-size: 1.1rem; margin: 0; padding-left: 26px;"></p>
+                        </div>
+
+                        <div>
+                            <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
+                                <i class="fas fa-box" style="color: var(--primary-color); width: 20px;"></i> Nombre
+                            </label>
+                            <p id="eliminar-nombre" style="color: var(--dark-color); font-size: 1.1rem; margin: 0; padding-left: 26px;"></p>
+                        </div>
+
+                        <div>
+                            <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
+                                <i class="fas fa-tag" style="color: var(--primary-color); width: 20px;"></i> Categoría
+                            </label>
+                            <p id="eliminar-categoria" style="color: var(--dark-color); font-size: 1.1rem; margin: 0; padding-left: 26px;"></p>
+                        </div>
+
+                        <div>
+                            <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
+                                <i class="fas fa-align-left" style="color: var(--primary-color); width: 20px;"></i> Descripción
+                            </label>
+                            <p id="eliminar-descripcion" style="color: var(--dark-color); font-size: 1rem; margin: 0; padding-left: 26px; word-break: break-word;"></p>
+                        </div>
+
+                        <div>
+                            <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
+                                <i class="fas fa-boxes" style="color: var(--primary-color); width: 20px;"></i> Cantidad
+                            </label>
+                            <p id="eliminar-cantidad" style="color: var(--dark-color); font-size: 1.1rem; margin: 0; padding-left: 26px;"></p>
+                        </div>
+
+                        <div>
+                            <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
+                                <i class="fas fa-dollar-sign" style="color: var(--primary-color); width: 20px;"></i> Precio
+                            </label>
+                            <p id="eliminar-precio" style="color: var(--primary-color); font-size: 1.2rem; font-weight: 700; margin: 0; padding-left: 26px;"></p>
+                        </div>
+
+                        <div>
+                            <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
+                                <i class="fas fa-toggle-on" style="color: var(--primary-color); width: 20px;"></i> Estado
+                            </label>
+                            <div style="padding-left: 26px;">
+                                <span id="eliminar-estado-badge" class="badge" style="font-size: 0.9rem; padding: 0.5rem 1rem;"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer" style="background: var(--light-color); border: none; padding: 1.5rem 2rem; display: flex; justify-content: space-between; gap: 1rem;">
+                <form id="formEliminarProducto" method="post" action="" style="display: flex; gap: 1rem; width: 100%; justify-content: flex-end;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="eliminar-id" name="IdProducto" />
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn" style="background: #e74c3c; color: var(--white); display: flex; align-items: center; gap: 0.5rem; border: none; padding: 0.8rem 2rem; border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
