@@ -1,136 +1,154 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using Pasteleria.Models;
 using Pasteleria.Abstracciones.ModeloUI;
+using X.PagedList;
 
 namespace Pasteleria.Controllers
 {
     public class ProductoController : Controller
     {
-        // GET: Producto/ListadoProductos
-        public IActionResult ListadoProductos()
+        private readonly PasteleriaDbContext _db;
+        public ProductoController(PasteleriaDbContext db) => _db = db;
+
+        private async Task<SelectList> GetCategoriasAsync(int? sel = null)
         {
-            // Por ahora retorna una lista vacía, luego conectarás con tu lógica de negocio
-            var productos = new List<Producto>();
-            return View(productos);
+            var cats = await _db.Categorias.AsNoTracking()
+                           .OrderBy(c => c.NombreCategoria)
+                           .ToListAsync();
+            return new SelectList(cats, nameof(Categoria.IdCategoria), nameof(Categoria.NombreCategoria), sel);
         }
 
-        // GET: Producto/CrearProducto
-        public IActionResult CrearProducto()
+        // LISTADO con filtros y paginación (desde la web)
+        public async Task<IActionResult> ListadoProductos([FromQuery] ProductoFiltroVM f)
         {
-            return View();
+            f.Categorias = await GetCategoriasAsync(f.IdCategoria);
+
+            var q = _db.Productos.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(f.Nombre))
+                q = q.Where(p => p.NombreProducto.Contains(f.Nombre));
+
+            if (f.IdCategoria.HasValue)
+                q = q.Where(p => p.IdCategoria == f.IdCategoria.Value);
+
+            q = q.OrderBy(p => p.NombreProducto);
+
+            var page = f.Pagina <= 0 ? 1 : f.Pagina;
+            var paged = await q.ToPagedListAsync(page, 10);
+
+            // Vista web
+            ViewBag.Filtro = f; // para recordar filtros en la vista
+            return View("ListadoProductos", paged);
         }
 
-        // POST: Producto/CrearProducto
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult CrearProducto(Producto producto, IFormFile archivo)
+        // GET: formulario web Crear
+        public async Task<IActionResult> CrearProducto()
         {
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    // Aquí procesarías el archivo si existe
-                    if (archivo != null && archivo.Length > 0)
-                    {
-                        using (var memoryStream = new MemoryStream())
-                        {
-                            archivo.CopyTo(memoryStream);
-                            producto.Imagen = memoryStream.ToArray();
-                        }
-                    }
-
-                    // Aquí implementarás la lógica para guardar el producto
-                    // Por ahora solo redirige
-                    return RedirectToAction(nameof(ListadoProductos));
-                }
-
-                return View(producto);
-            }
-            catch (Exception ex)
-            {
-                // Log del error
-                ModelState.AddModelError("", "Error al crear el producto: " + ex.Message);
-                return View(producto);
-            }
+            var vm = new ProductoFormVM { Categorias = await GetCategoriasAsync() };
+            return View("CrearProducto", vm);
         }
 
-        // GET: Producto/EditarProducto/5
-        public IActionResult EditarProducto(int id)
+        // POST: crear desde la web (Imagen obligatoria)
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> CrearProducto(ProductoFormVM vm)
         {
-            try
-            {
-                // Aquí buscarás el producto por id desde tu lógica de negocio
-                // Por ahora creamos un producto de ejemplo con datos
-                var producto = new Producto
-                {
-                    IdProducto = id,
-                    NombreProducto = "Producto de Ejemplo",
-                    IdCategoria = 1,
-                    DescripcionProducto = "Esta es una descripción de ejemplo",
-                    Cantidad = 10,
-                    Precio = 5000,
-                    PorcentajeImpuesto = 13,
-                    Estado = true
-                };
+            vm.Categorias = await GetCategoriasAsync(vm.IdCategoria);
 
-                return View(producto);
-            }
-            catch (Exception ex)
+            if (vm.Archivo == null || vm.Archivo.Length == 0)
+                ModelState.AddModelError(nameof(vm.Archivo), "La imagen es obligatoria");
+
+            if (!ModelState.IsValid) return View("CrearProducto", vm);
+
+            byte[] imagen;
+            using (var ms = new MemoryStream())
             {
-                // Si hay error, redirigir al listado
-                TempData["Error"] = "Error al cargar el producto: " + ex.Message;
-                return RedirectToAction(nameof(ListadoProductos));
+                await vm.Archivo!.CopyToAsync(ms);
+                imagen = ms.ToArray();
             }
+
+            var p = new Producto
+            {
+                NombreProducto = vm.NombreProducto.Trim(),
+                IdCategoria = vm.IdCategoria,
+                Precio = vm.Precio,
+                PorcentajeImpuesto = vm.PorcentajeImpuesto,
+                Cantidad = vm.Cantidad,
+                Estado = vm.Estado,
+                DescripcionProducto = (vm.DescripcionProducto ?? "").Trim(),
+                Imagen = imagen
+            };
+
+            _db.Add(p);
+            await _db.SaveChangesAsync();
+            TempData["ok"] = "Producto creado";
+            return RedirectToAction(nameof(ListadoProductos));
         }
 
-        // POST: Producto/EditarProducto
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult EditarProducto(Producto producto, IFormFile archivo)
+        // GET: formulario web Editar
+        public async Task<IActionResult> EditarProducto(int id)
         {
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    // Aquí procesarías el archivo si existe
-                    if (archivo != null && archivo.Length > 0)
-                    {
-                        using (var memoryStream = new MemoryStream())
-                        {
-                            archivo.CopyTo(memoryStream);
-                            producto.Imagen = memoryStream.ToArray();
-                        }
-                    }
+            var p = await _db.Productos.FindAsync(id);
+            if (p == null) return RedirectToAction(nameof(ListadoProductos));
 
-                    // Aquí implementarás la lógica para actualizar el producto
-                    TempData["Success"] = "Producto actualizado exitosamente";
-                    return RedirectToAction(nameof(ListadoProductos));
-                }
-
-                return View(producto);
-            }
-            catch (Exception ex)
+            var vm = new ProductoFormVM
             {
-                ModelState.AddModelError("", "Error al actualizar el producto: " + ex.Message);
-                return View(producto);
-            }
+                IdProducto = p.IdProducto,
+                NombreProducto = p.NombreProducto,
+                IdCategoria = p.IdCategoria,
+                Precio = p.Precio,
+                PorcentajeImpuesto = p.PorcentajeImpuesto,
+                Cantidad = p.Cantidad,
+                Estado = p.Estado,
+                Imagen = p.Imagen,
+                Categorias = await GetCategoriasAsync(p.IdCategoria)
+            };
+            return View("EditarProducto", vm);
         }
 
-        // POST: Producto/EliminarProducto
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult EliminarProducto(int IdProducto)
+        // POST: guardar edición desde la web (imagen opcional)
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditarProducto(ProductoFormVM vm)
         {
-            try
+            vm.Categorias = await GetCategoriasAsync(vm.IdCategoria);
+            if (!ModelState.IsValid) return View("EditarProducto", vm);
+
+            var p = await _db.Productos.FindAsync(vm.IdProducto);
+            if (p == null) return RedirectToAction(nameof(ListadoProductos));
+
+            p.NombreProducto = vm.NombreProducto.Trim();
+            p.IdCategoria = vm.IdCategoria;
+            p.Precio = vm.Precio;
+            p.PorcentajeImpuesto = vm.PorcentajeImpuesto;
+            p.Cantidad = vm.Cantidad;
+            p.Estado = vm.Estado;
+
+            // si subieron nueva imagen desde la página web
+            if (vm.Archivo is not null && vm.Archivo.Length > 0)
             {
-                // Aquí implementarás la lógica de eliminación
-                TempData["Success"] = "Producto eliminado exitosamente";
-                return RedirectToAction(nameof(ListadoProductos));
+                using var ms = new MemoryStream();
+                await vm.Archivo.CopyToAsync(ms);
+                p.Imagen = ms.ToArray();
             }
-            catch (Exception ex)
+
+            await _db.SaveChangesAsync();
+            TempData["ok"] = "Producto actualizado";
+            return RedirectToAction(nameof(ListadoProductos));
+        }
+
+        // POST: eliminar desde la web (botón en listado o modal)
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> EliminarProducto(int IdProducto)
+        {
+            var p = await _db.Productos.FindAsync(IdProducto);
+            if (p != null)
             {
-                TempData["Error"] = "Error al eliminar el producto: " + ex.Message;
-                return RedirectToAction(nameof(ListadoProductos));
+                _db.Productos.Remove(p);
+                await _db.SaveChangesAsync();
+                TempData["ok"] = "Producto eliminado";
             }
+            return RedirectToAction(nameof(ListadoProductos));
         }
     }
 }

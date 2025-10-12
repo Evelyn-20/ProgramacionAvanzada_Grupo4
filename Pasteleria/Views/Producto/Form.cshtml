@@ -1,0 +1,65 @@
+﻿@model Pasteleria.Models.ProductoFormVM
+<form asp-action="@(Model.IdProducto.HasValue ? "EditarProducto" : "CrearProducto")" method="post" enctype="multipart/form-data" class="row g-3">
+    @if (Model.IdProducto.HasValue)
+    {
+        <input type="hidden" asp-for="IdProducto" />
+    }
+
+    <div class="col-md-6">
+        <label asp-for="NombreProducto" class="form-label"></label>
+        <input asp-for="NombreProducto" class="form-control" />
+        <span asp-validation-for="NombreProducto" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="IdCategoria" class="form-label">Categoría</label>
+        <select asp-for="IdCategoria" asp-items="Model.Categorias" class="form-select"></select>
+        <span asp-validation-for="IdCategoria" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="Precio" class="form-label"></label>
+        <input asp-for="Precio" class="form-control" />
+        <span asp-validation-for="Precio" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="PorcentajeImpuesto" class="form-label">Impuesto (%)</label>
+        <input asp-for="PorcentajeImpuesto" class="form-control" />
+        <span asp-validation-for="PorcentajeImpuesto" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="Cantidad" class="form-label">Stock</label>
+        <input asp-for="Cantidad" class="form-control" />
+        <span asp-validation-for="Cantidad" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Imagen</label>
+        <input asp-for="Archivo" type="file" class="form-control" accept="image/*" />
+        <span asp-validation-for="Archivo" class="text-danger"></span>
+
+        @* Vista previa en edición *@
+        @if (Model.Imagen != null && Model.Imagen.Length > 0)
+        {
+            var base64 = Convert.ToBase64String(Model.Imagen);
+            <div class="form-text mt-1">Imagen actual:</div>
+            <img src="data:image/png;base64,@base64" class="img-thumbnail" style="max-height:120px" />
+        }
+    </div>
+
+    <div class="col-md-3 form-check mt-4">
+        <input asp-for="Estado" class="form-check-input" />
+        <label asp-for="Estado" class="form-check-label">Activo</label>
+    </div>
+
+    <div class="col-12">
+        <button class="btn btn-primary" type="submit">Guardar</button>
+        <a asp-action="ListadoProductos" class="btn btn-outline-secondary">Volver</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

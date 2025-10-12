@@ -1,8 +1,10 @@
-﻿@{
+﻿@using Pasteleria.Abstracciones.ModeloUI
+@model IEnumerable<Producto>
+
+@{
     ViewBag.Title = "Inventario";
 }
 
-<!-- Banner Hero -->
 <section class="hero" style="padding: 3rem 0;">
     <div class="hero-content">
         <h1 class="hero-title">Inventario</h1>
@@ -11,401 +13,85 @@
 </section>
 
 <div class="container" style="padding: 3rem 20px; max-width: 1400px;">
-    <!-- Barra de búsqueda y botón agregar -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap;">
-        <div style="position: relative; flex: 1; min-width: 300px;">
-            <i class="fas fa-search" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--primary-color);"></i>
-            <input type="text"
-                   id="searchInput"
-                   placeholder="Buscar por nombre, categoría o descripción..."
-                   style="width: 100%; padding: 1rem 1rem 1rem 50px; border: 2px solid var(--secondary-color); border-radius: 50px; font-size: 1rem; background: var(--white); transition: all 0.3s;">
-        </div>
-        <a href="@Url.Action("CrearProducto")" class="btn btn-primary" style="white-space: nowrap;">+ Agregar Producto</a>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;gap:1rem;flex-wrap:wrap;">
+        <form method="get" asp-action="ListadoProductos" style="display:flex;gap:1rem;flex:1;">
+            <input type="text" name="Nombre" placeholder="Buscar por nombre..."
+                   value="@(Context.Request.Query["Nombre"])"
+                   style="flex:1; padding:1rem; border:2px solid var(--secondary-color); border-radius:50px;" />
+            <input type="number" name="IdCategoria" placeholder="Categoría (Id)"
+                   value="@(Context.Request.Query["IdCategoria"])"
+                   style="width:220px; padding:1rem; border:2px solid var(--secondary-color); border-radius:10px;" />
+            <button class="btn btn-outline-secondary" type="submit">Filtrar</button>
+        </form>
+
+        <a asp-action="CrearProducto" class="btn btn-primary" style="white-space:nowrap;">+ Agregar Producto</a>
     </div>
 
-    <!-- Tabla con estilo mejorado -->
-    <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); overflow: hidden;">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div style="background:var(--white); border-radius:15px; box-shadow:var(--shadow); overflow:hidden;">
         <div class="table-responsive">
-            <table id="laTablaDeProductos" style="margin-bottom: 0; width: 100%; border-collapse: collapse;">
-                <thead style="background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%);">
+            <table style="margin-bottom:0; width:100%; border-collapse:collapse;">
+                <thead style="background:linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%);">
                     <tr>
-                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">#</th>
-                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Imagen</th>
-                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Nombre</th>
-                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Categoría</th>
-                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Descripción</th>
-                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Cantidad</th>
-                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Precio</th>
-                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Impuesto</th>
-                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Estado</th>
-                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none; text-align: center;">Acciones</th>
+                        <th style="padding:1.2rem;">#</th>
+                        <th style="padding:1.2rem;">Imagen</th>
+                        <th style="padding:1.2rem;">Nombre</th>
+                        <th style="padding:1.2rem;">Categoría (Id)</th>
+                        <th style="padding:1.2rem;" class="text-end">Precio</th>
+                        <th style="padding:1.2rem;" class="text-end">Imp. %</th>
+                        <th style="padding:1.2rem;" class="text-end">Stock</th>
+                        <th style="padding:1.2rem;">Activo</th>
+                        <th style="padding:1.2rem; width:200px;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Producto 1 -->
-                    <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
-                        onmouseover="this.style.background='var(--light-color)'"
-                        onmouseout="this.style.background='transparent'">
-                        <td style="padding: 1.2rem; color: var(--text-color);">1</td>
-                        <td style="padding: 1.2rem;">
-                            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-birthday-cake" style="font-size: 1.5rem; color: var(--primary-color); opacity: 0.6;"></i>
-                            </div>
-                        </td>
-                        <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">Pastel de Chocolate</td>
-                        <td style="padding: 1.2rem; color: var(--text-color);">Pasteles</td>
-                        <td style="padding: 1.2rem; color: var(--text-color); max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Delicioso pastel de chocolate con relleno de ganache</td>
-                        <td style="padding: 1.2rem; color: var(--text-color);">25</td>
-                        <td style="padding: 1.2rem; color: var(--primary-color); font-weight: 600;">₡15,000</td>
-                        <td style="padding: 1.2rem; color: var(--text-color);">13%</td>
-                        <td style="padding: 1.2rem;">
-                            <span style="background: #27ae60; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Activo</span>
-                        </td>
-                        <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
-                            <button type="button" class="btn btn-sm btn-editar" data-id="1"
-                                    style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button type="button" class="btn btn-sm"
-                                    style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
-                                    data-bs-toggle="modal" data-bs-target="#modalDetallesProducto">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button type="button" class="btn btn-sm"
-                                    style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
-                                    data-bs-toggle="modal" data-bs-target="#modalEliminarProducto">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-
-                    <!-- Producto 2 -->
-                    <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
-                        onmouseover="this.style.background='var(--light-color)'"
-                        onmouseout="this.style.background='transparent'">
-                        <td style="padding: 1.2rem; color: var(--text-color);">2</td>
-                        <td style="padding: 1.2rem;">
-                            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-cookie" style="font-size: 1.5rem; color: var(--primary-color); opacity: 0.6;"></i>
-                            </div>
-                        </td>
-                        <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">Galletas de Vainilla</td>
-                        <td style="padding: 1.2rem; color: var(--text-color);">Galletas</td>
-                        <td style="padding: 1.2rem; color: var(--text-color); max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Galletas artesanales con esencia de vainilla natural</td>
-                        <td style="padding: 1.2rem; color: var(--text-color);">50</td>
-                        <td style="padding: 1.2rem; color: var(--primary-color); font-weight: 600;">₡3,500</td>
-                        <td style="padding: 1.2rem; color: var(--text-color);">13%</td>
-                        <td style="padding: 1.2rem;">
-                            <span style="background: #27ae60; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Activo</span>
-                        </td>
-                        <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
-                            <button type="button" class="btn btn-sm btn-editar" data-id="2"
-                                    style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button type="button" class="btn btn-sm"
-                                    style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
-                                    data-bs-toggle="modal" data-bs-target="#modalDetallesProducto">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button type="button" class="btn btn-sm"
-                                    style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
-                                    data-bs-toggle="modal" data-bs-target="#modalEliminarProducto">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-
-                    <!-- Producto 3 -->
-                    <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
-                        onmouseover="this.style.background='var(--light-color)'"
-                        onmouseout="this.style.background='transparent'">
-                        <td style="padding: 1.2rem; color: var(--text-color);">3</td>
-                        <td style="padding: 1.2rem;">
-                            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-bread-slice" style="font-size: 1.5rem; color: var(--primary-color); opacity: 0.6;"></i>
-                            </div>
-                        </td>
-                        <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">Pan Integral</td>
-                        <td style="padding: 1.2rem; color: var(--text-color);">Panes</td>
-                        <td style="padding: 1.2rem; color: var(--text-color); max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Pan integral recién horneado con semillas</td>
-                        <td style="padding: 1.2rem; color: var(--text-color);">15</td>
-                        <td style="padding: 1.2rem; color: var(--primary-color); font-weight: 600;">₡2,800</td>
-                        <td style="padding: 1.2rem; color: var(--text-color);">13%</td>
-                        <td style="padding: 1.2rem;">
-                            <span style="background: #e74c3c; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Inactivo</span>
-                        </td>
-                        <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
-                            <button type="button" class="btn btn-sm btn-editar" data-id="3"
-                                    style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button type="button" class="btn btn-sm"
-                                    style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
-                                    data-bs-toggle="modal" data-bs-target="#modalDetallesProducto">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button type="button" class="btn btn-sm"
-                                    style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
-                                    data-bs-toggle="modal" data-bs-target="#modalEliminarProducto">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-
-                    <!-- Producto 4 -->
-                    <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
-                        onmouseover="this.style.background='var(--light-color)'"
-                        onmouseout="this.style.background='transparent'">
-                        <td style="padding: 1.2rem; color: var(--text-color);">4</td>
-                        <td style="padding: 1.2rem;">
-                            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-ice-cream" style="font-size: 1.5rem; color: var(--primary-color); opacity: 0.6;"></i>
-                            </div>
-                        </td>
-                        <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">Cupcake de Fresa</td>
-                        <td style="padding: 1.2rem; color: var(--text-color);">Cupcakes</td>
-                        <td style="padding: 1.2rem; color: var(--text-color); max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Delicioso cupcake con crema de fresa natural</td>
-                        <td style="padding: 1.2rem; color: var(--text-color);">40</td>
-                        <td style="padding: 1.2rem; color: var(--primary-color); font-weight: 600;">₡4,200</td>
-                        <td style="padding: 1.2rem; color: var(--text-color);">13%</td>
-                        <td style="padding: 1.2rem;">
-                            <span style="background: #27ae60; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Activo</span>
-                        </td>
-                        <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
-                            <button type="button" class="btn btn-sm btn-editar" data-id="4"
-                                    style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button type="button" class="btn btn-sm"
-                                    style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
-                                    data-bs-toggle="modal" data-bs-target="#modalDetallesProducto">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button type="button" class="btn btn-sm"
-                                    style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
-                                    data-bs-toggle="modal" data-bs-target="#modalEliminarProducto">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-
-                    <!-- Producto 5 -->
-                    <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
-                        onmouseover="this.style.background='var(--light-color)'"
-                        onmouseout="this.style.background='transparent'">
-                        <td style="padding: 1.2rem; color: var(--text-color);">5</td>
-                        <td style="padding: 1.2rem;">
-                            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-cookie-bite" style="font-size: 1.5rem; color: var(--primary-color); opacity: 0.6;"></i>
-                            </div>
-                        </td>
-                        <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">Donas Glaseadas</td>
-                        <td style="padding: 1.2rem; color: var(--text-color);">Donas</td>
-                        <td style="padding: 1.2rem; color: var(--text-color); max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Donas esponjosas con glaseado de colores</td>
-                        <td style="padding: 1.2rem; color: var(--text-color);">30</td>
-                        <td style="padding: 1.2rem; color: var(--primary-color); font-weight: 600;">₡1,800</td>
-                        <td style="padding: 1.2rem; color: var(--text-color);">13%</td>
-                        <td style="padding: 1.2rem;">
-                            <span style="background: #27ae60; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Activo</span>
-                        </td>
-                        <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
-                            <button type="button" class="btn btn-sm btn-editar" data-id="5"
-                                    style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button type="button" class="btn btn-sm"
-                                    style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
-                                    data-bs-toggle="modal" data-bs-target="#modalDetallesProducto">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button type="button" class="btn btn-sm"
-                                    style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
-                                    data-bs-toggle="modal" data-bs-target="#modalEliminarProducto">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var p in Model)
+                        {
+                            <tr style="border-bottom:1px solid var(--secondary-color);">
+                                <td style="padding:1.2rem;">@p.IdProducto</td>
+                                <td style="padding:1.2rem;">
+                                    @if (p.Imagen != null && p.Imagen.Length > 0)
+                                    {
+                                        var base64 = Convert.ToBase64String(p.Imagen);
+                                        <img src="data:image/png;base64,@base64" alt="img"
+                                             style="height:60px; width:auto; border-radius:10px;" />
+                                    }
+                                </td>
+                                <td style="padding:1.2rem;">@p.NombreProducto</td>
+                                <td style="padding:1.2rem;">@p.IdCategoria</td>
+                                <td style="padding:1.2rem; text-align:end;">@p.Precio.ToString("C")</td>
+                                <td style="padding:1.2rem; text-align:end;">@p.PorcentajeImpuesto</td>
+                                <td style="padding:1.2rem; text-align:end;">@p.Cantidad</td>
+                                <td style="padding:1.2rem;">@(p.Estado ? "Activo" : "Inactivo")</td>
+                                <td style="padding:1.2rem;">
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="EditarProducto" asp-route-id="@p.IdProducto" class="btn btn-sm btn-primary">Editar</a>
+                                        <form asp-action="EliminarProducto" method="post" style="display:inline;"
+                                              onsubmit="return confirm('¿Eliminar producto @p.NombreProducto?');">
+                                            <input type="hidden" name="IdProducto" value="@p.IdProducto" />
+                                            <button class="btn btn-sm btn-danger">Eliminar</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="9" style="padding:1.2rem;">Sin productos.</td></tr>
+                    }
                 </tbody>
             </table>
         </div>
-
-        <!-- Footer de paginación -->
-        <div style="padding: 1.5rem; background: var(--light-color); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--secondary-color); flex-wrap: wrap; gap: 1rem;">
-            <div style="color: var(--text-color); font-size: 0.95rem;">
-                Mostrando <strong><span id="startRecord">1</span>-<span id="endRecord">5</span></strong> de <strong id="totalRecords">5</strong> productos
-            </div>
-            <div style="display: flex; gap: 0.5rem;">
-                <button id="btnAnterior" class="btn btn-secondary" onclick="paginaAnterior()">
-                    &lt; Anterior
-                </button>
-                <button id="btnSiguiente" class="btn btn-primary" onclick="paginaSiguiente()">
-                    Siguiente &gt;
-                </button>
-            </div>
-        </div>
     </div>
 </div>
-
-<partial name="_ModalDetallesProducto" />
-<partial name="_ModalEliminarProducto" />
-
-@section Scripts {
-    <script>
-        // Variables de paginación
-        var paginaActual = 1;
-        var registrosPorPagina = 5;
-        var todasLasFilas = [];
-
-        document.addEventListener('DOMContentLoaded', function() {
-            var table = document.getElementById('laTablaDeProductos');
-            if (table && table.getElementsByTagName('tbody')[0]) {
-                todasLasFilas = Array.from(table.getElementsByTagName('tbody')[0].getElementsByTagName('tr'));
-                mostrarPagina(paginaActual);
-            }
-
-            // Manejar botones de editar
-            var botonesEditar = document.querySelectorAll('.btn-editar');
-            botonesEditar.forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    var productoId = this.getAttribute('data-id');
-                    window.location.href = '@Url.Action("EditarProducto", "Producto")/' + productoId;
-                });
-            });
-
-            // Manejar botones de detalles
-            var botonesDetalles = document.querySelectorAll('[data-bs-target="#modalDetallesProducto"]');
-            botonesDetalles.forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    var fila = this.closest('tr');
-                    var id = fila.cells[0].textContent;
-                    var nombre = fila.cells[2].textContent;
-                    var categoria = fila.cells[3].textContent;
-                    var descripcion = fila.cells[4].textContent;
-                    var cantidad = fila.cells[5].textContent;
-                    var precio = fila.cells[6].textContent;
-                    var impuesto = fila.cells[7].textContent;
-                    var estado = fila.cells[8].textContent.trim();
-
-                    document.getElementById('detalles-id').textContent = id;
-                    document.getElementById('detalles-nombre').textContent = nombre;
-                    document.getElementById('detalles-categoria').textContent = categoria;
-                    document.getElementById('detalles-descripcion').textContent = descripcion;
-                    document.getElementById('detalles-cantidad').textContent = cantidad;
-                    document.getElementById('detalles-precio').textContent = precio;
-                    document.getElementById('detalles-impuesto').textContent = impuesto;
-
-                    var estadoBadge = document.getElementById('detalles-estado-badge');
-                    estadoBadge.textContent = estado;
-                    if (estado === 'Activo') {
-                        estadoBadge.className = 'badge bg-success';
-                        estadoBadge.style.background = '#27ae60';
-                    } else {
-                        estadoBadge.className = 'badge bg-danger';
-                        estadoBadge.style.background = '#e74c3c';
-                    }
-                });
-            });
-
-            // Manejar botones de eliminar
-            var botonesEliminar = document.querySelectorAll('[data-bs-target="#modalEliminarProducto"]');
-            botonesEliminar.forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    var fila = this.closest('tr');
-                    var id = fila.cells[0].textContent;
-                    var nombre = fila.cells[2].textContent;
-                    var categoria = fila.cells[3].textContent;
-                    var descripcion = fila.cells[4].textContent;
-                    var cantidad = fila.cells[5].textContent;
-                    var precio = fila.cells[6].textContent;
-                    var estado = fila.cells[8].textContent.trim();
-
-                    document.getElementById('eliminar-id').value = id;
-                    document.getElementById('eliminar-id-display').textContent = id;
-                    document.getElementById('eliminar-nombre').textContent = nombre;
-                    document.getElementById('eliminar-categoria').textContent = categoria;
-                    document.getElementById('eliminar-descripcion').textContent = descripcion;
-                    document.getElementById('eliminar-cantidad').textContent = cantidad;
-                    document.getElementById('eliminar-precio').textContent = precio;
-
-                    var estadoBadge = document.getElementById('eliminar-estado-badge');
-                    estadoBadge.textContent = estado;
-                    if (estado === 'Activo') {
-                        estadoBadge.className = 'badge bg-success';
-                    } else {
-                        estadoBadge.className = 'badge bg-danger';
-                    }
-
-                    var form = document.getElementById('formEliminarProducto');
-                    form.action = '/Producto/EliminarProducto';
-                });
-            });
-        });
-
-        function mostrarPagina(pagina) {
-            var inicio = (pagina - 1) * registrosPorPagina;
-            var fin = inicio + registrosPorPagina;
-
-            todasLasFilas.forEach(function(row) {
-                row.style.display = 'none';
-            });
-
-            for (var i = inicio; i < fin && i < todasLasFilas.length; i++) {
-                todasLasFilas[i].style.display = '';
-            }
-
-            var totalRegistros = todasLasFilas.length;
-            var registroInicio = inicio + 1;
-            var registroFin = Math.min(fin, totalRegistros);
-
-            document.getElementById('startRecord').textContent = registroInicio;
-            document.getElementById('endRecord').textContent = registroFin;
-            document.getElementById('totalRecords').textContent = totalRegistros;
-
-            document.getElementById('btnAnterior').disabled = pagina === 1;
-            document.getElementById('btnSiguiente').disabled = fin >= totalRegistros;
-
-            if (pagina === 1) {
-                document.getElementById('btnAnterior').style.opacity = '0.5';
-                document.getElementById('btnAnterior').style.cursor = 'not-allowed';
-            } else {
-                document.getElementById('btnAnterior').style.opacity = '1';
-                document.getElementById('btnAnterior').style.cursor = 'pointer';
-            }
-
-            if (fin >= totalRegistros) {
-                document.getElementById('btnSiguiente').style.opacity = '0.5';
-                document.getElementById('btnSiguiente').style.cursor = 'not-allowed';
-            } else {
-                document.getElementById('btnSiguiente').style.opacity = '1';
-                document.getElementById('btnSiguiente').style.cursor = 'pointer';
-            }
-        }
-
-        function paginaAnterior() {
-            if (paginaActual > 1) {
-                paginaActual--;
-                mostrarPagina(paginaActual);
-            }
-        }
-
-        function paginaSiguiente() {
-            var totalPaginas = Math.ceil(todasLasFilas.length / registrosPorPagina);
-            if (paginaActual < totalPaginas) {
-                paginaActual++;
-                mostrarPagina(paginaActual);
-            }
-        }
-
-        // Hover effects para el input de búsqueda
-        var searchInput = document.getElementById('searchInput');
-        searchInput.addEventListener('focus', function() {
-            this.style.borderColor = 'var(--primary-color)';
-            this.style.boxShadow = '0 4px 12px rgba(212, 130, 92, 0.2)';
-        });
-        searchInput.addEventListener('blur', function() {
-            this.style.borderColor = 'var(--secondary-color)';
-            this.style.boxShadow = 'none';
-        });
-    </script>
-}
