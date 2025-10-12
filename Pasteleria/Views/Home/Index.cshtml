@@ -1,4 +1,6 @@
-﻿@{
+﻿@model Pasteleria.Models.HomeVM
+
+@{
     ViewData["Title"] = "Inicio";
 }
 
@@ -22,30 +24,22 @@
     <div class="container">
         <div class="features-grid">
             <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-cookie-bite"></i>
-                </div>
+                <div class="feature-icon"><i class="fas fa-cookie-bite"></i></div>
                 <h3>100% Artesanal</h3>
                 <p>Todos nuestros productos son elaborados a mano con técnicas tradicionales</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-leaf"></i>
-                </div>
+                <div class="feature-icon"><i class="fas fa-leaf"></i></div>
                 <h3>Ingredientes Naturales</h3>
                 <p>Utilizamos solo ingredientes frescos y de la más alta calidad</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-truck"></i>
-                </div>
+                <div class="feature-icon"><i class="fas fa-truck"></i></div>
                 <h3>Entrega a Domicilio</h3>
                 <p>Llevamos tus pedidos frescos directamente a tu puerta</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-heart"></i>
-                </div>
+                <div class="feature-icon"><i class="fas fa-heart"></i></div>
                 <h3>Hechos con Amor</h3>
                 <p>Cada producto es una obra de arte hecha con pasión</p>
             </div>
@@ -53,150 +47,92 @@
     </div>
 </section>
 
-<!-- Productos Destacados -->
+<!-- Productos Destacados (DINÁMICO) -->
 <section class="featured-products" id="productos">
     <div class="container">
         <div class="section-header">
             <h2>Nuestros Productos</h2>
             <p>Descubre nuestra deliciosa selección de pasteles y panes artesanales</p>
         </div>
-        <div class="products-grid">
-            <!-- Producto 1 -->
-            <div class="product-card">
-                <div class="product-image">
-                    <img src="~/images/pastel-chocolate.jpg" alt="Pastel de Chocolate" />
-                    <span class="badge">Nuevo</span>
-                </div>
-                <div class="product-info">
-                    <h3>Pastel de Chocolate</h3>
-                    <p>Delicioso pastel de chocolate con cobertura de ganache</p>
-                    <div class="product-footer">
-                        <span class="price">₡25,000</span>
-                        <button class="btn btn-sm btn-primary">Agregar</button>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Producto 2 -->
-            <div class="product-card">
-                <div class="product-image">
-                    <img src="~/images/pastel-vainilla.jpg" alt="Pastel de Vainilla" />
-                </div>
-                <div class="product-info">
-                    <h3>Pastel de Vainilla</h3>
-                    <p>Suave pastel de vainilla con relleno de fresas frescas</p>
-                    <div class="product-footer">
-                        <span class="price">₡22,000</span>
-                        <button class="btn btn-sm btn-primary">Agregar</button>
-                    </div>
-                </div>
-            </div>
+        @if (Model?.Productos != null && Model.Productos.Any())
+        {
+            <div class="products-grid">
+                @foreach (var p in Model.Productos)
+                {
+                    var img = (p.Imagen != null && p.Imagen.Length > 0)
+                    ? $"data:image/png;base64,{Convert.ToBase64String(p.Imagen)}"
+                    : Url.Content("~/images/placeholder-product.jpg");
 
-            <!-- Producto 3 -->
-            <div class="product-card">
-                <div class="product-image">
-                    <img src="~/images/pan-artesanal.jpg" alt="Pan Artesanal" />
-                    <span class="badge badge-popular">Popular</span>
-                </div>
-                <div class="product-info">
-                    <h3>Pan Artesanal</h3>
-                    <p>Pan de masa madre con corteza crujiente y miga suave</p>
-                    <div class="product-footer">
-                        <span class="price">₡3,500</span>
-                        <button class="btn btn-sm btn-primary">Agregar</button>
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="@img" alt="@p.NombreProducto" />
+                        </div>
+                        <div class="product-info">
+                            <h3>@p.NombreProducto</h3>
+                            @if (!string.IsNullOrWhiteSpace(p.DescripcionProducto))
+                            {
+                                <p>@p.DescripcionProducto</p>
+                            }
+                            <div class="product-footer">
+                                <span class="price">₡@p.Precio.ToString("N0")</span>
+                                <a asp-controller="Producto" asp-action="ListadoProductos" class="btn btn-sm btn-primary">
+                                    Ver catálogo
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                }
             </div>
-
-            <!-- Producto 4 -->
-            <div class="product-card">
-                <div class="product-image">
-                    <img src="~/images/galletas.jpg" alt="Galletas Artesanales" />
-                </div>
-                <div class="product-info">
-                    <h3>Galletas Artesanales</h3>
-                    <p>Variedad de galletas con chips de chocolate y nueces</p>
-                    <div class="product-footer">
-                        <span class="price">₡8,000</span>
-                        <button class="btn btn-sm btn-primary">Agregar</button>
-                    </div>
-                </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <p class="text-muted mb-3">Aún no hay productos registrados.</p>
+                <a asp-controller="Producto" asp-action="CrearProducto" class="btn btn-primary">
+                    Agregar primer producto
+                </a>
             </div>
-
-            <!-- Producto 5 -->
-            <div class="product-card">
-                <div class="product-image">
-                    <img src="~/images/cheesecake.jpg" alt="Cheesecake" />
-                </div>
-                <div class="product-info">
-                    <h3>Cheesecake</h3>
-                    <p>Cremoso cheesecake con base de galleta y frutos rojos</p>
-                    <div class="product-footer">
-                        <span class="price">₡28,000</span>
-                        <button class="btn btn-sm btn-primary">Agregar</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Producto 6 -->
-            <div class="product-card">
-                <div class="product-image">
-                    <img src="~/images/cupcakes.jpg" alt="Cupcakes" />
-                </div>
-                <div class="product-info">
-                    <h3>Cupcakes</h3>
-                    <p>Set de 6 cupcakes decorados con buttercream</p>
-                    <div class="product-footer">
-                        <span class="price">₡12,000</span>
-                        <button class="btn btn-sm btn-primary">Agregar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        }
     </div>
 </section>
 
-<!-- Categorías -->
+<!-- Categorías (DINÁMICO) -->
 <section class="categories">
     <div class="container">
         <div class="section-header">
             <h2>Categorías</h2>
             <p>Explora nuestras diferentes categorías de productos</p>
         </div>
-        <div class="categories-grid">
-            <!-- Categoría 1-->
-            <div class="category-card">
-                <div class="category-image">
-                    <img src="~/images/categoria-pasteles.jpg" alt="Pasteles" />
-                </div>
-                <h3>Pasteles</h3>
-                <a href="#" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
+
+        @if (Model?.Categorias != null && Model.Categorias.Any())
+        {
+            <div class="categories-grid">
+                @foreach (var c in Model.Categorias)
+                {
+                    var b64 = (c.Imagen != null && c.Imagen.Length > 0)
+                    ? $"data:image/png;base64,{Convert.ToBase64String(c.Imagen)}"
+                    : Url.Content("~/images/placeholder-category.jpg");
+
+                    <div class="category-card">
+                        <div class="category-image">
+                            <img src="@b64" alt="@c.NombreCategoria" />
+                        </div>
+                        <h3>@c.NombreCategoria</h3>
+                        <a asp-controller="Producto"
+                           asp-action="ListadoProductos"
+                           asp-route-IdCategoria="@c.IdCategoria"
+                           class="category-link">
+                            Ver productos <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                }
             </div>
-            <!-- Categoría 2-->
-            <div class="category-card">
-                <div class="category-image">
-                    <img src="~/images/categoria-panaderia.jpg" alt="Panadería" />
-                </div>
-                <h3>Panadería</h3>
-                <a href="#" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
-            </div>
-            <!-- Categoría 3-->
-            <div class="category-card">
-                <div class="category-image">
-                    <img src="~/images/categoria-galletas.jpg" alt="Galletas" />
-                </div>
-                <h3>Galletas</h3>
-                <a href="#" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
-            </div>
-            <!-- Categoría 4-->
-            <div class="category-card">
-                <div class="category-image">
-                    <img src="~/images/categoria-reposteria.jpg" alt="Repostería" />
-                </div>
-                <h3>Repostería</h3>
-                <a href="#" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
-            </div>
-        </div>
+        }
+        else
+        {
+            <div class="text-center text-muted py-4">Aún no hay categorías activas.</div>
+        }
     </div>
 </section>
 
@@ -233,45 +169,27 @@
         <div class="testimonials-grid">
             <div class="testimonial-card">
                 <div class="stars">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i>
                 </div>
                 <p>"El pastel de chocolate que ordené para el cumpleaños de mi hija fue simplemente perfecto. ¡Todos quedaron encantados!"</p>
-                <div class="testimonial-author">
-                    <strong>María González</strong>
-                    <span>Cliente verificado</span>
-                </div>
+                <div class="testimonial-author"><strong>María González</strong><span>Cliente verificado</span></div>
             </div>
             <div class="testimonial-card">
                 <div class="stars">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i>
                 </div>
                 <p>"La calidad de los panes artesanales es excepcional. Se nota que usan ingredientes frescos y de primera."</p>
-                <div class="testimonial-author">
-                    <strong>Carlos Rodríguez</strong>
-                    <span>Cliente frecuente</span>
-                </div>
+                <div class="testimonial-author"><strong>Carlos Rodríguez</strong><span>Cliente frecuente</span></div>
             </div>
             <div class="testimonial-card">
                 <div class="stars">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i>
                 </div>
                 <p>"Servicio impecable y productos deliciosos. Son mi pastelería favorita sin duda alguna."</p>
-                <div class="testimonial-author">
-                    <strong>Ana Jiménez</strong>
-                    <span>Cliente satisfecho</span>
-                </div>
+                <div class="testimonial-author"><strong>Ana Jiménez</strong><span>Cliente satisfecho</span></div>
             </div>
         </div>
     </div>

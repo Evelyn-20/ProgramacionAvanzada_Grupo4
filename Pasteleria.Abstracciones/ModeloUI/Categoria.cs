@@ -11,8 +11,9 @@ namespace Pasteleria.Abstracciones.ModeloUI
     public class Categoria
     {
         public int IdCategoria { get; set; }
-        [DisplayName("Nombre de la categoría")]
-        public string NombreCategoria { get; set; }
+        public string NombreCategoria { get; set; } = "";
         public bool Estado { get; set; }
+
+        public byte[]? Imagen { get; set; }
     }
-} 
+}

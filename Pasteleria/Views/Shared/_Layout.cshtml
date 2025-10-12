@@ -22,15 +22,29 @@
                 <ul class="nav-menu">
                     <li><a href="/">Inicio</a></li>
                     <li><a href="/Producto/ListadoProductos">Inventario</a></li>
+
+                    <!-- Categorías (dropdown dinámico) -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            Categorías
+                        </a>
+                        <ul id="menu-categorias" class="dropdown-menu"></ul>
+                    </li>
+
                     <li><a href="/Cliente/ListadoClientes">Clientes</a></li>
                     <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
                     <li><a href="#contacto">Contacto</a></li>
-                    <li><a href="#" class="btn-cart"><i class="fas fa-shopping-cart"></i> <span class="cart-count">0</span></a></li>
+                    <li>
+                        <a href="#" class="btn-cart">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="cart-count">0</span>
+                        </a>
+                    </li>
                 </ul>
+
                 <div class="hamburger">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+                    <span></span><span></span><span></span>
                 </div>
             </div>
         </nav>
@@ -92,6 +106,44 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+          const ul = document.getElementById('menu-categorias');
+          if (!ul) return;
+
+          try {
+            const res = await fetch('/Categoria/ActivasJson', { cache: 'no-store' });
+            if (!res.ok) throw new Error('No se pudo cargar categorías');
+            const data = await res.json();
+
+            if (!Array.isArray(data) || data.length === 0) {
+              ul.innerHTML = `
+                <li><a class="dropdown-item" href="/Categoria/ListadoCategorias">Administrar categorías…</a></li>`;
+              return;
+            }
+
+            const items = data.map(c => {
+              const id  = c.idCategoria ?? c.IdCategoria;
+              const nom = c.nombreCategoria ?? c.NombreCategoria;
+              return `<li>
+                        <a class="dropdown-item" href="/Producto/ListadoProductos?IdCategoria=${id}">
+                          ${nom}
+                        </a>
+                      </li>`;
+            }).join('');
+
+            ul.innerHTML = `
+              ${items}
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/Categoria/ListadoCategorias">Administrar categorías…</a></li>`;
+          } catch (e) {
+            ul.innerHTML = `
+              <li><a class="dropdown-item" href="/Categoria/ListadoCategorias">Categorías (admin)</a></li>`;
+            console.error(e);
+          }
+        });
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

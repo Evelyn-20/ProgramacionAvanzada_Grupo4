@@ -51,6 +51,19 @@
                         <th style="padding:1.2rem;">Activo</th>
                         <th style="padding:1.2rem; width:200px;">Acciones</th>
                     </tr>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2>Catálogo de productos</h2>
+                        <div class="btn-group">
+                            
+                            <a asp-controller="Categoria" asp-action="ListadoCategorias" class="btn btn-outline-secondary">+ Categoría</a>
+
+                            <a asp-action="CrearProducto" class="btn btn-primary">+ Producto</a>
+                        </div>
+                    </div>
+
+
+
+
                 </thead>
                 <tbody>
                     @if (Model != null && Model.Any())

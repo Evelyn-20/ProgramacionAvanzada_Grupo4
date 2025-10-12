@@ -1,0 +1,60 @@
+﻿@model Pasteleria.Models.CategoriaFormVM
+@{
+    ViewData["Title"] = "Editar categoría";
+    var base64 = Model.Imagen != null ? Convert.ToBase64String(Model.Imagen) : null;
+}
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white"><h4 class="mb-0">Editar categoría</h4></div>
+        <div class="card-body">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+            <form asp-action="Editar" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="IdCategoria" />
+
+                <div class="mb-3">
+                    <label asp-for="NombreCategoria" class="form-label"></label>
+                    <input asp-for="NombreCategoria" class="form-control" />
+                    <span asp-validation-for="NombreCategoria" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Archivo" class="form-label">Imagen (opcional)</label>
+                    <input asp-for="Archivo" type="file" accept="image/*" class="form-control" />
+                    <span asp-validation-for="Archivo" class="text-danger"></span>
+
+                    @if (base64 != null)
+                    {
+                        <div class="form-text mt-1">Imagen actual:</div>
+                        <img src="data:image/png;base64,@base64" class="img-thumbnail" style="max-height:150px" />
+                    }
+                    <img id="preview" class="img-thumbnail mt-2 d-none" style="max-height:150px" />
+                </div>
+
+                <div class="form-check mb-3">
+                    <input asp-for="Estado" class="form-check-input" />
+                    <label asp-for="Estado" class="form-check-label">Activo</label>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" type="submit">Guardar</button>
+                    <a asp-action="ListadoCategorias" class="btn btn-outline-secondary">Volver</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const i = document.getElementById('Archivo');
+        const p = document.getElementById('preview');
+        i?.addEventListener('change', e => {
+          const f = e.target.files?.[0]; if (!f) { p.classList.add('d-none'); return; }
+          const r = new FileReader();
+          r.onload = ev => { p.src = ev.target.result; p.classList.remove('d-none'); };
+          r.readAsDataURL(f);
+        });
+    </script>
+}
