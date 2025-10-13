@@ -110,13 +110,9 @@
             <div class="categories-grid">
                 @foreach (var c in Model.Categorias)
                 {
-                    var b64 = (c.Imagen != null && c.Imagen.Length > 0)
-                    ? $"data:image/png;base64,{Convert.ToBase64String(c.Imagen)}"
-                    : Url.Content("~/images/placeholder-category.jpg");
-
                     <div class="category-card">
-                        <div class="category-image">
-                            <img src="@b64" alt="@c.NombreCategoria" />
+                        <div class="category-icon">
+                            <i class="fas fa-layer-group fa-3x"></i>
                         </div>
                         <h3>@c.NombreCategoria</h3>
                         <a asp-controller="Producto"

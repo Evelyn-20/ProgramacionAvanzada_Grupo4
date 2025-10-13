@@ -1,116 +1,63 @@
-﻿@model Pasteleria.Abstracciones.ModeloUI.Cliente
-
+﻿@model Pasteleria.Models.ClienteFormVM
 @{
-    ViewBag.Title = "Actualizar Cliente";
+    ViewData["Title"] = "Editar Cliente";
 }
+<h2>Editar Cliente</h2>
+<hr />
 
-<!-- Banner Hero -->
-<section class="hero" style="padding: 3rem 0;">
-    <div class="hero-content">
-        <h1 class="hero-title">Editar Cliente</h1>
-        <p class="hero-subtitle">Modifica la información del cliente</p>
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+<form asp-action="EditarCliente" method="post" class="row g-3">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="IdCliente" />
+
+    <div class="col-md-6">
+        <label asp-for="NombreCliente" class="form-label"></label>
+        <input asp-for="NombreCliente" class="form-control" />
+        <span asp-validation-for="NombreCliente" class="text-danger"></span>
     </div>
-</section>
 
-<div class="container" style="padding: 3rem 20px; max-width: 800px;">
-    @using (Html.BeginForm("EditarCliente", "Cliente", FormMethod.Post))
-    {
-        @Html.AntiForgeryToken()
-        @Html.HiddenFor(model => model.IdCliente)
+    <div class="col-md-6">
+        <label asp-for="Cedula" class="form-label"></label>
+        <input asp-for="Cedula" class="form-control" />
+        <span asp-validation-for="Cedula" class="text-danger"></span>
+    </div>
 
-        <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); overflow: hidden;">
-            <!-- Header del formulario -->
-            <div style="background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%); padding: 1.5rem 2rem;">
-                <h4 style="color: var(--dark-color); margin: 0; font-weight: 600;">
-                    <i class="fas fa-user-edit" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
-                    Datos del Cliente
-                </h4>
-            </div>
+    <div class="col-md-6">
+        <label asp-for="Correo" class="form-label"></label>
+        <input asp-for="Correo" type="email" class="form-control" />
+        <span asp-validation-for="Correo" class="text-danger"></span>
+    </div>
 
-            <!-- Cuerpo del formulario -->
-            <div style="padding: 2rem;">
-                @Html.ValidationSummary(true, "Por favor, corrige los siguientes errores:", new { @class = "alert alert-danger", style = "margin-bottom: 1.5rem; padding: 1rem; border-radius: 10px; background: #fee; border: 1px solid #fcc; color: #c33;" })
+    <div class="col-md-6">
+        <label asp-for="Telefono" class="form-label"></label>
+        <input asp-for="Telefono" class="form-control" />
+        <span asp-validation-for="Telefono" class="text-danger"></span>
+    </div>
 
-                <div style="margin-bottom: 1.5rem;">
-                    @Html.LabelFor(model => model.NombreCliente, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
-                    @Html.EditorFor(model => model.NombreCliente, new { htmlAttributes = new { @class = "form-control", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
-                    @Html.ValidationMessageFor(model => model.NombreCliente, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
-                </div>
+    <div class="col-12">
+        <label asp-for="Direccion" class="form-label"></label>
+        <textarea asp-for="Direccion" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Direccion" class="text-danger"></span>
+    </div>
 
-                <div style="margin-bottom: 1.5rem;">
-                    @Html.LabelFor(model => model.Cedula, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
-                    @Html.EditorFor(model => model.Cedula, new { htmlAttributes = new { @class = "form-control", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
-                    @Html.ValidationMessageFor(model => model.Cedula, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
-                </div>
+    <div class="col-md-6">
+        <label asp-for="Contrasenna" class="form-label">Contraseña (dejar vacío para mantener la actual)</label>
+        <input asp-for="Contrasenna" type="password" class="form-control" placeholder="Nueva contraseña (opcional)" />
+        <span asp-validation-for="Contrasenna" class="text-danger"></span>
+    </div>
 
-                <div style="margin-bottom: 1.5rem;">
-                    @Html.LabelFor(model => model.Correo, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
-                    @Html.EditorFor(model => model.Correo, new { htmlAttributes = new { @class = "form-control", type = "email", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
-                    @Html.ValidationMessageFor(model => model.Correo, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
-                </div>
+    <div class="col-md-3 form-check mt-4">
+        <input asp-for="Estado" class="form-check-input" />
+        <label asp-for="Estado" class="form-check-label">Activo</label>
+    </div>
 
-                <div style="margin-bottom: 1.5rem;">
-                    @Html.LabelFor(model => model.Telefono, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
-                    @Html.EditorFor(model => model.Telefono, new { htmlAttributes = new { @class = "form-control", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
-                    @Html.ValidationMessageFor(model => model.Telefono, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
-                </div>
-
-                <div style="margin-bottom: 1.5rem;">
-                    @Html.LabelFor(model => model.Direccion, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
-                    @Html.TextAreaFor(model => model.Direccion, new { @class = "form-control", rows = "3", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s; resize: vertical;" })
-                    @Html.ValidationMessageFor(model => model.Direccion, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
-                </div>
-
-                <div style="margin-bottom: 1.5rem;">
-                    @Html.LabelFor(model => model.Contrasenna, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
-                    @Html.PasswordFor(model => model.Contrasenna, new { @class = "form-control", placeholder = "Dejar en blanco para no cambiar", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" })
-                    @Html.ValidationMessageFor(model => model.Contrasenna, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
-                    <small style="color: var(--text-color); font-size: 0.85rem; margin-top: 0.3rem; display: block;">
-                        <i class="fas fa-info-circle" style="color: var(--primary-color);"></i> Deja este campo vacío si no deseas cambiar la contraseña
-                    </small>
-                </div>
-
-                <div style="margin-bottom: 1.5rem; padding: 1rem; background: var(--light-color); border-radius: 10px; border: 2px solid var(--secondary-color);">
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        @Html.EditorFor(model => model.Estado, new { htmlAttributes = new { @class = "form-check-input", id = "estadoCheckbox", style = "width: 50px; height: 25px; cursor: pointer;" } })
-                        @Html.LabelFor(model => model.Estado, "Estado del Cliente (Activo/Inactivo)", new { @class = "form-check-label", @for = "estadoCheckbox", style = "color: var(--dark-color); font-weight: 500; cursor: pointer; margin: 0;" })
-                    </div>
-                    @Html.ValidationMessageFor(model => model.Estado, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
-                    <small style="color: var(--text-color); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
-                        <i class="fas fa-toggle-on" style="color: var(--primary-color);"></i> Activa o desactiva el acceso del cliente al sistema
-                    </small>
-                </div>
-            </div>
-
-            <!-- Footer del formulario -->
-            <div style="padding: 1.5rem 2rem; background: var(--light-color); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--secondary-color); gap: 1rem; flex-wrap: wrap;">
-                <button type="button" class="btn btn-secondary" onclick="window.location.href='@Url.Action("ListadoClientes", "Cliente")'" style="display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="fas fa-times"></i> Cancelar
-                </button>
-                <button type="submit" class="btn btn-primary" style="display: flex; align-items: center; gap: 0.5rem; background: #27ae60;">
-                    <i class="fas fa-check"></i> Guardar Cambios
-                </button>
-            </div>
-        </div>
-    }
-</div>
+    <div class="col-12">
+        <button class="btn btn-primary" type="submit">Guardar</button>
+        <a asp-action="ListadoClientes" class="btn btn-outline-secondary">Volver</a>
+    </div>
+</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        // Mejorar la experiencia con los inputs
-        document.addEventListener('DOMContentLoaded', function() {
-            var inputs = document.querySelectorAll('.form-control');
-            inputs.forEach(function(input) {
-                input.addEventListener('focus', function() {
-                    this.style.borderColor = 'var(--primary-color)';
-                    this.style.boxShadow = '0 0 0 3px rgba(212, 130, 92, 0.1)';
-                });
-                input.addEventListener('blur', function() {
-                    this.style.borderColor = 'var(--secondary-color)';
-                    this.style.boxShadow = 'none';
-                });
-            });
-        });
-    </script>
 }

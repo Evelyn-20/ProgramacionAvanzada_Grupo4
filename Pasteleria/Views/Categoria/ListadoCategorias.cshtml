@@ -43,7 +43,6 @@
                 <thead class="table-light">
                     <tr>
                         <th style="width:80px;">ID</th>
-                        <th style="width:100px;">Imagen</th>
                         <th>Nombre</th>
                         <th style="width:100px;">Activo</th>
                         <th style="width:250px;" class="text-end">Acciones</th>
@@ -54,21 +53,6 @@
                     {
                         <tr>
                             <td>@c.IdCategoria</td>
-                            <td>
-                                @if (c.Imagen != null && c.Imagen.Length > 0)
-                                {
-                                    var b64 = Convert.ToBase64String(c.Imagen);
-                                    <img src="data:image/png;base64,@b64"
-                                         class="img-thumbnail" style="height:60px;width:60px;object-fit:cover;" />
-                                }
-                                else
-                                {
-                                    <div class="bg-light border rounded d-flex align-items-center justify-content-center"
-                                         style="height:60px;width:60px;">
-                                        <small class="text-muted">Sin imagen</small>
-                                    </div>
-                                }
-                            </td>
                             <td>@c.NombreCategoria</td>
                             <td>@(c.Estado ? "Sí" : "No")</td>
                             <td class="text-end">

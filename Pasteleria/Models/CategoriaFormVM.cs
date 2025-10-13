@@ -12,9 +12,6 @@ namespace Pasteleria.Models
 
         public bool Estado { get; set; } = true;
 
-        // para previsualizar si ya tiene
-        public byte[]? Imagen { get; set; }
-
         // archivo subido desde la web
         [Display(Name = "Imagen")]
         public IFormFile? Archivo { get; set; }

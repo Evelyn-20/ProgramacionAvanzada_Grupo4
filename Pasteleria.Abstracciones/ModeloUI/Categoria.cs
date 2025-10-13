@@ -10,10 +10,14 @@ namespace Pasteleria.Abstracciones.ModeloUI
 {
     public class Categoria
     {
-        public int IdCategoria { get; set; }
-        public string NombreCategoria { get; set; } = "";
-        public bool Estado { get; set; }
+       public int IdCategoria { get; set; }
 
-        public byte[]? Imagen { get; set; }
+        [Required(ErrorMessage = "El nombre de la categoría es obligatorio")]
+        [StringLength(100, ErrorMessage = "El nombre no puede exceder 100 caracteres")]
+        [DisplayName("Nombre de la categoría")]
+        public string NombreCategoria { get; set; }
+
+        [DisplayName("Estado")]
+        public bool Estado { get; set; }
     }
 }

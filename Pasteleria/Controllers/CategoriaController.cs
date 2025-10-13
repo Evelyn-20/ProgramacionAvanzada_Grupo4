@@ -71,7 +71,7 @@ namespace Pasteleria.Controllers
             {
                 NombreCategoria = vm.NombreCategoria.Trim(),
                 Estado = vm.Estado,
-                Imagen = imagen
+                
             };
 
             _db.Categorias.Add(categoria);
@@ -96,7 +96,7 @@ namespace Pasteleria.Controllers
                 IdCategoria = categoria.IdCategoria,
                 NombreCategoria = categoria.NombreCategoria,
                 Estado = categoria.Estado,
-                Imagen = categoria.Imagen
+                
             };
 
             return View(vm);
@@ -127,7 +127,7 @@ namespace Pasteleria.Controllers
             {
                 using var ms = new MemoryStream();
                 await vm.Archivo.CopyToAsync(ms);
-                categoria.Imagen = ms.ToArray();
+                
             }
 
             await _db.SaveChangesAsync();
