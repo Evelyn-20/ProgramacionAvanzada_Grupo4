@@ -28,7 +28,7 @@ namespace Pasteleria.AccesoADatos.Modelos
         [Column("Total")]
         public decimal Total { get; set; }
 
-        [Column("Estado")]
-        public string Estado { get; set; }
+        [Column("IdEstadoPedido")]
+        public int IdEstadoPedido { get; set; }
     }
-} 
+}

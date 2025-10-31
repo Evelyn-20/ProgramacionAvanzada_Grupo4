@@ -128,3 +128,36 @@ INSERT INTO Categoria (NombreCategoria, Imagen, Estado)
 VALUES ('Cupcakes y Muffins', 0x, 1);
 
 insert into Cliente values ('Juan Perez Solano', '302220222', 'juan@gmail.com','98765432', 'San Jose', 'l1234567', 1);
+
+USE PASTELERIA
+GO
+
+-- Crear la nueva tabla EstadoPedido
+CREATE TABLE EstadoPedido(
+    IdEstadoPedido INT IDENTITY(1,1) PRIMARY KEY,
+    NombreEstado VARCHAR(50) NOT NULL UNIQUE,
+    Descripcion VARCHAR(200),
+    Estado BIT NOT NULL DEFAULT 1
+)
+GO
+
+-- Insertar los estados predefinidos
+INSERT INTO EstadoPedido (NombreEstado, Descripcion, Estado)
+VALUES 
+    ('Pendiente', 'Pedido registrado, pendiente de procesamiento', 1),
+    ('En Proceso', 'Pedido en preparación', 1),
+    ('Completado', 'Pedido completado y listo para entrega', 1),
+    ('Cancelado', 'Pedido cancelado', 1),
+    ('Entregado', 'Pedido entregado al cliente', 1)
+GO
+
+-- Agregar nueva columna IdEstadoPedido a la tabla Pedido
+ALTER TABLE Pedido
+ADD IdEstadoPedido INT NOT NULL
+GO
+
+-- Agregar la clave foránea
+ALTER TABLE Pedido
+ADD CONSTRAINT FK_Pedido_EstadoPedido FOREIGN KEY (IdEstadoPedido) 
+    REFERENCES EstadoPedido(IdEstadoPedido)
+GO

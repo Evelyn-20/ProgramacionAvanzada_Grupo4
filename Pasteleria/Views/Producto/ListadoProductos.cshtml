@@ -241,7 +241,7 @@
 
 @section Scripts {
     <script>
-        // Variables de paginación
+                // Variables de paginación
         var paginaActual = 1;
         var registrosPorPagina = 5;
         var todasLasFilas = [];
@@ -268,13 +268,21 @@
             var botonesDetalles = document.querySelectorAll('.btn-detalles');
             botonesDetalles.forEach(function(btn) {
                 btn.addEventListener('click', function() {
-                    document.getElementById('detalles-id').textContent = this.getAttribute('data-id');
+                    var productoId = this.getAttribute('data-id');
+
+                    // Cargar todos los datos del producto
+                    document.getElementById('detalles-id').textContent = productoId;
                     document.getElementById('detalles-nombre').textContent = this.getAttribute('data-nombre');
                     document.getElementById('detalles-categoria').textContent = this.getAttribute('data-categoria');
                     document.getElementById('detalles-descripcion').textContent = this.getAttribute('data-descripcion');
                     document.getElementById('detalles-cantidad').textContent = this.getAttribute('data-cantidad');
                     document.getElementById('detalles-precio').textContent = '₡' + this.getAttribute('data-precio');
                     document.getElementById('detalles-impuesto').textContent = this.getAttribute('data-impuesto') + '%';
+
+                    // Cargar la imagen del producto
+                    var imagenElement = document.getElementById('detalles-imagen');
+                    imagenElement.src = '@Url.Action("ObtenerImagenProducto", "Producto")?id=' + productoId;
+                    imagenElement.alt = this.getAttribute('data-nombre');
 
                     var estado = this.getAttribute('data-estado');
                     var estadoBadge = document.getElementById('detalles-estado-badge');

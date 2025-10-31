@@ -11,17 +11,23 @@ namespace Pasteleria.Abstracciones.ModeloUI
     public class Pedido
     {
         public int IdPedido { get; set; }
+
         [DisplayName("Cliente")]
         public int IdCliente { get; set; }
+
         [DisplayName("Usuario")]
         public int IdUsuario { get; set; }
+
         [DisplayName("Fecha")]
         public DateTime Fecha { get; set; }
+
         [DisplayName("Subtotal")]
         public decimal Subtotal { get; set; }
+
         [DisplayName("Total")]
         public decimal Total { get; set; }
+
         [DisplayName("Estado")]
-        public string Estado { get; set; } 
+        public int IdEstadoPedido { get; set; }
     }
 }
