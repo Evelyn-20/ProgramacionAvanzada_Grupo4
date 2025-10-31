@@ -1,7 +1,4 @@
-﻿@using Pasteleria.Abstracciones.ModeloUI
-@using X.PagedList
-@using X.PagedList.Mvc.Core
-@model IPagedList<Cliente>
+﻿@model List<Pasteleria.Abstracciones.ModeloUI.Cliente>
 
 @{
     ViewBag.Title = "Listado de Clientes";
@@ -16,107 +13,133 @@
 </section>
 
 <div class="container" style="padding: 3rem 20px; max-width: 1400px;">
-    <!-- Barra de búsqueda y botón agregar -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;gap:1rem;flex-wrap:wrap;">
-        <form method="get" asp-action="ListadoClientes" style="display:flex;gap:1rem;flex:1;">
-            <input type="text" name="Buscar" placeholder="Buscar por nombre, cédula, correo o teléfono..."
-                   value="@(Context.Request.Query["Buscar"])"
-                   style="flex:1; padding:1rem; border:2px solid var(--secondary-color); border-radius:50px;" />
-            <button class="btn btn-outline-secondary" type="submit">Buscar</button>
-            @if (!string.IsNullOrEmpty(Context.Request.Query["Buscar"]))
-            {
-                <a asp-action="ListadoClientes" class="btn btn-secondary">Limpiar</a>
-            }
-        </form>
-
-        <a asp-action="CrearCliente" class="btn btn-primary" style="white-space:nowrap;">+ Agregar Cliente</a>
-    </div>
-
-    <!-- Mensajes de éxito o error -->
-    @if (TempData["ok"] != null)
+    <!-- Mensajes de éxito/error -->
+    @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-bottom:2rem; border-radius:10px;">
-            <i class="fas fa-check-circle"></i> @TempData["ok"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
+
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-bottom:2rem; border-radius:10px;">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
             <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
 
+    <!-- Barra de búsqueda y botón agregar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap;">
+        <form method="get" action="@Url.Action("ListadoClientes")" style="position: relative; flex: 1; min-width: 300px; display: flex; gap: 0.5rem;">
+            <div style="position: relative; flex: 1;">
+                <i class="fas fa-search" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--primary-color); z-index: 1;"></i>
+                <input type="text"
+                       name="buscar"
+                       id="searchInput"
+                       value="@ViewBag.Buscar"
+                       placeholder="Buscar por nombre, cédula, correo o teléfono..."
+                       style="width: 100%; padding: 1rem 1rem 1rem 50px; border: 2px solid var(--secondary-color); border-radius: 50px; font-size: 1rem; background: var(--white); transition: all 0.3s;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="border-radius: 50px; padding: 0 2rem;">
+                <i class="fas fa-search"></i> Buscar
+            </button>
+        </form>
+        <a href="@Url.Action("CrearCliente")" class="btn btn-primary" style="white-space: nowrap;">
+            <i class="fas fa-user-plus"></i> Agregar Cliente
+        </a>
+    </div>
+
     <!-- Tabla con estilo mejorado -->
-    <div style="background:var(--white); border-radius:15px; box-shadow:var(--shadow); overflow:hidden;">
+    <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); overflow: hidden;">
         <div class="table-responsive">
-            <table style="margin-bottom:0; width:100%; border-collapse:collapse;">
-                <thead style="background:linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%);">
+            <table id="laTablaDeClientes" style="margin-bottom: 0; width: 100%; border-collapse: collapse;">
+                <thead style="background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%);">
                     <tr>
-                        <th style="padding:1.2rem;">#</th>
-                        <th style="padding:1.2rem;">Cédula</th>
-                        <th style="padding:1.2rem;">Nombre</th>
-                        <th style="padding:1.2rem;">Correo</th>
-                        <th style="padding:1.2rem;">Teléfono</th>
-                        <th style="padding:1.2rem;">Dirección</th>
-                        <th style="padding:1.2rem;">Estado</th>
-                        <th style="padding:1.2rem; width:200px;">Acciones</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">#</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Cédula</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Nombre</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Correo electrónico</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Teléfono</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Estado</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Dirección</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none; text-align: center;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Model != null && Model.Any())
+                    @if (Model != null && Model.Count > 0)
                     {
-                        foreach (var c in Model)
+                        int contador = 1;
+                        foreach (var cliente in Model)
                         {
-                            <tr style="border-bottom:1px solid var(--secondary-color); transition:background 0.3s;"
+                            <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
                                 onmouseover="this.style.background='var(--light-color)'"
-                                onmouseout="this.style.background='transparent'">
-                                <td style="padding:1.2rem; color:var(--text-color);">@c.IdCliente</td>
-                                <td style="padding:1.2rem; color:var(--text-color);">@c.Cedula</td>
-                                <td style="padding:1.2rem; color:var(--dark-color); font-weight:500;">@c.NombreCliente</td>
-                                <td style="padding:1.2rem; color:var(--text-color);">@c.Correo</td>
-                                <td style="padding:1.2rem; color:var(--text-color);">@c.Telefono</td>
-                                <td style="padding:1.2rem; color:var(--text-color); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">@c.Direccion</td>
-                                <td style="padding:1.2rem;">
-                                    @if (c.Estado)
+                                onmouseout="this.style.background='transparent'"
+                                data-cliente-id="@cliente.IdCliente"
+                                data-cliente-cedula="@cliente.Cedula"
+                                data-cliente-nombre="@cliente.NombreCliente"
+                                data-cliente-correo="@cliente.Correo"
+                                data-cliente-telefono="@cliente.Telefono"
+                                data-cliente-direccion="@cliente.Direccion"
+                                data-cliente-estado="@(cliente.Estado ? "Activo" : "Inactivo")">
+
+                                <td style="padding: 1.2rem; color: var(--text-color);">@contador</td>
+                                <td style="padding: 1.2rem; color: var(--text-color);">@cliente.Cedula</td>
+                                <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">@cliente.NombreCliente</td>
+                                <td style="padding: 1.2rem; color: var(--text-color);">@cliente.Correo</td>
+                                <td style="padding: 1.2rem; color: var(--text-color);">@cliente.Telefono</td>
+                                <td style="padding: 1.2rem;">
+                                    @if (cliente.Estado)
                                     {
-                                        <span style="background:#27ae60; color:var(--white); padding:0.4rem 1rem; border-radius:20px; font-size:0.85rem; font-weight:600;">Activo</span>
+                                        <span style="background: #27ae60; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Activo</span>
                                     }
                                     else
                                     {
-                                        <span style="background:#e74c3c; color:var(--white); padding:0.4rem 1rem; border-radius:20px; font-size:0.85rem; font-weight:600;">Inactivo</span>
+                                        <span style="background: #e74c3c; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Inactivo</span>
                                     }
                                 </td>
-                                <td style="padding:1.2rem;">
-                                    <div class="btn-group" role="group">
-                                        <a asp-action="EditarCliente" asp-route-id="@c.IdCliente" class="btn btn-sm btn-primary">Editar</a>
-                                        <form asp-action="EliminarCliente" method="post" style="display:inline;"
-                                              onsubmit="return confirm('¿Eliminar cliente @c.NombreCliente?');">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="IdCliente" value="@c.IdCliente" />
-                                            <button class="btn btn-sm btn-danger">Eliminar</button>
-                                        </form>
-                                    </div>
+                                <td style="padding: 1.2rem; color: var(--text-color); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    @(string.IsNullOrEmpty(cliente.Direccion) ? "Sin dirección" : cliente.Direccion)
+                                </td>
+                                <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
+                                    <button type="button"
+                                            class="btn btn-sm btn-editar"
+                                            data-id="@cliente.IdCliente"
+                                            style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-sm btn-ver-detalles"
+                                            style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalDetallesCliente">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-sm btn-eliminar"
+                                            style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalEliminarCliente">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
+                            contador++;
                         }
                     }
                     else
                     {
                         <tr>
-                            <td colspan="8" style="padding:3rem; text-align:center; color:var(--text-color);">
-                                <i class="fas fa-users" style="font-size:3rem; color:var(--secondary-color); margin-bottom:1rem; display:block;"></i>
-                                <p style="font-size:1.2rem; margin:0;">
-                                    @if (!string.IsNullOrEmpty(Context.Request.Query["Buscar"]))
-                                    {
-                                        <text>No se encontraron clientes con el término: <strong>@Context.Request.Query["Buscar"]</strong></text>
-                                    }
-                                    else
-                                    {
-                                        <text>No hay clientes registrados. ¡Agrega el primero!</text>
-                                    }
-                                </p>
+                            <td colspan="8" style="padding: 3rem; text-align: center; color: var(--text-color);">
+                                <i class="fas fa-inbox" style="font-size: 3rem; color: var(--secondary-color); opacity: 0.5; display: block; margin-bottom: 1rem;"></i>
+                                <p style="font-size: 1.2rem; margin: 0;">No se encontraron clientes</p>
+                                @if (!string.IsNullOrWhiteSpace(ViewBag.Buscar as string))
+                                {
+                                    <p style="margin-top: 0.5rem;">
+                                        <a href="@Url.Action("ListadoClientes")" style="color: var(--primary-color);">Limpiar búsqueda</a>
+                                    </p>
+                                }
                             </td>
                         </tr>
                     }
@@ -124,30 +147,200 @@
             </table>
         </div>
 
-        <!-- Footer de paginación SIMPLIFICADO -->
         @if (Model != null && Model.Count > 0)
         {
-            <div style="padding:1.5rem; background:var(--light-color); display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--secondary-color); flex-wrap:wrap; gap:1rem;">
-                <div style="color:var(--text-color); font-size:0.95rem;">
-                    Mostrando <strong>@Model.FirstItemOnPage - @Model.LastItemOnPage</strong> de <strong>@Model.TotalItemCount</strong> clientes
+            <!-- Footer de paginación -->
+            <div style="padding: 1.5rem; background: var(--light-color); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--secondary-color); flex-wrap: wrap; gap: 1rem;">
+                <div style="color: var(--text-color); font-size: 0.95rem;">
+                    Mostrando <strong><span id="startRecord">1</span>-<span id="endRecord">@Math.Min(5, Model.Count)</span></strong> de <strong id="totalRecords">@Model.Count</strong> clientes
                 </div>
-                <div>
-                    @Html.PagedListPager(Model, page => Url.Action("ListadoClientes", new { Buscar = Context.Request.Query["Buscar"], Pagina = page }))
+                <div style="display: flex; gap: 0.5rem;">
+                    <button id="btnAnterior"
+                            class="btn"
+                            onclick="paginaAnterior()"
+                            style="border-radius: 50px; background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color); padding: 0.8rem 2rem;">
+                        &lt; Anterior
+                    </button>
+                    <button id="btnSiguiente"
+                            class="btn"
+                            onclick="paginaSiguiente()"
+                            style="border-radius: 50px; background: var(--primary-color); color: var(--white); border: none; padding: 0.8rem 2rem;">
+                        Siguiente &gt;
+                    </button>
                 </div>
             </div>
         }
     </div>
 </div>
 
+<partial name="_ModalDetallesCliente" />
+<partial name="_ModalEliminarCliente" />
+
 @section Scripts {
     <script>
-        // Auto-ocultar alertas después de 5 segundos
-        setTimeout(function () {
-            var alerts = document.querySelectorAll('.alert');
-            alerts.forEach(function (alert) {
-                var bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
+        // Variables de paginación
+        var paginaActual = 1;
+        var registrosPorPagina = 5;
+        var todasLasFilas = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var table = document.getElementById('laTablaDeClientes');
+            if (table && table.getElementsByTagName('tbody')[0]) {
+                todasLasFilas = Array.from(table.getElementsByTagName('tbody')[0].getElementsByTagName('tr'));
+                if (todasLasFilas.length > 0 && !todasLasFilas[0].querySelector('td[colspan]')) {
+                    mostrarPagina(paginaActual);
+                }
+            }
+
+            // Manejar botones de editar
+            var botonesEditar = document.querySelectorAll('.btn-editar');
+            botonesEditar.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var clienteId = this.getAttribute('data-id');
+                    window.location.href = '@Url.Action("EditarCliente", "Cliente")?id=' + clienteId;
+                });
             });
-        }, 5000);
+
+            // Manejar botones de ver detalles
+            var botonesDetalles = document.querySelectorAll('.btn-ver-detalles');
+            botonesDetalles.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var fila = this.closest('tr');
+
+                    document.getElementById('detalles-id').textContent = fila.dataset.clienteId;
+                    document.getElementById('detalles-cedula').textContent = fila.dataset.clienteCedula;
+                    document.getElementById('detalles-nombre').textContent = fila.dataset.clienteNombre;
+                    document.getElementById('detalles-correo').textContent = fila.dataset.clienteCorreo;
+                    document.getElementById('detalles-telefono').textContent = fila.dataset.clienteTelefono;
+                    document.getElementById('detalles-direccion').textContent = fila.dataset.clienteDireccion || 'Sin dirección';
+
+                    var estadoBadge = document.getElementById('detalles-estado-badge');
+                    var estado = fila.dataset.clienteEstado;
+                    estadoBadge.textContent = estado;
+
+                    if (estado === 'Activo') {
+                        estadoBadge.style.background = '#27ae60';
+                        estadoBadge.style.color = 'white';
+                        estadoBadge.style.padding = '0.5rem 1rem';
+                        estadoBadge.style.borderRadius = '20px';
+                    } else {
+                        estadoBadge.style.background = '#e74c3c';
+                        estadoBadge.style.color = 'white';
+                        estadoBadge.style.padding = '0.5rem 1rem';
+                        estadoBadge.style.borderRadius = '20px';
+                    }
+                });
+            });
+
+            // Manejar botones de eliminar
+            var botonesEliminar = document.querySelectorAll('.btn-eliminar');
+            botonesEliminar.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var fila = this.closest('tr');
+
+                    document.getElementById('eliminar-id').value = fila.dataset.clienteId;
+                    document.getElementById('eliminar-id-display').textContent = fila.dataset.clienteId;
+                    document.getElementById('eliminar-nombre').textContent = fila.dataset.clienteNombre;
+                    document.getElementById('eliminar-cedula').textContent = fila.dataset.clienteCedula;
+                    document.getElementById('eliminar-correo').textContent = fila.dataset.clienteCorreo;
+                    document.getElementById('eliminar-telefono').textContent = fila.dataset.clienteTelefono;
+
+                    var estadoBadge = document.getElementById('eliminar-estado-badge');
+                    var estado = fila.dataset.clienteEstado;
+                    estadoBadge.textContent = estado;
+
+                    if (estado === 'Activo') {
+                        estadoBadge.style.background = '#27ae60';
+                        estadoBadge.style.color = 'white';
+                        estadoBadge.style.padding = '0.5rem 1rem';
+                        estadoBadge.style.borderRadius = '20px';
+                    } else {
+                        estadoBadge.style.background = '#e74c3c';
+                        estadoBadge.style.color = 'white';
+                        estadoBadge.style.padding = '0.5rem 1rem';
+                        estadoBadge.style.borderRadius = '20px';
+                    }
+
+                    var form = document.getElementById('formEliminarCliente');
+                    form.action = '@Url.Action("EliminarCliente", "Cliente")';
+                });
+            });
+
+            // Búsqueda mejorada
+            var searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('focus', function() {
+                    this.style.borderColor = 'var(--primary-color)';
+                    this.style.boxShadow = '0 4px 12px rgba(212, 130, 92, 0.2)';
+                });
+                searchInput.addEventListener('blur', function() {
+                    this.style.borderColor = 'var(--secondary-color)';
+                    this.style.boxShadow = 'none';
+                });
+            }
+        });
+
+        function mostrarPagina(pagina) {
+            if (todasLasFilas.length === 0 || todasLasFilas[0].querySelector('td[colspan]')) {
+                return;
+            }
+
+            var inicio = (pagina - 1) * registrosPorPagina;
+            var fin = inicio + registrosPorPagina;
+
+            todasLasFilas.forEach(function(row) {
+                row.style.display = 'none';
+            });
+
+            for (var i = inicio; i < fin && i < todasLasFilas.length; i++) {
+                todasLasFilas[i].style.display = '';
+            }
+
+            var totalRegistros = todasLasFilas.length;
+            var registroInicio = inicio + 1;
+            var registroFin = Math.min(fin, totalRegistros);
+
+            document.getElementById('startRecord').textContent = registroInicio;
+            document.getElementById('endRecord').textContent = registroFin;
+            document.getElementById('totalRecords').textContent = totalRegistros;
+
+            var btnAnterior = document.getElementById('btnAnterior');
+            var btnSiguiente = document.getElementById('btnSiguiente');
+
+            // Actualizar botón Anterior
+            btnAnterior.disabled = pagina === 1;
+            if (pagina === 1) {
+                btnAnterior.style.opacity = '0.5';
+                btnAnterior.style.cursor = 'not-allowed';
+            } else {
+                btnAnterior.style.opacity = '1';
+                btnAnterior.style.cursor = 'pointer';
+            }
+
+            // Actualizar botón Siguiente
+            btnSiguiente.disabled = fin >= totalRegistros;
+            if (fin >= totalRegistros) {
+                btnSiguiente.style.opacity = '0.5';
+                btnSiguiente.style.cursor = 'not-allowed';
+            } else {
+                btnSiguiente.style.opacity = '1';
+                btnSiguiente.style.cursor = 'pointer';
+            }
+        }
+
+        function paginaAnterior() {
+            if (paginaActual > 1) {
+                paginaActual--;
+                mostrarPagina(paginaActual);
+            }
+        }
+
+        function paginaSiguiente() {
+            var totalPaginas = Math.ceil(todasLasFilas.length / registrosPorPagina);
+            if (paginaActual < totalPaginas) {
+                paginaActual++;
+                mostrarPagina(paginaActual);
+            }
+        }
     </script>
 }

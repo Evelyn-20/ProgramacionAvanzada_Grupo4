@@ -1,15 +1,19 @@
-
-using Microsoft.EntityFrameworkCore;
-using Pasteleria.Models;
+using Pasteleria.Abstracciones.Logica.Producto;
+using Pasteleria.LogicaDeNegocio.Productos;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// ===== INYECCIÓN DE DEPENDENCIAS =====
+// Registrar los servicios de Producto
+builder.Services.AddScoped<IListarProductos, ListarProductos>();
+builder.Services.AddScoped<IObtenerProducto, ObtenerProducto>();
+builder.Services.AddScoped<ICrearProducto, CrearProducto>();
+builder.Services.AddScoped<IActualizarProducto, ActualizarProducto>();
+builder.Services.AddScoped<IEliminarProducto, EliminarProducto>();
 
-builder.Services.AddDbContext<PasteleriaDbContext>(opts =>
-    opts.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
@@ -22,9 +26,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthorization();
 
 app.MapControllerRoute(

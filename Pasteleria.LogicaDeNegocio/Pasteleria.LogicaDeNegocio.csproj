@@ -14,4 +14,13 @@
     <Folder Include="Usuarios\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Pasteleria.Abstracciones\Pasteleria.Abstracciones.csproj" />
+		<ProjectReference Include="..\Pasteleria.AccesoADatos\Pasteleria.AccesoADatos.csproj" />
+	</ItemGroup>
+
 </Project>

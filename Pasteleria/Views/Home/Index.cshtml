@@ -1,4 +1,4 @@
-﻿@model Pasteleria.Models.HomeVM
+﻿@model List<Pasteleria.Abstracciones.ModeloUI.Producto>
 
 @{
     ViewData["Title"] = "Inicio";
@@ -24,22 +24,30 @@
     <div class="container">
         <div class="features-grid">
             <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-cookie-bite"></i></div>
+                <div class="feature-icon">
+                    <i class="fas fa-cookie-bite"></i>
+                </div>
                 <h3>100% Artesanal</h3>
                 <p>Todos nuestros productos son elaborados a mano con técnicas tradicionales</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-leaf"></i></div>
+                <div class="feature-icon">
+                    <i class="fas fa-leaf"></i>
+                </div>
                 <h3>Ingredientes Naturales</h3>
                 <p>Utilizamos solo ingredientes frescos y de la más alta calidad</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-truck"></i></div>
+                <div class="feature-icon">
+                    <i class="fas fa-truck"></i>
+                </div>
                 <h3>Entrega a Domicilio</h3>
                 <p>Llevamos tus pedidos frescos directamente a tu puerta</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-heart"></i></div>
+                <div class="feature-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
                 <h3>Hechos con Amor</h3>
                 <p>Cada producto es una obra de arte hecha con pasión</p>
             </div>
@@ -47,88 +55,115 @@
     </div>
 </section>
 
-<!-- Productos Destacados (DINÁMICO) -->
+<!-- Productos Destacados -->
 <section class="featured-products" id="productos">
     <div class="container">
         <div class="section-header">
             <h2>Nuestros Productos</h2>
             <p>Descubre nuestra deliciosa selección de pasteles y panes artesanales</p>
         </div>
-
-        @if (Model?.Productos != null && Model.Productos.Any())
-        {
-            <div class="products-grid">
-                @foreach (var p in Model.Productos)
+        <div class="products-grid">
+            @if (Model != null && Model.Count > 0)
+            {
+                @foreach (var producto in Model.Take(6))
                 {
-                    var img = (p.Imagen != null && p.Imagen.Length > 0)
-                    ? $"data:image/png;base64,{Convert.ToBase64String(p.Imagen)}"
-                    : Url.Content("~/images/placeholder-product.jpg");
+                    @* Determinar el badge según el producto *@
+                    var badge = "";
+                    var badgeClass = "";
+
+                    @* El primer producto será "Nuevo" y el tercero "Popular" *@
+                    if (Model.IndexOf(producto) == 0)
+                    {
+                        badge = "Nuevo";
+                        badgeClass = "badge";
+                    }
+                    else if (Model.IndexOf(producto) == 2)
+                    {
+                        badge = "Popular";
+                        badgeClass = "badge badge-popular";
+                    }
 
                     <div class="product-card">
                         <div class="product-image">
-                            <img src="@img" alt="@p.NombreProducto" />
+                            <img src="@Url.Action("ObtenerImagenProducto", "Producto", new { id = producto.IdProducto })"
+                                 alt="@producto.NombreProducto" />
+                            @if (!string.IsNullOrEmpty(badge))
+                            {
+                                <span class="@badgeClass">@badge</span>
+                            }
                         </div>
                         <div class="product-info">
-                            <h3>@p.NombreProducto</h3>
-                            @if (!string.IsNullOrWhiteSpace(p.DescripcionProducto))
-                            {
-                                <p>@p.DescripcionProducto</p>
-                            }
+                            <h3>@producto.NombreProducto</h3>
+                            <p>@producto.DescripcionProducto</p>
                             <div class="product-footer">
-                                <span class="price">₡@p.Precio.ToString("N0")</span>
-                                <a asp-controller="Producto" asp-action="ListadoProductos" class="btn btn-sm btn-primary">
-                                    Ver catálogo
-                                </a>
+                                <span class="price">₡@producto.Precio.ToString("N0")</span>
+                                <button class="btn btn-sm btn-primary" onclick="agregarAlCarrito(@producto.IdProducto)">Agregar</button>
                             </div>
                         </div>
                     </div>
                 }
-            </div>
-        }
-        else
+            }
+            else
+            {
+                <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-color);">
+                    <i class="fas fa-inbox" style="font-size: 4rem; color: var(--secondary-color); opacity: 0.5; display: block; margin-bottom: 1rem;"></i>
+                    <p style="font-size: 1.2rem;">No hay productos disponibles en este momento</p>
+                </div>
+            }
+        </div>
+
+        @if (Model != null && Model.Count > 6)
         {
-            <div class="text-center py-5">
-                <p class="text-muted mb-3">Aún no hay productos registrados.</p>
-                <a asp-controller="Producto" asp-action="CrearProducto" class="btn btn-primary">
-                    Agregar primer producto
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="@Url.Action("ListadoProductos", "Producto")" class="btn btn-primary btn-lg">
+                    Ver Todos los Productos <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
         }
     </div>
 </section>
 
-<!-- Categorías (DINÁMICO) -->
+<!-- Categorías -->
 <section class="categories">
     <div class="container">
         <div class="section-header">
             <h2>Categorías</h2>
             <p>Explora nuestras diferentes categorías de productos</p>
         </div>
-
-        @if (Model?.Categorias != null && Model.Categorias.Any())
-        {
-            <div class="categories-grid">
-                @foreach (var c in Model.Categorias)
-                {
-                    <div class="category-card">
-                        <div class="category-icon">
-                            <i class="fas fa-layer-group fa-3x"></i>
-                        </div>
-                        <h3>@c.NombreCategoria</h3>
-                        <a asp-controller="Producto"
-                           asp-action="ListadoProductos"
-                           asp-route-IdCategoria="@c.IdCategoria"
-                           class="category-link">
-                            Ver productos <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                }
+        <div class="categories-grid">
+            <!-- Categoría 1-->
+            <div class="category-card">
+                <div class="category-image">
+                    <img src="~/images/categoria-pasteles.jpg" alt="Pasteles" />
+                </div>
+                <h3>Pasteles</h3>
+                <a href="@Url.Action("ListadoProductos", "Producto", new { categoria = 1 })" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
             </div>
-        }
-        else
-        {
-            <div class="text-center text-muted py-4">Aún no hay categorías activas.</div>
-        }
+            <!-- Categoría 2-->
+            <div class="category-card">
+                <div class="category-image">
+                    <img src="~/images/categoria-panaderia.jpg" alt="Panadería" />
+                </div>
+                <h3>Panadería</h3>
+                <a href="@Url.Action("ListadoProductos", "Producto", new { categoria = 2 })" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <!-- Categoría 3-->
+            <div class="category-card">
+                <div class="category-image">
+                    <img src="~/images/categoria-galletas.jpg" alt="Galletas" />
+                </div>
+                <h3>Galletas</h3>
+                <a href="@Url.Action("ListadoProductos", "Producto", new { categoria = 3 })" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <!-- Categoría 4-->
+            <div class="category-card">
+                <div class="category-image">
+                    <img src="~/images/categoria-reposteria.jpg" alt="Repostería" />
+                </div>
+                <h3>Repostería</h3>
+                <a href="@Url.Action("ListadoProductos", "Producto", new { categoria = 4 })" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -165,27 +200,45 @@
         <div class="testimonials-grid">
             <div class="testimonial-card">
                 <div class="stars">
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
                 </div>
                 <p>"El pastel de chocolate que ordené para el cumpleaños de mi hija fue simplemente perfecto. ¡Todos quedaron encantados!"</p>
-                <div class="testimonial-author"><strong>María González</strong><span>Cliente verificado</span></div>
+                <div class="testimonial-author">
+                    <strong>María González</strong>
+                    <span>Cliente verificado</span>
+                </div>
             </div>
             <div class="testimonial-card">
                 <div class="stars">
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
                 </div>
                 <p>"La calidad de los panes artesanales es excepcional. Se nota que usan ingredientes frescos y de primera."</p>
-                <div class="testimonial-author"><strong>Carlos Rodríguez</strong><span>Cliente frecuente</span></div>
+                <div class="testimonial-author">
+                    <strong>Carlos Rodríguez</strong>
+                    <span>Cliente frecuente</span>
+                </div>
             </div>
             <div class="testimonial-card">
                 <div class="stars">
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
                 </div>
                 <p>"Servicio impecable y productos deliciosos. Son mi pastelería favorita sin duda alguna."</p>
-                <div class="testimonial-author"><strong>Ana Jiménez</strong><span>Cliente satisfecho</span></div>
+                <div class="testimonial-author">
+                    <strong>Ana Jiménez</strong>
+                    <span>Cliente satisfecho</span>
+                </div>
             </div>
         </div>
     </div>

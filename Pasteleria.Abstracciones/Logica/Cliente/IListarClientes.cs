@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Pasteleria.Abstracciones.ModeloUI;
+using ClienteUI = Pasteleria.Abstracciones.ModeloUI.Cliente;
 
 namespace Pasteleria.Abstracciones.Logica.Cliente
 {
     public interface IListarClientes
     {
-        List<ModeloUI.Cliente> Listar();
-        List<ModeloUI.Cliente> BuscarPorNombreOCedula(string filtro);
+        List<ClienteUI> Obtener();
+        List<ClienteUI> BuscarPorNombre(string nombre);
+        List<ClienteUI> BuscarPorCedula(string cedula);
     }
 }

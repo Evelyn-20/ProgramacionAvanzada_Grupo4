@@ -37,6 +37,7 @@ CREATE TABLE Rol(
 CREATE TABLE Categoria(
     IdCategoria INT IDENTITY(1,1) PRIMARY KEY,
     NombreCategoria VARCHAR(100) NOT NULL,
+    Imagen VARBINARY(MAX) NOT NULL,
     Estado BIT NOT NULL
 )
 
@@ -93,3 +94,37 @@ ADD CONSTRAINT FK_DetallePedido_Pedido FOREIGN KEY (IdPedido) REFERENCES Pedido(
 
 ALTER TABLE DetallePedido
 ADD CONSTRAINT FK_DetallePedido_Producto FOREIGN KEY (IdProducto) REFERENCES Producto(IdProducto)
+
+INSERT INTO Producto (IdCategoria, NombreProducto, DescripcionProducto, Cantidad, Precio, PorcentajeImpuesto, Imagen, Estado)
+   VALUES (1, 'Pastel de Chocolate', 'Delicioso pastel de chocolate', 10, 15000.00, 13.00, 0x, 1);
+
+INSERT INTO Producto (IdCategoria, NombreProducto, DescripcionProducto, Cantidad, Precio, PorcentajeImpuesto, Imagen, Estado)
+VALUES (1, 'Pastel de Vainilla', 'Suave pastel de vainilla con relleno de fresas frescas', 8, 22000.00, 13.00, 0x, 1);
+
+INSERT INTO Producto (IdCategoria, NombreProducto, DescripcionProducto, Cantidad, Precio, PorcentajeImpuesto, Imagen, Estado)
+VALUES (2, 'Pan Artesanal', 'Pan de masa madre con corteza crujiente y miga suave', 20, 3500.00, 13.00, 0x, 1);
+
+INSERT INTO Producto (IdCategoria, NombreProducto, DescripcionProducto, Cantidad, Precio, PorcentajeImpuesto, Imagen, Estado)
+VALUES (3, 'Galletas Artesanales', 'Variedad de galletas con chips de chocolate y nueces', 30, 8000.00, 13.00, 0x, 1);
+
+INSERT INTO Producto (IdCategoria, NombreProducto, DescripcionProducto, Cantidad, Precio, PorcentajeImpuesto, Imagen, Estado)
+VALUES (4, 'Cheesecake', 'Cremoso cheesecake con base de galleta y frutos rojos', 6, 28000.00, 13.00, 0x, 1);
+
+INSERT INTO Producto (IdCategoria, NombreProducto, DescripcionProducto, Cantidad, Precio, PorcentajeImpuesto, Imagen, Estado)
+VALUES (5, 'Cupcakes', 'Set de 6 cupcakes decorados con buttercream', 15, 12000.00, 13.00, 0x, 1);
+
+INSERT INTO Categoria(NombreCategoria, Imagen, Estado)
+   VALUES ('Pasteles', 0x, 1);
+   INSERT INTO Categoria (NombreCategoria, Imagen, Estado)
+VALUES ('Panadería', 0x, 1);
+
+INSERT INTO Categoria (NombreCategoria, Imagen, Estado)
+VALUES ('Galletas', 0x, 1);
+
+INSERT INTO Categoria (NombreCategoria, Imagen, Estado)
+VALUES ('Postres Especiales', 0x, 1);
+
+INSERT INTO Categoria (NombreCategoria, Imagen, Estado)
+VALUES ('Cupcakes y Muffins', 0x, 1);
+
+insert into Cliente values ('Juan Perez Solano', '302220222', 'juan@gmail.com','98765432', 'San Jose', 'l1234567', 1);

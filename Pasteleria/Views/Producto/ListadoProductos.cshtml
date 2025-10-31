@@ -1,10 +1,10 @@
-﻿@using Pasteleria.Abstracciones.ModeloUI
-@model IEnumerable<Producto>
+﻿@model List<Pasteleria.Abstracciones.ModeloUI.Producto>
 
 @{
     ViewBag.Title = "Inventario";
 }
 
+<!-- Banner Hero -->
 <section class="hero" style="padding: 3rem 0;">
     <div class="hero-content">
         <h1 class="hero-title">Inventario</h1>
@@ -13,98 +13,381 @@
 </section>
 
 <div class="container" style="padding: 3rem 20px; max-width: 1400px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;gap:1rem;flex-wrap:wrap;">
-        <form method="get" asp-action="ListadoProductos" style="display:flex;gap:1rem;flex:1;">
-            <input type="text" name="Nombre" placeholder="Buscar por nombre..."
-                   value="@(Context.Request.Query["Nombre"])"
-                   style="flex:1; padding:1rem; border:2px solid var(--secondary-color); border-radius:50px;" />
-            <input type="number" name="IdCategoria" placeholder="Categoría (Id)"
-                   value="@(Context.Request.Query["IdCategoria"])"
-                   style="width:220px; padding:1rem; border:2px solid var(--secondary-color); border-radius:10px;" />
-            <button class="btn btn-outline-secondary" type="submit">Filtrar</button>
-        </form>
-
-        <a asp-action="CrearProducto" class="btn btn-primary" style="white-space:nowrap;">+ Agregar Producto</a>
-    </div>
-
+    <!-- Mensajes de éxito/error -->
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success">@TempData["Success"]</div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
     }
+
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger">@TempData["Error"]</div>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
     }
 
-    <div style="background:var(--white); border-radius:15px; box-shadow:var(--shadow); overflow:hidden;">
+    <!-- Barra de búsqueda y botón agregar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap;">
+        <form method="get" action="@Url.Action("ListadoProductos", "Producto")" style="position: relative; flex: 1; min-width: 300px; display: flex; gap: 0.5rem;">
+            <div style="position: relative; flex: 1;">
+                <i class="fas fa-search" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--primary-color); z-index: 1;"></i>
+                <input type="text"
+                       id="buscar"
+                       name="buscar"
+                       value="@ViewBag.Buscar"
+                       placeholder="Buscar por nombre..."
+                       style="width: 100%; padding: 1rem 1rem 1rem 50px; border: 2px solid var(--secondary-color); border-radius: 50px; font-size: 1rem; background: var(--white); transition: all 0.3s;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="border-radius: 50px; padding: 0 2rem;">
+                <i class="fas fa-search"></i> Buscar
+            </button>
+        </form>
+        <a href="@Url.Action("CrearProducto", "Producto")" class="btn btn-primary" style="white-space: nowrap;">
+            <i class="fas fa-plus"></i> Agregar Producto
+        </a>
+    </div>
+
+    <!-- Filtro por categoría -->
+    <div style="margin-bottom: 2rem;">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <a href="@Url.Action("ListadoProductos", "Producto")"
+               class="btn btn-primary"
+               style="border-radius: 50px; @(ViewBag.Categoria == null ? "" : "background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color);")">
+                Todas
+            </a>
+            <a href="@Url.Action("ListadoProductos", "Producto", new { categoria = 1 })"
+               class="btn btn-primary"
+               style="border-radius: 50px; @(ViewBag.Categoria == 1 ? "" : "background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color);")">
+                Pasteles
+            </a>
+            <a href="@Url.Action("ListadoProductos", "Producto", new { categoria = 2 })"
+               class="btn btn-primary"
+               style="border-radius: 50px; @(ViewBag.Categoria == 2 ? "" : "background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color);")">
+                Panadería
+            </a>
+            <a href="@Url.Action("ListadoProductos", "Producto", new { categoria = 3 })"
+               class="btn btn-primary"
+               style="border-radius: 50px; @(ViewBag.Categoria == 3 ? "" : "background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color);")">
+                Galletas
+            </a>
+            <a href="@Url.Action("ListadoProductos", "Producto", new { categoria = 4 })"
+               class="btn btn-primary"
+               style="border-radius: 50px; @(ViewBag.Categoria == 4 ? "" : "background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color);")">
+                Postres Especiales
+            </a>
+            <a href="@Url.Action("ListadoProductos", "Producto", new { categoria = 5 })"
+               class="btn btn-primary"
+               style="border-radius: 50px; @(ViewBag.Categoria == 5 ? "" : "background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color);")">
+                Cupcakes y Muffins
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabla con estilo mejorado -->
+    <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); overflow: hidden;">
         <div class="table-responsive">
-            <table style="margin-bottom:0; width:100%; border-collapse:collapse;">
-                <thead style="background:linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%);">
+            <table id="laTablaDeProductos" style="margin-bottom: 0; width: 100%; border-collapse: collapse;">
+                <thead style="background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%);">
                     <tr>
-                        <th style="padding:1.2rem;">#</th>
-                        <th style="padding:1.2rem;">Imagen</th>
-                        <th style="padding:1.2rem;">Nombre</th>
-                        <th style="padding:1.2rem;">Categoría (Id)</th>
-                        <th style="padding:1.2rem;" class="text-end">Precio</th>
-                        <th style="padding:1.2rem;" class="text-end">Imp. %</th>
-                        <th style="padding:1.2rem;" class="text-end">Stock</th>
-                        <th style="padding:1.2rem;">Activo</th>
-                        <th style="padding:1.2rem; width:200px;">Acciones</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">#</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Imagen</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Nombre</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Categoría</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Descripción</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Cantidad</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Precio</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Impuesto</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Estado</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none; text-align: center;">Acciones</th>
                     </tr>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2>Catálogo de productos</h2>
-                        <div class="btn-group">
-                            
-                            <a asp-controller="Categoria" asp-action="ListadoCategorias" class="btn btn-outline-secondary">+ Categoría</a>
-
-                            <a asp-action="CrearProducto" class="btn btn-primary">+ Producto</a>
-                        </div>
-                    </div>
-
-
-
-
                 </thead>
                 <tbody>
-                    @if (Model != null && Model.Any())
+                    @if (Model != null && Model.Count > 0)
                     {
-                        foreach (var p in Model)
+                        @foreach (var producto in Model)
                         {
-                            <tr style="border-bottom:1px solid var(--secondary-color);">
-                                <td style="padding:1.2rem;">@p.IdProducto</td>
-                                <td style="padding:1.2rem;">
-                                    @if (p.Imagen != null && p.Imagen.Length > 0)
+                            <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
+                                onmouseover="this.style.background='var(--light-color)'"
+                                onmouseout="this.style.background='transparent'">
+                                <td style="padding: 1.2rem; color: var(--text-color);">@producto.IdProducto</td>
+                                <td style="padding: 1.2rem;">
+                                    <img src="@Url.Action("ObtenerImagenProducto", "Producto", new { id = producto.IdProducto })"
+                                         alt="@producto.NombreProducto"
+                                         style="width: 60px; height: 60px; object-fit: cover; border-radius: 10px; box-shadow: var(--shadow);">
+                                </td>
+                                <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">@producto.NombreProducto</td>
+                                <td style="padding: 1.2rem; color: var(--text-color);">
+                                    @{
+                                        var nombreCategoria = "";
+                                        switch (producto.IdCategoria)
+                                        {
+                                            case 1: nombreCategoria = "Pasteles"; break;
+                                            case 2: nombreCategoria = "Galletas"; break;
+                                            case 3: nombreCategoria = "Panes"; break;
+                                            case 4: nombreCategoria = "Cupcakes"; break;
+                                            case 5: nombreCategoria = "Donas"; break;
+                                            default: nombreCategoria = "Otros"; break;
+                                        }
+                                    }
+                                    @nombreCategoria
+                                </td>
+                                <td style="padding: 1.2rem; color: var(--text-color); max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    @producto.DescripcionProducto
+                                </td>
+                                <td style="padding: 1.2rem; color: var(--text-color);">@producto.Cantidad</td>
+                                <td style="padding: 1.2rem; color: var(--primary-color); font-weight: 600;">₡@producto.Precio.ToString("N2")</td>
+                                <td style="padding: 1.2rem; color: var(--text-color);">@producto.PorcentajeImpuesto%</td>
+                                <td style="padding: 1.2rem;">
+                                    @if (producto.Estado)
                                     {
-                                        var base64 = Convert.ToBase64String(p.Imagen);
-                                        <img src="data:image/png;base64,@base64" alt="img"
-                                             style="height:60px; width:auto; border-radius:10px;" />
+                                        <span style="background: #27ae60; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="background: #e74c3c; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Inactivo</span>
                                     }
                                 </td>
-                                <td style="padding:1.2rem;">@p.NombreProducto</td>
-                                <td style="padding:1.2rem;">@p.IdCategoria</td>
-                                <td style="padding:1.2rem; text-align:end;">@p.Precio.ToString("C")</td>
-                                <td style="padding:1.2rem; text-align:end;">@p.PorcentajeImpuesto</td>
-                                <td style="padding:1.2rem; text-align:end;">@p.Cantidad</td>
-                                <td style="padding:1.2rem;">@(p.Estado ? "Activo" : "Inactivo")</td>
-                                <td style="padding:1.2rem;">
-                                    <div class="btn-group" role="group">
-                                        <a asp-action="EditarProducto" asp-route-id="@p.IdProducto" class="btn btn-sm btn-primary">Editar</a>
-                                        <form asp-action="EliminarProducto" method="post" style="display:inline;"
-                                              onsubmit="return confirm('¿Eliminar producto @p.NombreProducto?');">
-                                            <input type="hidden" name="IdProducto" value="@p.IdProducto" />
-                                            <button class="btn btn-sm btn-danger">Eliminar</button>
-                                        </form>
-                                    </div>
+                                <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
+                                    <button type="button"
+                                            class="btn btn-sm btn-editar"
+                                            data-id="@producto.IdProducto"
+                                            style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-sm btn-detalles"
+                                            data-id="@producto.IdProducto"
+                                            data-nombre="@producto.NombreProducto"
+                                            data-categoria="@nombreCategoria"
+                                            data-descripcion="@producto.DescripcionProducto"
+                                            data-cantidad="@producto.Cantidad"
+                                            data-precio="@producto.Precio.ToString("N2")"
+                                            data-impuesto="@producto.PorcentajeImpuesto"
+                                            data-estado="@(producto.Estado ? "Activo" : "Inactivo")"
+                                            style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalDetallesProducto">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-sm btn-eliminar"
+                                            data-id="@producto.IdProducto"
+                                            data-nombre="@producto.NombreProducto"
+                                            data-categoria="@nombreCategoria"
+                                            data-descripcion="@producto.DescripcionProducto"
+                                            data-cantidad="@producto.Cantidad"
+                                            data-precio="@producto.Precio.ToString("N2")"
+                                            data-estado="@(producto.Estado ? "Activo" : "Inactivo")"
+                                            style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalEliminarProducto">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
                         }
                     }
                     else
                     {
-                        <tr><td colspan="9" style="padding:1.2rem;">Sin productos.</td></tr>
+                        <tr>
+                            <td colspan="10" style="padding: 3rem; text-align: center; color: var(--text-color);">
+                                <i class="fas fa-inbox" style="font-size: 3rem; color: var(--secondary-color); opacity: 0.5; display: block; margin-bottom: 1rem;"></i>
+                                <p style="font-size: 1.2rem; margin: 0;">No se encontraron productos</p>
+                                @if (!string.IsNullOrWhiteSpace(ViewBag.Buscar as string) || ViewBag.Categoria != null)
+                                {
+                                    <p style="margin-top: 0.5rem;">
+                                        <a href="@Url.Action("ListadoProductos", "Producto")" style="color: var(--primary-color);">Limpiar filtros</a>
+                                    </p>
+                                }
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </table>
         </div>
+
+        @if (Model != null && Model.Count > 0)
+        {
+            <!-- Footer de paginación -->
+            <div style="padding: 1.5rem; background: var(--light-color); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--secondary-color); flex-wrap: wrap; gap: 1rem;">
+                <div style="color: var(--text-color); font-size: 0.95rem;">
+                    Mostrando <strong><span id="startRecord">1</span>-<span id="endRecord">@Math.Min(5, Model.Count)</span></strong> de <strong id="totalRecords">@Model.Count</strong> productos
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button id="btnAnterior"
+                            class="btn"
+                            onclick="paginaAnterior()"
+                            style="border-radius: 50px; background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color); padding: 0.8rem 2rem;">
+                        &lt; Anterior
+                    </button>
+                    <button id="btnSiguiente"
+                            class="btn"
+                            onclick="paginaSiguiente()"
+                            style="border-radius: 50px; background: var(--primary-color); color: var(--white); border: none; padding: 0.8rem 2rem;">
+                        Siguiente &gt;
+                    </button>
+                </div>
+            </div>
+        }
     </div>
 </div>
+
+<partial name="_ModalDetallesProducto" />
+<partial name="_ModalEliminarProducto" />
+
+@section Scripts {
+    <script>
+        // Variables de paginación
+        var paginaActual = 1;
+        var registrosPorPagina = 5;
+        var todasLasFilas = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var table = document.getElementById('laTablaDeProductos');
+            if (table && table.getElementsByTagName('tbody')[0]) {
+                todasLasFilas = Array.from(table.getElementsByTagName('tbody')[0].getElementsByTagName('tr'));
+                if (todasLasFilas.length > 0 && !todasLasFilas[0].querySelector('td[colspan]')) {
+                    mostrarPagina(paginaActual);
+                }
+            }
+
+            // Manejar botones de editar
+            var botonesEditar = document.querySelectorAll('.btn-editar');
+            botonesEditar.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var productoId = this.getAttribute('data-id');
+                    window.location.href = '@Url.Action("EditarProducto", "Producto")?id=' + productoId;
+                });
+            });
+
+            // Manejar botones de detalles
+            var botonesDetalles = document.querySelectorAll('.btn-detalles');
+            botonesDetalles.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    document.getElementById('detalles-id').textContent = this.getAttribute('data-id');
+                    document.getElementById('detalles-nombre').textContent = this.getAttribute('data-nombre');
+                    document.getElementById('detalles-categoria').textContent = this.getAttribute('data-categoria');
+                    document.getElementById('detalles-descripcion').textContent = this.getAttribute('data-descripcion');
+                    document.getElementById('detalles-cantidad').textContent = this.getAttribute('data-cantidad');
+                    document.getElementById('detalles-precio').textContent = '₡' + this.getAttribute('data-precio');
+                    document.getElementById('detalles-impuesto').textContent = this.getAttribute('data-impuesto') + '%';
+
+                    var estado = this.getAttribute('data-estado');
+                    var estadoBadge = document.getElementById('detalles-estado-badge');
+                    estadoBadge.textContent = estado;
+                    if (estado === 'Activo') {
+                        estadoBadge.style.background = '#27ae60';
+                    } else {
+                        estadoBadge.style.background = '#e74c3c';
+                    }
+                });
+            });
+
+            // Manejar botones de eliminar
+            var botonesEliminar = document.querySelectorAll('.btn-eliminar');
+            botonesEliminar.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    document.getElementById('eliminar-id').value = this.getAttribute('data-id');
+                    document.getElementById('eliminar-id-display').textContent = this.getAttribute('data-id');
+                    document.getElementById('eliminar-nombre').textContent = this.getAttribute('data-nombre');
+                    document.getElementById('eliminar-categoria').textContent = this.getAttribute('data-categoria');
+                    document.getElementById('eliminar-descripcion').textContent = this.getAttribute('data-descripcion');
+                    document.getElementById('eliminar-cantidad').textContent = this.getAttribute('data-cantidad');
+                    document.getElementById('eliminar-precio').textContent = '₡' + this.getAttribute('data-precio');
+
+                    var estado = this.getAttribute('data-estado');
+                    var estadoBadge = document.getElementById('eliminar-estado-badge');
+                    estadoBadge.textContent = estado;
+                    if (estado === 'Activo') {
+                        estadoBadge.className = 'badge bg-success';
+                        estadoBadge.style.background = '#27ae60';
+                    } else {
+                        estadoBadge.className = 'badge bg-danger';
+                        estadoBadge.style.background = '#e74c3c';
+                    }
+
+                    var form = document.getElementById('formEliminarProducto');
+                    form.action = '@Url.Action("EliminarProducto", "Producto")';
+                });
+            });
+
+            // Búsqueda mejorada
+            var searchInput = document.getElementById('buscar');
+            searchInput.addEventListener('focus', function() {
+                this.style.borderColor = 'var(--primary-color)';
+                this.style.boxShadow = '0 4px 12px rgba(212, 130, 92, 0.2)';
+            });
+            searchInput.addEventListener('blur', function() {
+                this.style.borderColor = 'var(--secondary-color)';
+                this.style.boxShadow = 'none';
+            });
+        });
+
+        function mostrarPagina(pagina) {
+            if (todasLasFilas.length === 0 || todasLasFilas[0].querySelector('td[colspan]')) {
+                return;
+            }
+
+            var inicio = (pagina - 1) * registrosPorPagina;
+            var fin = inicio + registrosPorPagina;
+
+            todasLasFilas.forEach(function(row) {
+                row.style.display = 'none';
+            });
+
+            for (var i = inicio; i < fin && i < todasLasFilas.length; i++) {
+                todasLasFilas[i].style.display = '';
+            }
+
+            var totalRegistros = todasLasFilas.length;
+            var registroInicio = inicio + 1;
+            var registroFin = Math.min(fin, totalRegistros);
+
+            document.getElementById('startRecord').textContent = registroInicio;
+            document.getElementById('endRecord').textContent = registroFin;
+            document.getElementById('totalRecords').textContent = totalRegistros;
+
+            var btnAnterior = document.getElementById('btnAnterior');
+            var btnSiguiente = document.getElementById('btnSiguiente');
+
+            // Actualizar botón Anterior
+            btnAnterior.disabled = pagina === 1;
+            if (pagina === 1) {
+                btnAnterior.style.opacity = '0.5';
+                btnAnterior.style.cursor = 'not-allowed';
+            } else {
+                btnAnterior.style.opacity = '1';
+                btnAnterior.style.cursor = 'pointer';
+            }
+
+            // Actualizar botón Siguiente
+            btnSiguiente.disabled = fin >= totalRegistros;
+            if (fin >= totalRegistros) {
+                btnSiguiente.style.opacity = '0.5';
+                btnSiguiente.style.cursor = 'not-allowed';
+            } else {
+                btnSiguiente.style.opacity = '1';
+                btnSiguiente.style.cursor = 'pointer';
+            }
+        }
+
+        function paginaAnterior() {
+            if (paginaActual > 1) {
+                paginaActual--;
+                mostrarPagina(paginaActual);
+            }
+        }
+
+        function paginaSiguiente() {
+            var totalPaginas = Math.ceil(todasLasFilas.length / registrosPorPagina);
+            if (paginaActual < totalPaginas) {
+                paginaActual++;
+                mostrarPagina(paginaActual);
+            }
+        }
+    </script>
+}

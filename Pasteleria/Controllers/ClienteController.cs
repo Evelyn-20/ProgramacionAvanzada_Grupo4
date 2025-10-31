@@ -1,165 +1,206 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Pasteleria.Models;
+using Pasteleria.Abstracciones.Logica.Cliente;
 using Pasteleria.Abstracciones.ModeloUI;
-using X.PagedList;
+using Pasteleria.LogicaDeNegocio.Clientes;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Pasteleria.Controllers
 {
     public class ClienteController : Controller
     {
-        // Inyección del contexto de base de datos
-        private readonly PasteleriaDbContext _db;
-        public ClienteController(PasteleriaDbContext db) => _db = db;
+        private IListarClientes _listarCliente;
+        private ICrearCliente _crearCliente;
+        private IObtenerCliente _obtenerClientePorId;
+        private IActualizarCliente _actualizarCliente;
+        private IEliminarCliente _eliminarCliente;
 
-        // LISTADO con filtros y paginación
-        public async Task<IActionResult> ListadoClientes([FromQuery] ClienteFiltroVM f)
+        public ClienteController()
         {
-            // Query base de clientes sin rastreo de cambios (mejor rendimiento para lectura)
-            var q = _db.Clientes.AsNoTracking();
-
-            // Aplicar filtro de búsqueda si existe
-            if (!string.IsNullOrWhiteSpace(f.Buscar))
+            try
             {
-                var filtro = f.Buscar.ToLower().Trim();
-                q = q.Where(c => c.NombreCliente.ToLower().Contains(filtro) ||
-                                 c.Cedula.Contains(filtro) ||
-                                 c.Correo.ToLower().Contains(filtro) ||
-                                 c.Telefono.Contains(filtro));
+                _listarCliente = new ListarClientes();
+                _crearCliente = new CrearCliente();
+                _obtenerClientePorId = new ObtenerCliente();
+                _actualizarCliente = new ActualizarCliente();
+                _eliminarCliente = new EliminarCliente();
             }
-
-            // Ordenar alfabéticamente por nombre
-            q = q.OrderBy(c => c.NombreCliente);
-
-            // Configurar paginación (10 clientes por página)
-            var page = f.Pagina <= 0 ? 1 : f.Pagina;
-            var paged = await q.ToPagedListAsync(page, 10);
-
-            // Pasar el filtro a la vista para mantener los valores
-            ViewBag.Filtro = f;
-            return View("ListadoClientes", paged);
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
-        // GET: formulario Crear
+        // GET: Cliente/ListadoClientes
+        public IActionResult ListadoClientes(string buscar)
+        {
+            try
+            {
+                List<Cliente> clientes = new List<Cliente>();
+
+                if (!string.IsNullOrWhiteSpace(buscar))
+                {
+                    // Buscar por nombre o cédula
+                    var clientesPorNombre = _listarCliente.BuscarPorNombre(buscar);
+                    var clientesPorCedula = _listarCliente.BuscarPorCedula(buscar);
+
+                    // Combinar resultados y eliminar duplicados
+                    clientes = clientesPorNombre.Union(clientesPorCedula).ToList();
+                    ViewBag.Buscar = buscar;
+                }
+                else
+                {
+                    clientes = _listarCliente.Obtener();
+                }
+
+                return View(clientes);
+            }
+            catch (Exception ex)
+            {
+
+                TempData["Error"] = $"Error al cargar clientes: {ex.Message}";
+                return View(new List<Cliente>());
+            }
+        }
+
+        // GET: Cliente/CrearCliente
+        [HttpGet]
         public IActionResult CrearCliente()
         {
-            var vm = new ClienteFormVM();
-            return View("CrearCliente", vm);
+            return View();
         }
 
-        // POST: crear cliente
-        [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> CrearCliente(ClienteFormVM vm)
+        // POST: Cliente/CrearCliente
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CrearCliente(Cliente cliente)
         {
-            // Validar que el modelo sea válido
-            if (!ModelState.IsValid)
-                return View("CrearCliente", vm);
-
-            // Validar que la contraseña sea obligatoria al crear
-            if (string.IsNullOrWhiteSpace(vm.Contrasenna))
+            try
             {
-                ModelState.AddModelError(nameof(vm.Contrasenna), "La contraseña es obligatoria al crear un cliente");
-                return View("CrearCliente", vm);
+                System.Diagnostics.Debug.WriteLine($"Nombre: {cliente?.NombreCliente}");
+                System.Diagnostics.Debug.WriteLine($"Cédula: {cliente?.Cedula}");
+                System.Diagnostics.Debug.WriteLine($"Correo: {cliente?.Correo}");
+
+                if (ModelState.IsValid)
+                {
+                    // Establecer estado como activo
+                    cliente.Estado = true;
+
+                    int resultado = await _crearCliente.Guardar(cliente);
+
+                    if (resultado > 0)
+                    {
+                        TempData["Success"] = "Cliente creado exitosamente";
+                        return RedirectToAction(nameof(ListadoClientes));
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "No se pudo crear el cliente en la base de datos");
+                    }
+                }
+                else
+                {
+                    foreach (var key in ModelState.Keys)
+                    {
+                        var errors = ModelState[key].Errors;
+                        foreach (var error in errors)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"  {key}: {error.ErrorMessage}");
+                        }
+                    }
+                }
+
+                return View(cliente);
             }
-
-            // Verificar si la cédula ya existe
-            if (await _db.Clientes.AnyAsync(c => c.Cedula == vm.Cedula))
+            catch (Exception ex)
             {
-                ModelState.AddModelError(nameof(vm.Cedula), "Ya existe un cliente con esta cédula");
-                return View("CrearCliente", vm);
+                ModelState.AddModelError("", $"Error: {ex.Message}");
+                return View(cliente);
             }
-
-            // Crear el nuevo cliente
-            var c = new Cliente
-            {
-                NombreCliente = vm.NombreCliente.Trim(),
-                Cedula = vm.Cedula.Trim(),
-                Correo = vm.Correo.Trim(),
-                Telefono = vm.Telefono.Trim(),
-                Direccion = vm.Direccion.Trim(),
-                Contrasenna = vm.Contrasenna, // TODO: Implementar hash en producción
-                Estado = true // Nuevo cliente siempre activo
-            };
-
-            _db.Add(c);
-            await _db.SaveChangesAsync();
-            TempData["ok"] = "Cliente creado exitosamente";
-            return RedirectToAction(nameof(ListadoClientes));
         }
 
-        // GET: formulario Editar
-        public async Task<IActionResult> EditarCliente(int id)
+        // GET: Cliente/EditarCliente/5
+        [HttpGet]
+        public IActionResult EditarCliente(int id)
         {
-            // Buscar el cliente por ID
-            var c = await _db.Clientes.FindAsync(id);
-            if (c == null) return RedirectToAction(nameof(ListadoClientes));
-
-            // Mapear a ViewModel para el formulario
-            var vm = new ClienteFormVM
+            try
             {
-                IdCliente = c.IdCliente,
-                NombreCliente = c.NombreCliente,
-                Cedula = c.Cedula,
-                Correo = c.Correo,
-                Telefono = c.Telefono,
-                Direccion = c.Direccion,
-                Estado = c.Estado
-                // No pasamos la contraseña por seguridad
-            };
-            return View("EditarCliente", vm);
+                var cliente = _obtenerClientePorId.Obtener(id);
+
+                if (cliente == null)
+                {
+                    TempData["Error"] = "Cliente no encontrado";
+                    return RedirectToAction(nameof(ListadoClientes));
+                }
+
+                return View(cliente);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error al cargar el cliente: " + ex.Message;
+                return RedirectToAction(nameof(ListadoClientes));
+            }
         }
 
-        // POST: guardar edición
-        [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditarCliente(ClienteFormVM vm)
+        // POST: Cliente/EditarCliente
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditarCliente(Cliente cliente)
         {
-            // Remover validación de contraseña (es opcional al editar)
-            ModelState.Remove(nameof(vm.Contrasenna));
-
-            if (!ModelState.IsValid) return View("EditarCliente", vm);
-
-            // Buscar el cliente a actualizar
-            var c = await _db.Clientes.FindAsync(vm.IdCliente);
-            if (c == null) return RedirectToAction(nameof(ListadoClientes));
-
-            // Verificar si la cédula ya existe en otro cliente
-            if (await _db.Clientes.AnyAsync(x => x.Cedula == vm.Cedula && x.IdCliente != vm.IdCliente))
+            try
             {
-                ModelState.AddModelError(nameof(vm.Cedula), "Ya existe otro cliente con esta cédula");
-                return View("EditarCliente", vm);
+                System.Diagnostics.Debug.WriteLine($"ID: {cliente?.IdCliente}");
+
+                if (ModelState.IsValid)
+                {
+                    int resultado = _actualizarCliente.Actualizar(cliente);
+
+                    if (resultado > 0)
+                    {
+                        TempData["Success"] = "Cliente actualizado exitosamente";
+                        return RedirectToAction(nameof(ListadoClientes));
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "No se pudo actualizar el cliente");
+                    }
+                }
+
+                return View(cliente);
             }
-
-            // Actualizar los datos del cliente
-            c.NombreCliente = vm.NombreCliente.Trim();
-            c.Cedula = vm.Cedula.Trim();
-            c.Correo = vm.Correo.Trim();
-            c.Telefono = vm.Telefono.Trim();
-            c.Direccion = vm.Direccion.Trim();
-            c.Estado = vm.Estado;
-
-            // Solo actualizar contraseña si se proporciona una nueva
-            if (!string.IsNullOrWhiteSpace(vm.Contrasenna))
+            catch (Exception ex)
             {
-                c.Contrasenna = vm.Contrasenna; // TODO: Hashear contraseña
+                ModelState.AddModelError("", "Error al actualizar el cliente: " + ex.Message);
+                return View(cliente);
             }
-
-            await _db.SaveChangesAsync();
-            TempData["ok"] = "Cliente actualizado exitosamente";
-            return RedirectToAction(nameof(ListadoClientes));
         }
 
-        // POST: eliminar cliente
-        [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> EliminarCliente(int IdCliente)
+        // POST: Cliente/EliminarCliente
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EliminarCliente(int IdCliente)
         {
-            var c = await _db.Clientes.FindAsync(IdCliente);
-            if (c != null)
+            try
             {
-                _db.Clientes.Remove(c);
-                await _db.SaveChangesAsync();
-                TempData["ok"] = "Cliente eliminado exitosamente";
+                int resultado = _eliminarCliente.Eliminar(IdCliente);
+
+                if (resultado > 0)
+                {
+                    TempData["Success"] = "Cliente eliminado exitosamente";
+                }
+                else
+                {
+                    TempData["Error"] = "No se pudo eliminar el cliente";
+                }
+
+                return RedirectToAction(nameof(ListadoClientes));
             }
-            return RedirectToAction(nameof(ListadoClientes));
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error al eliminar el cliente: " + ex.Message;
+                return RedirectToAction(nameof(ListadoClientes));
+            }
         }
     }
 }

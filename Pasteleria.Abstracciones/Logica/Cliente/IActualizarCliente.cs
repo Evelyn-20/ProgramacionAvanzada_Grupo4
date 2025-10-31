@@ -9,6 +9,6 @@ namespace Pasteleria.Abstracciones.Logica.Cliente
 {
     public interface IActualizarCliente
     {
-        bool Actualizar(ModeloUI.Cliente cliente);
+        int Actualizar(ModeloUI.Cliente cliente);
     }
 }

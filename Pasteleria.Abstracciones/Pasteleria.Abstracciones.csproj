@@ -7,10 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Logica\Categoria\" />
     <Folder Include="Logica\DetallePedido\" />
     <Folder Include="Logica\Usuario\" />
     <Folder Include="Logica\Pedido\" />
     <Folder Include="Logica\Rol\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
   </ItemGroup>
 
 </Project>

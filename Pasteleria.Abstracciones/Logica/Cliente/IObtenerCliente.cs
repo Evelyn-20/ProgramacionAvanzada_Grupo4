@@ -9,6 +9,6 @@ namespace Pasteleria.Abstracciones.Logica.Cliente
 {
     public interface IObtenerCliente
     {
-        ModeloUI.Cliente ObtenerPorId(int idCliente);
+        ModeloUI.Cliente Obtener(int id);
     }
 }

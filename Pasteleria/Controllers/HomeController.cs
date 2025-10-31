@@ -1,53 +1,54 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Pasteleria.Models;
-using Pasteleria.Abstracciones.ModeloUI;
+using Pasteleria.Abstracciones.Logica.Producto;
 
 namespace Pasteleria.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly PasteleriaDbContext _db;
+        private readonly IListarProductos _listarProductos;
 
-        public HomeController(ILogger<HomeController> logger, PasteleriaDbContext db)
+        public HomeController(ILogger<HomeController> logger, IListarProductos listarProductos)
         {
             _logger = logger;
-            _db = db;
+            _listarProductos = listarProductos;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var vm = new HomeVM
+            try
             {
-                // últimos 6 productos activos
-                Productos = await _db.Productos
-                                     .AsNoTracking()
-                                     .Where(p => p.Estado)
-                                     .OrderByDescending(p => p.IdProducto)
-                                     .Take(6)
-                                     .ToListAsync(),
-                // hasta 8 categorías activas con imagen (o sin imagen)
-                Categorias = await _db.Categorias
-                                      .AsNoTracking()
-                                      .Where(c => c.Estado)
-                                      .OrderBy(c => c.NombreCategoria)
-                                      .Take(8)
-                                      .ToListAsync()
-            };
+                // Obtener todos los productos activos
+                var productos = _listarProductos.Obtener()
+                    .Where(p => p.Estado == true)
+                    .Take(6)
+                    .ToList();
 
-            ViewBag.TotalProductos = await _db.Productos.CountAsync();
-            ViewBag.StockTotal = await _db.Productos.SumAsync(p => p.Cantidad);
-            ViewBag.TotalCategorias = await _db.Categorias.CountAsync();
+                _logger.LogInformation($"Se cargaron {productos.Count} productos en la página de inicio");
 
-            return View(vm);
+                // Pasar los productos a la vista
+                return View(productos);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al cargar los productos en la página de inicio");
+
+                // En caso de error, pasar una lista vacía
+                return View(new List<Pasteleria.Abstracciones.ModeloUI.Producto>());
+            }
         }
 
-        public IActionResult Privacy() => View();
+        public IActionResult Privacy()
+        {
+            return View();
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
-            => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
     }
 }

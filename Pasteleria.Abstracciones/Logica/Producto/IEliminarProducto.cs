@@ -8,5 +8,6 @@ namespace Pasteleria.Abstracciones.Logica.Producto
 {
     public interface IEliminarProducto
     {
+        int Eliminar(int idProducto);
     }
 }

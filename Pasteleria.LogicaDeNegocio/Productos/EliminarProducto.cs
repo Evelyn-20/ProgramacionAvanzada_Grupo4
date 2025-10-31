@@ -1,12 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Pasteleria.Abstracciones.Logica.Producto;
 
 namespace Pasteleria.LogicaDeNegocio.Productos
 {
-    public class EliminarProducto
+    public class EliminarProducto : IEliminarProducto
     {
+        private IEliminarProducto _eliminarProducto;
+
+        public EliminarProducto()
+        {
+            _eliminarProducto = new AccesoADatos.Productos.EliminarProducto();
+        }
+
+        public int Eliminar(int idProducto)
+        {
+            int resultado = _eliminarProducto.Eliminar(idProducto);
+            return resultado;
+        }
     }
 }

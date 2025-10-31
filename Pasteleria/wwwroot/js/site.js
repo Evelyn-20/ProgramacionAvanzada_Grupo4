@@ -23,11 +23,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const navLinks = document.querySelectorAll('.nav-menu a');
     navLinks.forEach(link => {
         link.addEventListener('click', () => {
-            navMenu.classList.remove('active');
-            const spans = hamburger.querySelectorAll('span');
-            spans[0].style.transform = 'none';
-            spans[1].style.opacity = '1';
-            spans[2].style.transform = 'none';
+            if (navMenu) {
+                navMenu.classList.remove('active');
+                if (hamburger) {
+                    const spans = hamburger.querySelectorAll('span');
+                    spans[0].style.transform = 'none';
+                    spans[1].style.opacity = '1';
+                    spans[2].style.transform = 'none';
+                }
+            }
         });
     });
 
@@ -73,39 +77,50 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Simulación de agregar al carrito (placeholder)
-    const addToCartButtons = document.querySelectorAll('.product-card .btn-primary');
-    const cartCount = document.querySelector('.cart-count');
-    let count = 0;
+    // SOLO aplicar esto en páginas que tengan el grid de productos
+    const productsGrid = document.querySelector('.products-grid');
+    if (productsGrid) {
+        const addToCartButtons = productsGrid.querySelectorAll('.product-card .btn-primary');
+        const cartCount = document.querySelector('.cart-count');
+        let count = 0;
 
-    addToCartButtons.forEach(button => {
-        button.addEventListener('click', function (e) {
-            e.preventDefault();
-            count++;
-            cartCount.textContent = count;
+        addToCartButtons.forEach(button => {
+            // Verificar que NO sea un botón de tipo submit
+            if (button.type !== 'submit') {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    count++;
+                    if (cartCount) {
+                        cartCount.textContent = count;
+                    }
 
-            // Animación del botón
-            this.textContent = '¡Agregado!';
-            this.style.background = '#27ae60';
+                    // Animación del botón
+                    this.textContent = '¡Agregado!';
+                    this.style.background = '#27ae60';
 
-            setTimeout(() => {
-                this.textContent = 'Agregar';
-                this.style.background = '';
-            }, 1500);
+                    setTimeout(() => {
+                        this.textContent = 'Agregar';
+                        this.style.background = '';
+                    }, 1500);
 
-            // Animación del contador del carrito
-            cartCount.style.transform = 'scale(1.3)';
-            setTimeout(() => {
-                cartCount.style.transform = 'scale(1)';
-            }, 300);
+                    // Animación del contador del carrito
+                    if (cartCount) {
+                        cartCount.style.transform = 'scale(1.3)';
+                        setTimeout(() => {
+                            cartCount.style.transform = 'scale(1)';
+                        }, 300);
+                    }
+                });
+            }
         });
-    });
+    }
 
-    // Efecto parallax suave en el hero
-    window.addEventListener('scroll', function () {
-        const scrolled = window.pageYOffset;
-        const hero = document.querySelector('.hero');
-        if (hero) {
+    // Efecto parallax suave en el hero - SOLO en la página principal
+    const hero = document.querySelector('.hero');
+    if (hero && !document.querySelector('form')) { // No aplicar parallax en páginas con formularios
+        window.addEventListener('scroll', function () {
+            const scrolled = window.pageYOffset;
             hero.style.transform = `translateY(${scrolled * 0.5}px)`;
-        }
-    });
+        });
+    }
 });

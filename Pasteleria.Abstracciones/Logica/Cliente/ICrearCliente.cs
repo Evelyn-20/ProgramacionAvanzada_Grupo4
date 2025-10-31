@@ -9,6 +9,6 @@ namespace Pasteleria.Abstracciones.Logica.Cliente
 {
     public interface ICrearCliente
     {
-        bool Crear(ModeloUI.Cliente cliente);
+        Task<int> Guardar(ModeloUI.Cliente elCliente);
     }
 }

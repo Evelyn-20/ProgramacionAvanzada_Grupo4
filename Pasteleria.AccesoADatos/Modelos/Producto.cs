@@ -1,40 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pasteleria.AccesoADatos.Modelos
 {
     [Table("Producto")]
-    public class Producto
+    public class ProductoAD
     {
-        [Column("IdProducto")]
+        [Key]
         public int IdProducto { get; set; }
 
-        [Column("IdCategoria")]
+        [Required]
         public int IdCategoria { get; set; }
 
-        [Column("NombreProducto")]
+        [Required]
+        [StringLength(200)]
         public string NombreProducto { get; set; }
 
-        [Column("DescripcionProducto")]
+        [Required]
         public string DescripcionProducto { get; set; }
 
-        [Column("Cantidad")]
+        [Required]
         public int Cantidad { get; set; }
 
-        [Column("Precio")]
+        [Required]
         public decimal Precio { get; set; }
 
-        [Column("PorcentajeImpuesto")]
+        [Required]
         public decimal PorcentajeImpuesto { get; set; }
 
-        [Column("Imagen")]
         public byte[] Imagen { get; set; }
 
-        [Column("Estado")]
+        [Required]
         public bool Estado { get; set; }
     }
-} 
+}
