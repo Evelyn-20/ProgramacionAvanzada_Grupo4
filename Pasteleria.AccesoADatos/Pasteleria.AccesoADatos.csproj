@@ -9,8 +9,6 @@
 	<ItemGroup>
 		<Folder Include="DetallePedidos\" />
 		<Folder Include="Pedidos\" />
-		<Folder Include="Roles\" />
-		<Folder Include="Usuarios\" />
 	</ItemGroup>
 
 	<ItemGroup>

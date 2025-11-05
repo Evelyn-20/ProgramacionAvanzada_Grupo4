@@ -1,5 +1,6 @@
 ﻿using Pasteleria.Abstracciones.Logica.Cliente;
 using Pasteleria.AccesoADatos.Modelos;
+using Pasteleria.AccesoADatos.Auditoria;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -9,10 +10,12 @@ namespace Pasteleria.AccesoADatos.Clientes
     public class ActualizarCliente : IActualizarCliente
     {
         private Contexto _contexto;
+        private RegistrarAuditoria _auditoria;
 
         public ActualizarCliente()
         {
             _contexto = new Contexto();
+            _auditoria = new RegistrarAuditoria();
         }
 
         public int Actualizar(Abstracciones.ModeloUI.Cliente elCliente)
@@ -25,7 +28,7 @@ namespace Pasteleria.AccesoADatos.Clientes
 
                 if (clienteExistente == null)
                 {
-                    throw new Exception("El cliente no existe");
+                    return 0;
                 }
 
                 // Validar que la cédula no esté duplicada (excepto para el mismo cliente)
@@ -44,6 +47,17 @@ namespace Pasteleria.AccesoADatos.Clientes
                     throw new Exception("Ya existe otro cliente con ese correo electrónico");
                 }
 
+                // Guardar valores anteriores para auditoría (sin contraseña por seguridad)
+                var valoresAnteriores = new
+                {
+                    clienteExistente.NombreCliente,
+                    clienteExistente.Cedula,
+                    clienteExistente.Correo,
+                    clienteExistente.Telefono,
+                    clienteExistente.Direccion,
+                    clienteExistente.Estado
+                };
+
                 // Actualizar los valores del cliente existente
                 clienteExistente.NombreCliente = elCliente.NombreCliente?.Trim();
                 clienteExistente.Cedula = elCliente.Cedula?.Trim();
@@ -54,8 +68,24 @@ namespace Pasteleria.AccesoADatos.Clientes
                 clienteExistente.Estado = elCliente.Estado;
 
                 _contexto.Cliente.Update(clienteExistente);
-
                 int cantidadDeDatosActualizados = _contexto.SaveChanges();
+
+                // Registrar en auditoría
+                if (cantidadDeDatosActualizados > 0)
+                {
+                    _auditoria.RegistrarActualizacion("Cliente", elCliente.IdCliente,
+                        valoresAnteriores,
+                        new
+                        {
+                            clienteExistente.NombreCliente,
+                            clienteExistente.Cedula,
+                            clienteExistente.Correo,
+                            clienteExistente.Telefono,
+                            clienteExistente.Direccion,
+                            clienteExistente.Estado
+                        }
+                    );
+                }
 
                 System.Diagnostics.Debug.WriteLine($"Cliente actualizado exitosamente. ID: {elCliente.IdCliente}");
 
@@ -64,7 +94,7 @@ namespace Pasteleria.AccesoADatos.Clientes
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error al actualizar cliente: {ex.Message}");
-                throw new Exception("Error al actualizar el cliente en la base de datos", ex);
+                throw;
             }
         }
     }

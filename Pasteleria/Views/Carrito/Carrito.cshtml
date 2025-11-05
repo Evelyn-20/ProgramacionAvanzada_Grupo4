@@ -1,0 +1,193 @@
+﻿@{
+    ViewData["Title"] = "Carrito de Compras";
+}
+
+<!-- Banner Hero -->
+<section class="hero" style="padding: 3rem 0;">
+    <div class="hero-content">
+        <h1 class="hero-title">Carrito de Compras</h1>
+        <p class="hero-subtitle">Selecciona y gestiona los productos antes de realizar la compra</p>
+    </div>
+</section>
+
+<div class="container" style="padding: 3rem 20px; max-width: 1400px;">
+    <!-- Mensajes de éxito/error -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div style="display: grid; grid-template-columns: 1fr 400px; gap: 2rem; align-items: start;">
+        <!-- Sección de Productos -->
+        <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); padding: 2rem;">
+            <h2 style="color: var(--dark-color); margin-bottom: 2rem; font-family: 'Playfair Display', serif; font-size: 1.8rem;">
+                <i class="fas fa-shopping-basket"></i> Productos
+            </h2>
+
+            <div id="productosCarrito">
+                <!-- Producto 1 -->
+                <div class="producto-carrito" style="display: flex; gap: 1.5rem; padding: 1.5rem; border-bottom: 2px solid var(--secondary-color); align-items: center;">
+                    <div style="width: 100px; height: 100px; border-radius: 10px; overflow: hidden; flex-shrink: 0;">
+                        <img src="~/images/placeholder-product.jpg" alt="Producto" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="flex: 1;">
+                        <h4 style="color: var(--dark-color); margin-bottom: 0.5rem; font-weight: 600;">Producto de Ejemplo</h4>
+                        <p style="color: var(--text-color); margin-bottom: 0.5rem; font-size: 0.9rem;">Marca Ejemplo</p>
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-top: 1rem;">
+                            <button type="button" class="btn-cantidad" style="width: 35px; height: 35px; border-radius: 50%; background: var(--secondary-color); border: none; color: var(--dark-color); font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                                -
+                            </button>
+                            <input type="number" value="2" min="1" style="width: 60px; text-align: center; border: 2px solid var(--secondary-color); border-radius: 8px; padding: 0.5rem; font-weight: 600;">
+                            <button type="button" class="btn-cantidad" style="width: 35px; height: 35px; border-radius: 50%; background: var(--secondary-color); border: none; color: var(--dark-color); font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                                +
+                            </button>
+                        </div>
+                    </div>
+                    <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 1rem;">
+                        <span style="color: var(--primary-color); font-weight: 700; font-size: 1.3rem;">₡25,000</span>
+                        <button type="button" class="btn-eliminar-producto" style="width: 40px; height: 40px; border-radius: 50%; background: #e74c3c; border: none; color: var(--white); cursor: pointer; transition: all 0.3s;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Producto 2 -->
+                <div class="producto-carrito" style="display: flex; gap: 1.5rem; padding: 1.5rem; border-bottom: 2px solid var(--secondary-color); align-items: center;">
+                    <div style="width: 100px; height: 100px; border-radius: 10px; overflow: hidden; flex-shrink: 0;">
+                        <img src="~/images/placeholder-product.jpg" alt="Producto" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="flex: 1;">
+                        <h4 style="color: var(--dark-color); margin-bottom: 0.5rem; font-weight: 600;">Otro Producto</h4>
+                        <p style="color: var(--text-color); margin-bottom: 0.5rem; font-size: 0.9rem;">Otra Marca</p>
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-top: 1rem;">
+                            <button type="button" class="btn-cantidad" style="width: 35px; height: 35px; border-radius: 50%; background: var(--secondary-color); border: none; color: var(--dark-color); font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                                -
+                            </button>
+                            <input type="number" value="1" min="1" style="width: 60px; text-align: center; border: 2px solid var(--secondary-color); border-radius: 8px; padding: 0.5rem; font-weight: 600;">
+                            <button type="button" class="btn-cantidad" style="width: 35px; height: 35px; border-radius: 50%; background: var(--secondary-color); border: none; color: var(--dark-color); font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                                +
+                            </button>
+                        </div>
+                    </div>
+                    <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 1rem;">
+                        <span style="color: var(--primary-color); font-weight: 700; font-size: 1.3rem;">₡35,000</span>
+                        <button type="button" class="btn-eliminar-producto" style="width: 40px; height: 40px; border-radius: 50%; background: #e74c3c; border: none; color: var(--white); cursor: pointer; transition: all 0.3s;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Producto 3 -->
+                <div class="producto-carrito" style="display: flex; gap: 1.5rem; padding: 1.5rem; border-bottom: 2px solid var(--secondary-color); align-items: center;">
+                    <div style="width: 100px; height: 100px; border-radius: 10px; overflow: hidden; flex-shrink: 0;">
+                        <img src="~/images/placeholder-product.jpg" alt="Producto" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="flex: 1;">
+                        <h4 style="color: var(--dark-color); margin-bottom: 0.5rem; font-weight: 600;">Tercer Producto</h4>
+                        <p style="color: var(--text-color); margin-bottom: 0.5rem; font-size: 0.9rem;">Tercera Marca</p>
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-top: 1rem;">
+                            <button type="button" class="btn-cantidad" style="width: 35px; height: 35px; border-radius: 50%; background: var(--secondary-color); border: none; color: var(--dark-color); font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                                -
+                            </button>
+                            <input type="number" value="1" min="1" style="width: 60px; text-align: center; border: 2px solid var(--secondary-color); border-radius: 8px; padding: 0.5rem; font-weight: 600;">
+                            <button type="button" class="btn-cantidad" style="width: 35px; height: 35px; border-radius: 50%; background: var(--secondary-color); border: none; color: var(--dark-color); font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                                +
+                            </button>
+                        </div>
+                    </div>
+                    <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 1rem;">
+                        <span style="color: var(--primary-color); font-weight: 700; font-size: 1.3rem;">₡15,000</span>
+                        <button type="button" class="btn-eliminar-producto" style="width: 40px; height: 40px; border-radius: 50%; background: #e74c3c; border: none; color: var(--white); cursor: pointer; transition: all 0.3s;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mensaje cuando no hay productos -->
+                <div id="carritoVacio" style="display: none; text-align: center; padding: 3rem; color: var(--text-color);">
+                    <i class="fas fa-shopping-cart" style="font-size: 4rem; color: var(--secondary-color); opacity: 0.5; display: block; margin-bottom: 1rem;"></i>
+                    <p style="font-size: 1.2rem;">Tu carrito está vacío</p>
+                    <a href="@Url.Action("ListadoProductos", "Producto")" class="btn btn-primary" style="margin-top: 1rem;">
+                        Ver Productos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumen del Pedido -->
+        <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); padding: 2rem; position: sticky; top: 100px;">
+            <h3 style="color: var(--dark-color); margin-bottom: 1.5rem; font-family: 'Playfair Display', serif; font-size: 1.5rem;">
+                Resumen del Pedido
+            </h3>
+
+            <div style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--secondary-color);">
+                    <span style="color: var(--text-color);">Subtotal:</span>
+                    <span style="color: var(--dark-color); font-weight: 600;" id="subtotal">₡75,000</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--secondary-color);">
+                    <span style="color: var(--text-color);">Descuento:</span>
+                    <span style="color: #27ae60; font-weight: 600;" id="descuento">₡0</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid var(--secondary-color);">
+                    <span style="color: var(--text-color);">Impuesto (13%):</span>
+                    <span style="color: var(--dark-color); font-weight: 600;" id="impuesto">₡9,750</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
+                    <span style="color: var(--dark-color); font-weight: 700; font-size: 1.2rem;">Total:</span>
+                    <span style="color: var(--primary-color); font-weight: 700; font-size: 1.5rem;" id="total">₡84,750</span>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <a href="@Url.Action("ProcederPago", "Carrito")" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem; text-align: center; text-decoration: none;">
+                    <i class="fas fa-credit-card"></i> Proceder al Pago
+                </a>
+                <a href="@Url.Action("ListadoProductos", "Producto")" class="btn btn-secondary" style="width: 100%; padding: 1rem; font-size: 1.1rem; text-align: center; text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> Continuar Comprando
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Los botones de cantidad tendrán hover
+        document.querySelectorAll('.btn-cantidad').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.background = 'var(--primary-color)';
+                this.style.color = 'var(--white)';
+                this.style.transform = 'scale(1.1)';
+            });
+            btn.addEventListener('mouseleave', function() {
+                this.style.background = 'var(--secondary-color)';
+                this.style.color = 'var(--dark-color)';
+                this.style.transform = 'scale(1)';
+            });
+        });
+
+        // Los botones de eliminar tendrán hover
+        document.querySelectorAll('.btn-eliminar-producto').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.background = '#c0392b';
+                this.style.transform = 'scale(1.1)';
+            });
+            btn.addEventListener('mouseleave', function() {
+                this.style.background = '#e74c3c';
+                this.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+}

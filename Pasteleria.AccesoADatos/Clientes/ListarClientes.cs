@@ -40,7 +40,7 @@ namespace Pasteleria.AccesoADatos.Clientes
                     return new List<Abstracciones.ModeloUI.Cliente>();
                 }
 
-                List<ClienteAD> clientesAD = _contexto.Cliente 
+                List<ClienteAD> clientesAD = _contexto.Cliente
                     .Where(c => c.NombreCliente.Contains(nombre) ||
                                 c.Correo.Contains(nombre) ||
                                 c.Telefono.Contains(nombre))

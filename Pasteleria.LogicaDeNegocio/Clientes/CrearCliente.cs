@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Pasteleria.Abstracciones.Logica.Cliente;
-using Pasteleria.Abstracciones.Logica.Auditoria;
 using Pasteleria.Abstracciones.ModeloUI;
 
 namespace Pasteleria.LogicaDeNegocio.Clientes
@@ -9,12 +8,10 @@ namespace Pasteleria.LogicaDeNegocio.Clientes
     public class CrearCliente : ICrearCliente
     {
         private ICrearCliente _crearCliente;
-        private IRegistrarAuditoria _registrarAuditoria;
 
         public CrearCliente()
         {
             _crearCliente = new AccesoADatos.Clientes.CrearCliente();
-            _registrarAuditoria = new Auditoria.RegistrarAuditoria();
         }
 
         public async Task<int> Guardar(Cliente elCliente)
@@ -65,6 +62,7 @@ namespace Pasteleria.LogicaDeNegocio.Clientes
                 throw new ArgumentException("La contraseña debe contener al menos una letra y un número");
             }
 
+            // Establecer estado como activo
             elCliente.Estado = true;
 
             // ENCRIPTAR CONTRASEÑA usando BCrypt
@@ -78,25 +76,6 @@ namespace Pasteleria.LogicaDeNegocio.Clientes
                 {
                     throw new Exception("No se pudo guardar el cliente en la base de datos");
                 }
-
-                // Registrar auditoría de creación
-                var valoresNuevos = new
-                {
-                    elCliente.NombreCliente,
-                    elCliente.Cedula,
-                    elCliente.Correo,
-                    elCliente.Telefono,
-                    elCliente.Direccion,
-                    elCliente.Estado
-                    // No incluir contraseña por seguridad
-                };
-
-                _registrarAuditoria.RegistrarCreacion(
-                    tabla: "Cliente",
-                    idRegistro: elCliente.IdCliente,
-                    valoresNuevos: valoresNuevos,
-                    usuarioNombre: "Sistema"
-                );
 
                 return cantidadDeResultados;
             }

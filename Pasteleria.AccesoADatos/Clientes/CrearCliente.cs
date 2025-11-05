@@ -1,6 +1,7 @@
 ﻿using Pasteleria.Abstracciones.Logica.Cliente;
 using Pasteleria.Abstracciones.ModeloUI;
 using Pasteleria.AccesoADatos.Modelos;
+using Pasteleria.AccesoADatos.Auditoria;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -11,10 +12,12 @@ namespace Pasteleria.AccesoADatos.Clientes
     public class CrearCliente : ICrearCliente
     {
         private Contexto _contexto;
+        private RegistrarAuditoria _auditoria;
 
         public CrearCliente()
         {
             _contexto = new Contexto();
+            _auditoria = new RegistrarAuditoria();
         }
 
         public async Task<int> Guardar(Abstracciones.ModeloUI.Cliente elCliente)
@@ -39,13 +42,29 @@ namespace Pasteleria.AccesoADatos.Clientes
                 _contexto.Cliente.Add(elClienteAGuardar);
                 int cantidadDeDatosAgregados = await _contexto.SaveChangesAsync();
 
+                // Registrar en auditoría
+                if (cantidadDeDatosAgregados > 0)
+                {
+                    _auditoria.RegistrarCreacion("Cliente", elClienteAGuardar.IdCliente, new
+                    {
+                        elClienteAGuardar.IdCliente,
+                        elClienteAGuardar.NombreCliente,
+                        elClienteAGuardar.Cedula,
+                        elClienteAGuardar.Correo,
+                        elClienteAGuardar.Telefono,
+                        elClienteAGuardar.Direccion,
+                        elClienteAGuardar.Estado
+                        // No incluir contraseña por seguridad
+                    });
+                }
+
                 System.Diagnostics.Debug.WriteLine($"Cliente guardado exitosamente. ID: {elClienteAGuardar.IdCliente}");
                 return cantidadDeDatosAgregados;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error al guardar cliente: {ex.Message}");
-                throw new Exception("Error al guardar el cliente en la base de datos", ex);
+                throw;
             }
         }
 

@@ -11,8 +11,15 @@ namespace Pasteleria.Abstracciones.ModeloUI
     public class Rol
     {
         public int IdRol { get; set; }
-        [DisplayName("Nombre del rol")]
+
+        [Required(ErrorMessage = "El nombre del rol es obligatorio")]
+        [StringLength(50, ErrorMessage = "El nombre del rol no puede exceder 50 caracteres")]
+        [Display(Name = "Nombre del Rol")]
         public string NombreRol { get; set; }
+
+        [Display(Name = "Estado")]
         public bool Estado { get; set; }
-    } 
+
+        public string EstadoTexto => Estado ? "Activo" : "Inactivo";
+    }
 }

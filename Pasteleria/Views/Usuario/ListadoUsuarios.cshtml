@@ -1,0 +1,343 @@
+﻿@model List<Pasteleria.Abstracciones.ModeloUI.Usuario>
+
+@{
+    ViewBag.Title = "Listado de Usuarios";
+}
+
+<!-- Banner Hero -->
+<section class="hero" style="padding: 3rem 0;">
+    <div class="hero-content">
+        <h1 class="hero-title">Listado de Usuarios</h1>
+        <p class="hero-subtitle">Administra y visualiza toda la información de tus usuarios</p>
+    </div>
+</section>
+
+<div class="container" style="padding: 3rem 20px; max-width: 1400px;">
+    <!-- Mensajes de éxito/error -->
+    @if (TempData["Exito"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
+            <i class="fas fa-check-circle"></i> @TempData["Exito"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Barra de búsqueda y botón agregar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap;">
+        <form method="get" action="@Url.Action("ListadoUsuarios")" style="position: relative; flex: 1; min-width: 300px; display: flex; gap: 0.5rem;">
+            <div style="position: relative; flex: 1;">
+                <i class="fas fa-search" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--primary-color); z-index: 1;"></i>
+                <input type="text"
+                       name="buscar"
+                       id="searchInput"
+                       value="@ViewBag.Buscar"
+                       placeholder="Buscar por nombre o email..."
+                       style="width: 100%; padding: 1rem 1rem 1rem 50px; border: 2px solid var(--secondary-color); border-radius: 50px; font-size: 1rem; background: var(--white); transition: all 0.3s;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="border-radius: 50px; padding: 0 2rem;">
+                <i class="fas fa-search"></i> Buscar
+            </button>
+        </form>
+        <a href="@Url.Action("CrearUsuario")" class="btn btn-primary" style="white-space: nowrap;">
+            <i class="fas fa-user-plus"></i> Agregar Usuario
+        </a>
+    </div>
+
+    <!-- Tabla con estilo mejorado -->
+    <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); overflow: hidden;">
+        <div class="table-responsive">
+            <table id="laTablaDeUsuarios" style="margin-bottom: 0; width: 100%; border-collapse: collapse;">
+                <thead style="background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%);">
+                    <tr>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">#</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Nombre</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Email</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Rol</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Estado</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none; text-align: center;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        int contador = 1;
+                        foreach (var usuario in Model)
+                        {
+                            var nombreRol = ViewBag.RolesDict != null && ViewBag.RolesDict.ContainsKey(usuario.IdRol)
+                            ? ViewBag.RolesDict[usuario.IdRol]
+                            : "Sin rol";
+
+                            <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
+                                onmouseover="this.style.background='var(--light-color)'"
+                                onmouseout="this.style.background='transparent'"
+                                data-usuario-id="@usuario.IdUsuario"
+                                data-usuario-nombre="@usuario.NombreUsuario"
+                                data-usuario-email="@usuario.Email"
+                                data-usuario-rol="@nombreRol"
+                                data-usuario-estado="@(usuario.Estado ? "Activo" : "Inactivo")">
+
+                                <td style="padding: 1.2rem; color: var(--text-color);">@contador</td>
+                                <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">@usuario.NombreUsuario</td>
+                                <td style="padding: 1.2rem; color: var(--text-color);">@usuario.Email</td>
+                                <td style="padding: 1.2rem; color: var(--text-color);">
+                                    <span style="background: var(--primary-color); color: var(--white); padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.85rem; font-weight: 600;">
+                                        @nombreRol
+                                    </span>
+                                </td>
+                                <td style="padding: 1.2rem;">
+                                    @if (usuario.Estado)
+                                    {
+                                        <span style="background: #27ae60; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="background: #e74c3c; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Inactivo</span>
+                                    }
+                                </td>
+                                <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
+                                    <button type="button"
+                                            class="btn btn-sm btn-editar"
+                                            data-id="@usuario.IdUsuario"
+                                            style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-sm btn-ver-detalles"
+                                            style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalDetallesUsuario">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-sm btn-eliminar"
+                                            style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalEliminarUsuario">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            contador++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" style="padding: 3rem; text-align: center; color: var(--text-color);">
+                                <i class="fas fa-inbox" style="font-size: 3rem; color: var(--secondary-color); opacity: 0.5; display: block; margin-bottom: 1rem;"></i>
+                                <p style="font-size: 1.2rem; margin: 0;">No se encontraron usuarios</p>
+                                @if (!string.IsNullOrWhiteSpace(ViewBag.Buscar as string))
+                                {
+                                    <p style="margin-top: 0.5rem;">
+                                        <a href="@Url.Action("ListadoUsuarios")" style="color: var(--primary-color);">Limpiar búsqueda</a>
+                                    </p>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model != null && Model.Count > 0)
+        {
+            <!-- Footer de paginación -->
+            <div style="padding: 1.5rem; background: var(--light-color); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--secondary-color); flex-wrap: wrap; gap: 1rem;">
+                <div style="color: var(--text-color); font-size: 0.95rem;">
+                    Mostrando <strong><span id="startRecord">1</span>-<span id="endRecord">@Math.Min(5, Model.Count)</span></strong> de <strong id="totalRecords">@Model.Count</strong> usuarios
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button id="btnAnterior"
+                            class="btn"
+                            onclick="paginaAnterior()"
+                            style="border-radius: 50px; background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color); padding: 0.8rem 2rem;">
+                        &lt; Anterior
+                    </button>
+                    <button id="btnSiguiente"
+                            class="btn"
+                            onclick="paginaSiguiente()"
+                            style="border-radius: 50px; background: var(--primary-color); color: var(--white); border: none; padding: 0.8rem 2rem;">
+                        Siguiente &gt;
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<partial name="_ModalDetallesUsuario" />
+<partial name="_ModalEliminarUsuario" />
+
+@section Scripts {
+    <script>
+        // Variables de paginación
+        var paginaActual = 1;
+        var registrosPorPagina = 5;
+        var todasLasFilas = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var table = document.getElementById('laTablaDeUsuarios');
+            if (table && table.getElementsByTagName('tbody')[0]) {
+                todasLasFilas = Array.from(table.getElementsByTagName('tbody')[0].getElementsByTagName('tr'));
+                if (todasLasFilas.length > 0 && !todasLasFilas[0].querySelector('td[colspan]')) {
+                    mostrarPagina(paginaActual);
+                }
+            }
+
+            // Manejar botones de editar
+            var botonesEditar = document.querySelectorAll('.btn-editar');
+            botonesEditar.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var usuarioId = this.getAttribute('data-id');
+                    window.location.href = '@Url.Action("EditarUsuario", "Usuario")?id=' + usuarioId;
+                });
+            });
+
+            // Manejar botones de ver detalles
+            var botonesDetalles = document.querySelectorAll('.btn-ver-detalles');
+            botonesDetalles.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var fila = this.closest('tr');
+
+                    document.getElementById('detalles-id').textContent = fila.dataset.usuarioId;
+                    document.getElementById('detalles-nombre').textContent = fila.dataset.usuarioNombre;
+                    document.getElementById('detalles-email').textContent = fila.dataset.usuarioEmail;
+                    document.getElementById('detalles-rol').textContent = fila.dataset.usuarioRol;
+
+                    var estadoBadge = document.getElementById('detalles-estado-badge');
+                    var estado = fila.dataset.usuarioEstado;
+                    estadoBadge.textContent = estado;
+
+                    if (estado === 'Activo') {
+                        estadoBadge.style.background = '#27ae60';
+                        estadoBadge.style.color = 'white';
+                        estadoBadge.style.padding = '0.5rem 1rem';
+                        estadoBadge.style.borderRadius = '20px';
+                    } else {
+                        estadoBadge.style.background = '#e74c3c';
+                        estadoBadge.style.color = 'white';
+                        estadoBadge.style.padding = '0.5rem 1rem';
+                        estadoBadge.style.borderRadius = '20px';
+                    }
+                });
+            });
+
+            // Manejar botones de eliminar
+            var botonesEliminar = document.querySelectorAll('.btn-eliminar');
+            botonesEliminar.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var fila = this.closest('tr');
+
+                    document.getElementById('eliminar-id').value = fila.dataset.usuarioId;
+                    document.getElementById('eliminar-id-display').textContent = fila.dataset.usuarioId;
+                    document.getElementById('eliminar-nombre').textContent = fila.dataset.usuarioNombre;
+                    document.getElementById('eliminar-email').textContent = fila.dataset.usuarioEmail;
+                    document.getElementById('eliminar-rol').textContent = fila.dataset.usuarioRol;
+
+                    var estadoBadge = document.getElementById('eliminar-estado-badge');
+                    var estado = fila.dataset.usuarioEstado;
+                    estadoBadge.textContent = estado;
+
+                    if (estado === 'Activo') {
+                        estadoBadge.style.background = '#27ae60';
+                        estadoBadge.style.color = 'white';
+                        estadoBadge.style.padding = '0.5rem 1rem';
+                        estadoBadge.style.borderRadius = '20px';
+                    } else {
+                        estadoBadge.style.background = '#e74c3c';
+                        estadoBadge.style.color = 'white';
+                        estadoBadge.style.padding = '0.5rem 1rem';
+                        estadoBadge.style.borderRadius = '20px';
+                    }
+
+                    var form = document.getElementById('formEliminarUsuario');
+                    form.action = '@Url.Action("EliminarUsuario", "Usuario")';
+                });
+            });
+
+            // Búsqueda mejorada
+            var searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('focus', function() {
+                    this.style.borderColor = 'var(--primary-color)';
+                    this.style.boxShadow = '0 4px 12px rgba(212, 130, 92, 0.2)';
+                });
+                searchInput.addEventListener('blur', function() {
+                    this.style.borderColor = 'var(--secondary-color)';
+                    this.style.boxShadow = 'none';
+                });
+            }
+        });
+
+        function mostrarPagina(pagina) {
+            if (todasLasFilas.length === 0 || todasLasFilas[0].querySelector('td[colspan]')) {
+                return;
+            }
+
+            var inicio = (pagina - 1) * registrosPorPagina;
+            var fin = inicio + registrosPorPagina;
+
+            todasLasFilas.forEach(function(row) {
+                row.style.display = 'none';
+            });
+
+            for (var i = inicio; i < fin && i < todasLasFilas.length; i++) {
+                todasLasFilas[i].style.display = '';
+            }
+
+            var totalRegistros = todasLasFilas.length;
+            var registroInicio = inicio + 1;
+            var registroFin = Math.min(fin, totalRegistros);
+
+            document.getElementById('startRecord').textContent = registroInicio;
+            document.getElementById('endRecord').textContent = registroFin;
+            document.getElementById('totalRecords').textContent = totalRegistros;
+
+            var btnAnterior = document.getElementById('btnAnterior');
+            var btnSiguiente = document.getElementById('btnSiguiente');
+
+            // Actualizar botón Anterior
+            btnAnterior.disabled = pagina === 1;
+            if (pagina === 1) {
+                btnAnterior.style.opacity = '0.5';
+                btnAnterior.style.cursor = 'not-allowed';
+            } else {
+                btnAnterior.style.opacity = '1';
+                btnAnterior.style.cursor = 'pointer';
+            }
+
+            // Actualizar botón Siguiente
+            btnSiguiente.disabled = fin >= totalRegistros;
+            if (fin >= totalRegistros) {
+                btnSiguiente.style.opacity = '0.5';
+                btnSiguiente.style.cursor = 'not-allowed';
+            } else {
+                btnSiguiente.style.opacity = '1';
+                btnSiguiente.style.cursor = 'pointer';
+            }
+        }
+
+        function paginaAnterior() {
+            if (paginaActual > 1) {
+                paginaActual--;
+                mostrarPagina(paginaActual);
+            }
+        }
+
+        function paginaSiguiente() {
+            var totalPaginas = Math.ceil(todasLasFilas.length / registrosPorPagina);
+            if (paginaActual < totalPaginas) {
+                paginaActual++;
+                mostrarPagina(paginaActual);
+            }
+        }
+    </script>
+}

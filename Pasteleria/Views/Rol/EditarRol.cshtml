@@ -1,0 +1,86 @@
+﻿@model Pasteleria.Abstracciones.ModeloUI.Rol
+
+@{
+    ViewBag.Title = "Actualizar Rol";
+}
+
+<!-- Banner Hero -->
+<section class="hero" style="padding: 3rem 0;">
+    <div class="hero-content">
+        <h1 class="hero-title">Editar Rol</h1>
+        <p class="hero-subtitle">Modifica la información del rol</p>
+    </div>
+</section>
+
+<div class="container" style="padding: 3rem 20px; max-width: 800px;">
+    @using (Html.BeginForm("EditarRol", "Rol", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.IdRol)
+
+        <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); overflow: hidden;">
+            <!-- Header del formulario -->
+            <div style="background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%); padding: 1.5rem 2rem;">
+                <h4 style="color: var(--dark-color); margin: 0; font-weight: 600;">
+                    <i class="fas fa-user-edit" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
+                    Datos del Rol
+                </h4>
+            </div>
+
+            <!-- Cuerpo del formulario -->
+            <div style="padding: 2rem;">
+                @Html.ValidationSummary(true, "Por favor, corrige los siguientes errores:", new { @class = "alert alert-danger", style = "margin-bottom: 1.5rem; padding: 1rem; border-radius: 10px; background: #fee; border: 1px solid #fcc; color: #c33;" })
+
+                <div style="margin-bottom: 1.5rem;">
+                    @Html.LabelFor(model => model.NombreRol, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
+                    @Html.EditorFor(model => model.NombreRol, new { htmlAttributes = new { @class = "form-control", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
+                    @Html.ValidationMessageFor(model => model.NombreRol, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
+                    <small style="color: var(--text-color); font-size: 0.85rem; margin-top: 0.3rem; display: block;">
+                        <i class="fas fa-info-circle" style="color: var(--primary-color);"></i> El nombre del rol debe ser único y descriptivo
+                    </small>
+                </div>
+
+                <div style="margin-bottom: 1.5rem; padding: 1rem; background: var(--light-color); border-radius: 10px; border: 2px solid var(--secondary-color);">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        @Html.EditorFor(model => model.Estado, new { htmlAttributes = new { @class = "form-check-input", id = "estadoCheckbox", style = "width: 50px; height: 25px; cursor: pointer;" } })
+                        @Html.LabelFor(model => model.Estado, "Estado del Rol (Activo/Inactivo)", new { @class = "form-check-label", @for = "estadoCheckbox", style = "color: var(--dark-color); font-weight: 500; cursor: pointer; margin: 0;" })
+                    </div>
+                    @Html.ValidationMessageFor(model => model.Estado, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
+                    <small style="color: var(--text-color); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                        <i class="fas fa-toggle-on" style="color: var(--primary-color);"></i> Activa o desactiva el rol en el sistema
+                    </small>
+                </div>
+            </div>
+
+            <!-- Footer del formulario -->
+            <div style="padding: 1.5rem 2rem; background: var(--light-color); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--secondary-color); gap: 1rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='@Url.Action("ListadoRoles", "Rol")'" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary" style="display: flex; align-items: center; gap: 0.5rem; background: #27ae60;">
+                    <i class="fas fa-check"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Mejorar la experiencia con los inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            var inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(function(input) {
+                input.addEventListener('focus', function() {
+                    this.style.borderColor = 'var(--primary-color)';
+                    this.style.boxShadow = '0 0 0 3px rgba(212, 130, 92, 0.1)';
+                });
+                input.addEventListener('blur', function() {
+                    this.style.borderColor = 'var(--secondary-color)';
+                    this.style.boxShadow = 'none';
+                });
+            });
+        });
+    </script>
+}

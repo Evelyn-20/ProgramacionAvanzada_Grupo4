@@ -8,9 +8,7 @@
 
   <ItemGroup>
     <Folder Include="Logica\DetallePedido\" />
-    <Folder Include="Logica\Usuario\" />
     <Folder Include="Logica\Pedido\" />
-    <Folder Include="Logica\Rol\" />
   </ItemGroup>
 
   <ItemGroup>
