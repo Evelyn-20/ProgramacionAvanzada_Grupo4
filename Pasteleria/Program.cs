@@ -6,7 +6,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// ===== INYECCIÓN DE DEPENDENCIAS =====
 // Registrar los servicios de Producto
 builder.Services.AddScoped<IListarProductos, ListarProductos>();
 builder.Services.AddScoped<IObtenerProducto, ObtenerProducto>();

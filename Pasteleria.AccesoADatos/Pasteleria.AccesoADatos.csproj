@@ -7,7 +7,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Folder Include="Categorias\" />
 		<Folder Include="DetallePedidos\" />
 		<Folder Include="Pedidos\" />
 		<Folder Include="Roles\" />

@@ -1,22 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pasteleria.AccesoADatos.Modelos
 {
     [Table("Categoria")]
-    public class Categoria
+    public class CategoriaAD
     {
-        [Column("IdCategoria")]
+        [Key]
         public int IdCategoria { get; set; }
 
-        [Column("NombreCategoria")]
+        [Required]
+        [StringLength(100)]
         public string NombreCategoria { get; set; }
 
-        [Column("Estado")]
+        [Required]
+        public byte[] Imagen { get; set; }
+
+        [Required]
         public bool Estado { get; set; }
     }
-} 
+}

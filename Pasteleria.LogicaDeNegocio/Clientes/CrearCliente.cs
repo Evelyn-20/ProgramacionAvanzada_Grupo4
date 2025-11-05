@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Pasteleria.Abstracciones.Logica.Cliente;
+using Pasteleria.Abstracciones.Logica.Auditoria;
 using Pasteleria.Abstracciones.ModeloUI;
 
 namespace Pasteleria.LogicaDeNegocio.Clientes
@@ -8,10 +9,12 @@ namespace Pasteleria.LogicaDeNegocio.Clientes
     public class CrearCliente : ICrearCliente
     {
         private ICrearCliente _crearCliente;
+        private IRegistrarAuditoria _registrarAuditoria;
 
         public CrearCliente()
         {
             _crearCliente = new AccesoADatos.Clientes.CrearCliente();
+            _registrarAuditoria = new Auditoria.RegistrarAuditoria();
         }
 
         public async Task<int> Guardar(Cliente elCliente)
@@ -27,7 +30,6 @@ namespace Pasteleria.LogicaDeNegocio.Clientes
                 throw new ArgumentException("La cédula es obligatoria");
             }
 
-            // Validar formato de cédula (opcional)
             if (elCliente.Cedula.Length < 9)
             {
                 throw new ArgumentException("La cédula debe tener al menos 9 caracteres");
@@ -38,7 +40,6 @@ namespace Pasteleria.LogicaDeNegocio.Clientes
                 throw new ArgumentException("El correo electrónico es obligatorio");
             }
 
-            // Validar formato de correo
             if (!elCliente.Correo.Contains("@") || !elCliente.Correo.Contains("."))
             {
                 throw new ArgumentException("El formato del correo electrónico no es válido");
@@ -59,13 +60,11 @@ namespace Pasteleria.LogicaDeNegocio.Clientes
                 throw new ArgumentException("La contraseña debe tener al menos 6 caracteres");
             }
 
-            // Validar complejidad de contraseña (opcional pero recomendado)
             if (!ContieneCaracteresValidos(elCliente.Contrasenna))
             {
                 throw new ArgumentException("La contraseña debe contener al menos una letra y un número");
             }
 
-            // Establecer estado como activo por defecto
             elCliente.Estado = true;
 
             // ENCRIPTAR CONTRASEÑA usando BCrypt
@@ -80,16 +79,33 @@ namespace Pasteleria.LogicaDeNegocio.Clientes
                     throw new Exception("No se pudo guardar el cliente en la base de datos");
                 }
 
+                // Registrar auditoría de creación
+                var valoresNuevos = new
+                {
+                    elCliente.NombreCliente,
+                    elCliente.Cedula,
+                    elCliente.Correo,
+                    elCliente.Telefono,
+                    elCliente.Direccion,
+                    elCliente.Estado
+                    // No incluir contraseña por seguridad
+                };
+
+                _registrarAuditoria.RegistrarCreacion(
+                    tabla: "Cliente",
+                    idRegistro: elCliente.IdCliente,
+                    valoresNuevos: valoresNuevos,
+                    usuarioNombre: "Sistema"
+                );
+
                 return cantidadDeResultados;
             }
             catch (Exception ex)
             {
-                // Re-lanzar la excepción para que el controlador la maneje
                 throw new Exception($"Error al crear el cliente: {ex.Message}", ex);
             }
         }
 
-        // Método para validar complejidad de contraseña
         private bool ContieneCaracteresValidos(string password)
         {
             bool tieneLetra = false;

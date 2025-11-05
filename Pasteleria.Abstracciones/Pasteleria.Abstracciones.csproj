@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Logica\Categoria\" />
     <Folder Include="Logica\DetallePedido\" />
     <Folder Include="Logica\Usuario\" />
     <Folder Include="Logica\Pedido\" />

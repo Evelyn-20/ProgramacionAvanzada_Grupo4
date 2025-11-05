@@ -48,7 +48,9 @@ namespace Pasteleria.AccesoADatos.Productos
                 Precio = productoAD.Precio,
                 PorcentajeImpuesto = productoAD.PorcentajeImpuesto,
                 Imagen = productoAD.Imagen,
-                Estado = productoAD.Estado
+                Estado = productoAD.Estado,
+                FechaCreacion = productoAD.FechaCreacion,
+                FechaActualizacion = productoAD.FechaActualizacion
             };
         }
     }

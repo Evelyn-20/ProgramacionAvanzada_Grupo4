@@ -161,3 +161,28 @@ ALTER TABLE Pedido
 ADD CONSTRAINT FK_Pedido_EstadoPedido FOREIGN KEY (IdEstadoPedido) 
     REFERENCES EstadoPedido(IdEstadoPedido)
 GO
+
+-- Agregar columnas de fecha a la tabla Producto
+ALTER TABLE Producto
+ADD FechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
+    FechaActualizacion DATETIME NOT NULL DEFAULT GETDATE();
+
+-- Actualizar registros existentes con fecha actual
+UPDATE Producto
+SET FechaCreacion = GETDATE(),
+    FechaActualizacion = GETDATE()
+WHERE FechaCreacion IS NULL OR FechaActualizacion IS NULL;
+
+-- Crear tabla de Auditoría
+CREATE TABLE Auditoria (
+    IdAuditoria INT PRIMARY KEY IDENTITY(1,1),
+    Tabla VARCHAR(100) NOT NULL,
+    IdRegistro INT NOT NULL,
+    Accion VARCHAR(50) NOT NULL, -- 'CREAR', 'ACTUALIZAR', 'ELIMINAR'
+    UsuarioId INT NULL, -- Si tienes usuarios
+    UsuarioNombre VARCHAR(200) NULL,
+    ValoresAnteriores NVARCHAR(MAX) NULL,
+    ValoresNuevos NVARCHAR(MAX) NULL,
+    Descripcion NVARCHAR(500) NULL,
+    FechaAccion DATETIME NOT NULL DEFAULT GETDATE()
+);

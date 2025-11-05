@@ -1,14 +1,14 @@
-﻿@model List<Pasteleria.Abstracciones.ModeloUI.Producto>
+﻿@model List<Pasteleria.Abstracciones.ModeloUI.Categoria>
 
 @{
-    ViewBag.Title = "Inventario";
+    ViewBag.Title = "Categorías";
 }
 
 <!-- Banner Hero -->
 <section class="hero" style="padding: 3rem 0;">
     <div class="hero-content">
-        <h1 class="hero-title">Inventario</h1>
-        <p class="hero-subtitle">Administra y visualiza todo el inventario de productos</p>
+        <h1 class="hero-title">Categorías</h1>
+        <p class="hero-subtitle">Administra y visualiza todas las categorías de productos</p>
     </div>
 </section>
 
@@ -32,7 +32,7 @@
 
     <!-- Barra de búsqueda y botón agregar -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap;">
-        <form method="get" action="@Url.Action("ListadoProductos", "Producto")" style="position: relative; flex: 1; min-width: 300px; display: flex; gap: 0.5rem;">
+        <form method="get" action="@Url.Action("ListadoCategorias", "Categoria")" style="position: relative; flex: 1; min-width: 300px; display: flex; gap: 0.5rem;">
             <div style="position: relative; flex: 1;">
                 <i class="fas fa-search" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--primary-color); z-index: 1;"></i>
                 <input type="text"
@@ -46,48 +46,20 @@
                 <i class="fas fa-search"></i> Buscar
             </button>
         </form>
-        <a href="@Url.Action("CrearProducto", "Producto")" class="btn btn-primary" style="white-space: nowrap;">
-            <i class="fas fa-plus"></i> Agregar Producto
+        <a href="@Url.Action("CrearCategoria", "Categoria")" class="btn btn-primary" style="white-space: nowrap;">
+            <i class="fas fa-plus"></i> Agregar Categoría
         </a>
-    </div>
-
-    <!-- Filtro por categoría -->
-    <div style="margin-bottom: 2rem;">
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <a href="@Url.Action("ListadoProductos", "Producto")"
-               class="btn btn-primary"
-               style="border-radius: 50px; @(ViewBag.Categoria == null ? "" : "background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color);")">
-                Todas
-            </a>
-
-            @if (ViewBag.TodasCategorias != null)
-            {
-                @foreach (var categoria in (List<Pasteleria.Abstracciones.ModeloUI.Categoria>)ViewBag.TodasCategorias)
-                {
-                    <a href="@Url.Action("ListadoProductos", "Producto", new { categoria = categoria.IdCategoria })"
-                       class="btn btn-primary"
-                       style="border-radius: 50px; @(ViewBag.Categoria == categoria.IdCategoria ? "" : "background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color);")">
-                        @categoria.NombreCategoria
-                    </a>
-                }
-            }
-        </div>
     </div>
 
     <!-- Tabla con estilo mejorado -->
     <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); overflow: hidden;">
         <div class="table-responsive">
-            <table id="laTablaDeProductos" style="margin-bottom: 0; width: 100%; border-collapse: collapse;">
+            <table id="laTablaDeCategor" style="margin-bottom: 0; width: 100%; border-collapse: collapse;">
                 <thead style="background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%);">
                     <tr>
                         <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">#</th>
                         <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Imagen</th>
                         <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Nombre</th>
-                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Categoría</th>
-                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Descripción</th>
-                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Cantidad</th>
-                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Precio</th>
-                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Impuesto</th>
                         <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Estado</th>
                         <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none; text-align: center;">Acciones</th>
                     </tr>
@@ -95,46 +67,20 @@
                 <tbody>
                     @if (Model != null && Model.Count > 0)
                     {
-                        @foreach (var producto in Model)
+                        @foreach (var categoria in Model)
                         {
                             <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
                                 onmouseover="this.style.background='var(--light-color)'"
                                 onmouseout="this.style.background='transparent'">
-                                <td style="padding: 1.2rem; color: var(--text-color);">@producto.IdProducto</td>
+                                <td style="padding: 1.2rem; color: var(--text-color);">@categoria.IdCategoria</td>
                                 <td style="padding: 1.2rem;">
-                                    <img src="@Url.Action("ObtenerImagenProducto", "Producto", new { id = producto.IdProducto })"
-                                         alt="@producto.NombreProducto"
+                                    <img src="@Url.Action("ObtenerImagenCategoria", "Categoria", new { id = categoria.IdCategoria })"
+                                         alt="@categoria.NombreCategoria"
                                          style="width: 60px; height: 60px; object-fit: cover; border-radius: 10px; box-shadow: var(--shadow);">
                                 </td>
-                                <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">@producto.NombreProducto</td>
-                                <td style="padding: 1.2rem; color: var(--text-color);">
-                                    @{
-                                        var nombreCategoria = "Sin categoría";
-                                        if (ViewBag.TodasCategorias != null)
-                                        {
-                                            var categoriaProducto = ((List<Pasteleria.Abstracciones.ModeloUI.Categoria>)ViewBag.TodasCategorias)
-                                            .FirstOrDefault(c => c.IdCategoria == producto.IdCategoria);
-                                            if (categoriaProducto != null)
-                                            {
-                                                nombreCategoria = categoriaProducto.NombreCategoria;
-                                            }
-                                            else
-                                            {
-                                                nombreCategoria = $"Categoría {producto.IdCategoria}";
-                                            }
-                                        }
-                                    }
-                                    @nombreCategoria
-
-                                </td>
-                                <td style="padding: 1.2rem; color: var(--text-color); max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                    @producto.DescripcionProducto
-                                </td>
-                                <td style="padding: 1.2rem; color: var(--text-color);">@producto.Cantidad</td>
-                                <td style="padding: 1.2rem; color: var(--primary-color); font-weight: 600;">₡@producto.Precio.ToString("N2")</td>
-                                <td style="padding: 1.2rem; color: var(--text-color);">@producto.PorcentajeImpuesto%</td>
+                                <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">@categoria.NombreCategoria</td>
                                 <td style="padding: 1.2rem;">
-                                    @if (producto.Estado)
+                                    @if (categoria.Estado)
                                     {
                                         <span style="background: #27ae60; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Activo</span>
                                     }
@@ -146,39 +92,28 @@
                                 <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
                                     <button type="button"
                                             class="btn btn-sm btn-editar"
-                                            data-id="@producto.IdProducto"
+                                            data-id="@categoria.IdCategoria"
                                             style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button type="button"
                                             class="btn btn-sm btn-detalles"
-                                            data-id="@producto.IdProducto"
-                                            data-nombre="@producto.NombreProducto"
-                                            data-categoria="@nombreCategoria"
-                                            data-descripcion="@producto.DescripcionProducto"
-                                            data-cantidad="@producto.Cantidad"
-                                            data-precio="@producto.Precio.ToString("N2")"
-                                            data-impuesto="@producto.PorcentajeImpuesto"
-                                            data-estado="@(producto.Estado ? "Activo" : "Inactivo")"
-                                            data-fecha-creacion="@producto.FechaCreacionFormateada"
-                                            data-fecha-actualizacion="@producto.FechaActualizacionFormateada"
+                                            data-id="@categoria.IdCategoria"
+                                            data-nombre="@categoria.NombreCategoria"
+                                            data-estado="@(categoria.Estado ? "Activo" : "Inactivo")"
                                             style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
                                             data-bs-toggle="modal"
-                                            data-bs-target="#modalDetallesProducto">
+                                            data-bs-target="#modalDetallesCategoria">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <button type="button"
                                             class="btn btn-sm btn-eliminar"
-                                            data-id="@producto.IdProducto"
-                                            data-nombre="@producto.NombreProducto"
-                                            data-categoria="@nombreCategoria"
-                                            data-descripcion="@producto.DescripcionProducto"
-                                            data-cantidad="@producto.Cantidad"
-                                            data-precio="@producto.Precio.ToString("N2")"
-                                            data-estado="@(producto.Estado ? "Activo" : "Inactivo")"
+                                            data-id="@categoria.IdCategoria"
+                                            data-nombre="@categoria.NombreCategoria"
+                                            data-estado="@(categoria.Estado ? "Activo" : "Inactivo")"
                                             style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
                                             data-bs-toggle="modal"
-                                            data-bs-target="#modalEliminarProducto">
+                                            data-bs-target="#modalEliminarCategoria">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -188,13 +123,13 @@
                     else
                     {
                         <tr>
-                            <td colspan="10" style="padding: 3rem; text-align: center; color: var(--text-color);">
+                            <td colspan="5" style="padding: 3rem; text-align: center; color: var(--text-color);">
                                 <i class="fas fa-inbox" style="font-size: 3rem; color: var(--secondary-color); opacity: 0.5; display: block; margin-bottom: 1rem;"></i>
-                                <p style="font-size: 1.2rem; margin: 0;">No se encontraron productos</p>
-                                @if (!string.IsNullOrWhiteSpace(ViewBag.Buscar as string) || ViewBag.Categoria != null)
+                                <p style="font-size: 1.2rem; margin: 0;">No se encontraron categorías</p>
+                                @if (!string.IsNullOrWhiteSpace(ViewBag.Buscar as string))
                                 {
                                     <p style="margin-top: 0.5rem;">
-                                        <a href="@Url.Action("ListadoProductos", "Producto")" style="color: var(--primary-color);">Limpiar filtros</a>
+                                        <a href="@Url.Action("ListadoCategorias", "Categoria")" style="color: var(--primary-color);">Limpiar filtros</a>
                                     </p>
                                 }
                             </td>
@@ -209,7 +144,7 @@
             <!-- Footer de paginación -->
             <div style="padding: 1.5rem; background: var(--light-color); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--secondary-color); flex-wrap: wrap; gap: 1rem;">
                 <div style="color: var(--text-color); font-size: 0.95rem;">
-                    Mostrando <strong><span id="startRecord">1</span>-<span id="endRecord">@Math.Min(5, Model.Count)</span></strong> de <strong id="totalRecords">@Model.Count</strong> productos
+                    Mostrando <strong><span id="startRecord">1</span>-<span id="endRecord">@Math.Min(5, Model.Count)</span></strong> de <strong id="totalRecords">@Model.Count</strong> categorías
                 </div>
                 <div style="display: flex; gap: 0.5rem;">
                     <button id="btnAnterior"
@@ -230,18 +165,18 @@
     </div>
 </div>
 
-<partial name="_ModalDetallesProducto" />
-<partial name="_ModalEliminarProducto" />
+<partial name="_ModalDetallesCategoria" />
+<partial name="_ModalEliminarCategoria" />
 
 @section Scripts {
     <script>
-                // Variables de paginación
+        // Variables de paginación
         var paginaActual = 1;
         var registrosPorPagina = 5;
         var todasLasFilas = [];
 
         document.addEventListener('DOMContentLoaded', function() {
-            var table = document.getElementById('laTablaDeProductos');
+            var table = document.getElementById('laTablaDeCategor');
             if (table && table.getElementsByTagName('tbody')[0]) {
                 todasLasFilas = Array.from(table.getElementsByTagName('tbody')[0].getElementsByTagName('tr'));
                 if (todasLasFilas.length > 0 && !todasLasFilas[0].querySelector('td[colspan]')) {
@@ -253,8 +188,8 @@
             var botonesEditar = document.querySelectorAll('.btn-editar');
             botonesEditar.forEach(function(btn) {
                 btn.addEventListener('click', function() {
-                    var productoId = this.getAttribute('data-id');
-                    window.location.href = '@Url.Action("EditarProducto", "Producto")?id=' + productoId;
+                    var categoriaId = this.getAttribute('data-id');
+                    window.location.href = '@Url.Action("EditarCategoria", "Categoria")?id=' + categoriaId;
                 });
             });
 
@@ -262,24 +197,15 @@
             var botonesDetalles = document.querySelectorAll('.btn-detalles');
             botonesDetalles.forEach(function(btn) {
                 btn.addEventListener('click', function() {
-                    var productoId = this.getAttribute('data-id');
+                    var categoriaId = this.getAttribute('data-id');
 
-                    // Cargar todos los datos del producto
-                    document.getElementById('detalles-id').textContent = productoId;
+                    // Cargar todos los datos de la categoría
+                    document.getElementById('detalles-id').textContent = categoriaId;
                     document.getElementById('detalles-nombre').textContent = this.getAttribute('data-nombre');
-                    document.getElementById('detalles-categoria').textContent = this.getAttribute('data-categoria');
-                    document.getElementById('detalles-descripcion').textContent = this.getAttribute('data-descripcion');
-                    document.getElementById('detalles-cantidad').textContent = this.getAttribute('data-cantidad');
-                    document.getElementById('detalles-precio').textContent = '₡' + this.getAttribute('data-precio');
-                    document.getElementById('detalles-impuesto').textContent = this.getAttribute('data-impuesto') + '%';
 
-                    // Cargar fechas
-                    document.getElementById('detalles-fecha-creacion').textContent = this.getAttribute('data-fecha-creacion');
-                    document.getElementById('detalles-fecha-actualizacion').textContent = this.getAttribute('data-fecha-actualizacion');
-
-                    // Cargar la imagen del producto
+                    // Cargar la imagen de la categoría
                     var imagenElement = document.getElementById('detalles-imagen');
-                    imagenElement.src = '@Url.Action("ObtenerImagenProducto", "Producto")?id=' + productoId;
+                    imagenElement.src = '@Url.Action("ObtenerImagenCategoria", "Categoria")?id=' + categoriaId;
                     imagenElement.alt = this.getAttribute('data-nombre');
 
                     var estado = this.getAttribute('data-estado');
@@ -300,10 +226,6 @@
                     document.getElementById('eliminar-id').value = this.getAttribute('data-id');
                     document.getElementById('eliminar-id-display').textContent = this.getAttribute('data-id');
                     document.getElementById('eliminar-nombre').textContent = this.getAttribute('data-nombre');
-                    document.getElementById('eliminar-categoria').textContent = this.getAttribute('data-categoria');
-                    document.getElementById('eliminar-descripcion').textContent = this.getAttribute('data-descripcion');
-                    document.getElementById('eliminar-cantidad').textContent = this.getAttribute('data-cantidad');
-                    document.getElementById('eliminar-precio').textContent = '₡' + this.getAttribute('data-precio');
 
                     var estado = this.getAttribute('data-estado');
                     var estadoBadge = document.getElementById('eliminar-estado-badge');
@@ -316,8 +238,8 @@
                         estadoBadge.style.background = '#e74c3c';
                     }
 
-                    var form = document.getElementById('formEliminarProducto');
-                    form.action = '@Url.Action("EliminarProducto", "Producto")';
+                    var form = document.getElementById('formEliminarCategoria');
+                    form.action = '@Url.Action("EliminarCategoria", "Categoria")';
                 });
             });
 

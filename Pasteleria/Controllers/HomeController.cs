@@ -1,42 +1,63 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Pasteleria.Models;
 using Pasteleria.Abstracciones.Logica.Producto;
+using Pasteleria.Abstracciones.Logica.Categoria;
+using Pasteleria.Abstracciones.ModeloUI;
+using Pasteleria.LogicaDeNegocio.Productos;
+using Pasteleria.LogicaDeNegocio.Categorias;
+using System;
+using System.Collections.Generic;
 
 namespace Pasteleria.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly IListarProductos _listarProductos;
+        private IListarProductos _listarProductos;
+        private IListarCategorias _listarCategorias;
 
-        public HomeController(ILogger<HomeController> logger, IListarProductos listarProductos)
+        public HomeController()
         {
-            _logger = logger;
-            _listarProductos = listarProductos;
+            try
+            {
+                _listarProductos = new ListarProductos();
+                _listarCategorias = new ListarCategorias();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ERROR EN CONSTRUCTOR: {ex.Message}");
+                throw;
+            }
         }
 
         public IActionResult Index()
         {
             try
             {
-                // Obtener todos los productos activos
-                var productos = _listarProductos.Obtener()
-                    .Where(p => p.Estado == true)
-                    .Take(6)
-                    .ToList();
+                // Obtener productos activos para mostrar en la página principal
+                var productos = _listarProductos.Obtener();
+                var productosActivos = productos.FindAll(p => p.Estado);
 
-                _logger.LogInformation($"Se cargaron {productos.Count} productos en la página de inicio");
+                // Obtener categorías activas
+                var categorias = _listarCategorias.ObtenerActivas();
 
-                // Pasar los productos a la vista
-                return View(productos);
+                // Crear un ViewModel para pasar ambas listas
+                var viewModel = new HomeViewModel
+                {
+                    Productos = productosActivos,
+                    Categorias = categorias
+                };
+
+                return View(viewModel);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al cargar los productos en la página de inicio");
-
-                // En caso de error, pasar una lista vacía
-                return View(new List<Pasteleria.Abstracciones.ModeloUI.Producto>());
+                System.Diagnostics.Debug.WriteLine($"ERROR EN INDEX: {ex.Message}");
+                // Retornar vista con listas vacías en caso de error
+                var viewModel = new HomeViewModel
+                {
+                    Productos = new List<Producto>(),
+                    Categorias = new List<Categoria>()
+                };
+                return View(viewModel);
             }
         }
 
@@ -48,7 +69,14 @@ namespace Pasteleria.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View();
         }
+    }
+
+    // ViewModel para la página de inicio
+    public class HomeViewModel
+    {
+        public List<Producto> Productos { get; set; }
+        public List<Categoria> Categorias { get; set; }
     }
 }

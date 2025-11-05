@@ -1,5 +1,6 @@
 ﻿using System;
 using Pasteleria.Abstracciones.Logica.Cliente;
+using Pasteleria.Abstracciones.Logica.Auditoria;
 using Pasteleria.Abstracciones.ModeloUI;
 
 namespace Pasteleria.LogicaDeNegocio.Clientes
@@ -8,11 +9,13 @@ namespace Pasteleria.LogicaDeNegocio.Clientes
     {
         private IActualizarCliente _actualizarCliente;
         private IObtenerCliente _obtenerCliente;
+        private IRegistrarAuditoria _registrarAuditoria;
 
         public ActualizarCliente()
         {
             _actualizarCliente = new AccesoADatos.Clientes.ActualizarCliente();
             _obtenerCliente = new AccesoADatos.Clientes.ObtenerCliente();
+            _registrarAuditoria = new Auditoria.RegistrarAuditoria();
         }
 
         public int Actualizar(Cliente cliente)
@@ -53,34 +56,41 @@ namespace Pasteleria.LogicaDeNegocio.Clientes
                 throw new ArgumentException("El teléfono es obligatorio");
             }
 
-            // Verificar que el cliente existe
+            // Obtener valores anteriores para auditoría
             var clienteExistente = _obtenerCliente.Obtener(cliente.IdCliente);
             if (clienteExistente == null)
             {
                 throw new Exception("El cliente no existe en la base de datos");
             }
 
+            // Guardar valores anteriores (sin contraseña)
+            var valoresAnteriores = new
+            {
+                clienteExistente.NombreCliente,
+                clienteExistente.Cedula,
+                clienteExistente.Correo,
+                clienteExistente.Telefono,
+                clienteExistente.Direccion,
+                clienteExistente.Estado
+            };
+
             // Manejo de contraseña
             if (string.IsNullOrWhiteSpace(cliente.Contrasenna))
             {
-                // Si la contraseña está vacía, mantener la actual
                 cliente.Contrasenna = clienteExistente.Contrasenna;
             }
             else
             {
-                // Validar longitud de nueva contraseña
                 if (cliente.Contrasenna.Length < 6)
                 {
                     throw new ArgumentException("La contraseña debe tener al menos 6 caracteres");
                 }
 
-                // Validar complejidad de contraseña
                 if (!ContieneCaracteresValidos(cliente.Contrasenna))
                 {
                     throw new ArgumentException("La contraseña debe contener al menos una letra y un número");
                 }
 
-                // ENCRIPTAR LA NUEVA CONTRASEÑA
                 cliente.Contrasenna = BCrypt.Net.BCrypt.HashPassword(cliente.Contrasenna);
             }
 
@@ -93,6 +103,25 @@ namespace Pasteleria.LogicaDeNegocio.Clientes
                     throw new Exception("No se pudo actualizar el cliente en la base de datos");
                 }
 
+                // Registrar auditoría de actualización
+                var valoresNuevos = new
+                {
+                    cliente.NombreCliente,
+                    cliente.Cedula,
+                    cliente.Correo,
+                    cliente.Telefono,
+                    cliente.Direccion,
+                    cliente.Estado
+                };
+
+                _registrarAuditoria.RegistrarActualizacion(
+                    tabla: "Cliente",
+                    idRegistro: cliente.IdCliente,
+                    valoresAnteriores: valoresAnteriores,
+                    valoresNuevos: valoresNuevos,
+                    usuarioNombre: "Sistema"
+                );
+
                 return resultado;
             }
             catch (Exception ex)
@@ -101,7 +130,6 @@ namespace Pasteleria.LogicaDeNegocio.Clientes
             }
         }
 
-        // Método para validar complejidad de contraseña
         private bool ContieneCaracteresValidos(string password)
         {
             bool tieneLetra = false;
@@ -116,7 +144,6 @@ namespace Pasteleria.LogicaDeNegocio.Clientes
             return tieneLetra && tieneNumero;
         }
 
-        // Método público para verificar contraseñas (útil para login)
         public static bool VerificarContrasena(string contrasenaIngresada, string hashAlmacenado)
         {
             try

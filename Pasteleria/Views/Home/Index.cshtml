@@ -1,4 +1,4 @@
-﻿@model List<Pasteleria.Abstracciones.ModeloUI.Producto>
+﻿@model Pasteleria.Controllers.HomeViewModel
 
 @{
     ViewData["Title"] = "Inicio";
@@ -63,21 +63,21 @@
             <p>Descubre nuestra deliciosa selección de pasteles y panes artesanales</p>
         </div>
         <div class="products-grid">
-            @if (Model != null && Model.Count > 0)
+            @if (Model.Productos != null && Model.Productos.Count > 0)
             {
-                @foreach (var producto in Model.Take(6))
+                @foreach (var producto in Model.Productos.Take(6))
                 {
                     @* Determinar el badge según el producto *@
                     var badge = "";
                     var badgeClass = "";
 
                     @* El primer producto será "Nuevo" y el tercero "Popular" *@
-                    if (Model.IndexOf(producto) == 0)
+                    if (Model.Productos.IndexOf(producto) == 0)
                     {
                         badge = "Nuevo";
                         badgeClass = "badge";
                     }
-                    else if (Model.IndexOf(producto) == 2)
+                    else if (Model.Productos.IndexOf(producto) == 2)
                     {
                         badge = "Popular";
                         badgeClass = "badge badge-popular";
@@ -112,7 +112,7 @@
             }
         </div>
 
-        @if (Model != null && Model.Count > 6)
+        @if (Model.Productos != null && Model.Productos.Count > 6)
         {
             <div style="text-align: center; margin-top: 2rem;">
                 <a href="@Url.Action("ListadoProductos", "Producto")" class="btn btn-primary btn-lg">
@@ -131,39 +131,63 @@
             <p>Explora nuestras diferentes categorías de productos</p>
         </div>
         <div class="categories-grid">
-            <!-- Categoría 1-->
-            <div class="category-card">
-                <div class="category-image">
-                    <img src="~/images/categoria-pasteles.jpg" alt="Pasteles" />
+            @if (Model.Categorias != null && Model.Categorias.Count > 0)
+            {
+                @foreach (var categoria in Model.Categorias.Take(4))
+                {
+                    <div class="category-card">
+                        <div class="category-image">
+                            <img src="@Url.Action("ObtenerImagenCategoria", "Categoria", new { id = categoria.IdCategoria })"
+                                 alt="@categoria.NombreCategoria" />
+                        </div>
+                        <h3>@categoria.NombreCategoria</h3>
+                        <a href="@Url.Action("ListadoProductos", "Producto", new { categoria = categoria.IdCategoria })"
+                           class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                }
+            }
+            else
+            {
+                <!-- Fallback con categorías estáticas si no hay en BD -->
+                <div class="category-card">
+                    <div class="category-image">
+                        <img src="~/images/categoria-pasteles.jpg" alt="Pasteles" />
+                    </div>
+                    <h3>Pasteles</h3>
+                    <a href="@Url.Action("ListadoProductos", "Producto")" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
                 </div>
-                <h3>Pasteles</h3>
-                <a href="@Url.Action("ListadoProductos", "Producto", new { categoria = 1 })" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
-            </div>
-            <!-- Categoría 2-->
-            <div class="category-card">
-                <div class="category-image">
-                    <img src="~/images/categoria-panaderia.jpg" alt="Panadería" />
+                <div class="category-card">
+                    <div class="category-image">
+                        <img src="~/images/categoria-panaderia.jpg" alt="Panadería" />
+                    </div>
+                    <h3>Panadería</h3>
+                    <a href="@Url.Action("ListadoProductos", "Producto")" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
                 </div>
-                <h3>Panadería</h3>
-                <a href="@Url.Action("ListadoProductos", "Producto", new { categoria = 2 })" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
-            </div>
-            <!-- Categoría 3-->
-            <div class="category-card">
-                <div class="category-image">
-                    <img src="~/images/categoria-galletas.jpg" alt="Galletas" />
+                <div class="category-card">
+                    <div class="category-image">
+                        <img src="~/images/categoria-galletas.jpg" alt="Galletas" />
+                    </div>
+                    <h3>Galletas</h3>
+                    <a href="@Url.Action("ListadoProductos", "Producto")" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
                 </div>
-                <h3>Galletas</h3>
-                <a href="@Url.Action("ListadoProductos", "Producto", new { categoria = 3 })" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
-            </div>
-            <!-- Categoría 4-->
-            <div class="category-card">
-                <div class="category-image">
-                    <img src="~/images/categoria-reposteria.jpg" alt="Repostería" />
+                <div class="category-card">
+                    <div class="category-image">
+                        <img src="~/images/categoria-reposteria.jpg" alt="Repostería" />
+                    </div>
+                    <h3>Repostería</h3>
+                    <a href="@Url.Action("ListadoProductos", "Producto")" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
                 </div>
-                <h3>Repostería</h3>
-                <a href="@Url.Action("ListadoProductos", "Producto", new { categoria = 4 })" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
-            </div>
+            }
         </div>
+
+        @if (Model.Categorias != null && Model.Categorias.Count > 4)
+        {
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="@Url.Action("ListadoCategorias", "Categoria")" class="btn btn-primary btn-lg">
+                    Ver Todas las Categorías <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        }
     </div>
 </section>
 

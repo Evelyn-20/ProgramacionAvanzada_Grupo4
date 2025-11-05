@@ -30,33 +30,46 @@
             <div style="padding: 2rem;">
                 @Html.ValidationSummary(true, "Por favor, corrige los siguientes errores:", new { @class = "alert alert-danger", style = "margin-bottom: 1.5rem; padding: 1rem; border-radius: 10px; background: #fee; border: 1px solid #fcc; color: #c33;" })
 
+                <!-- Nombre del Producto -->
                 <div style="margin-bottom: 1.5rem;">
                     @Html.LabelFor(model => model.NombreProducto, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
                     @Html.EditorFor(model => model.NombreProducto, new { htmlAttributes = new { @class = "form-control", placeholder = "Ej: Pastel de Chocolate", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
                     @Html.ValidationMessageFor(model => model.NombreProducto, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
                 </div>
 
+                <!-- Categoría -->
                 <div style="margin-bottom: 1.5rem;">
                     @Html.LabelFor(model => model.IdCategoria, "Categoría", new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
-                    @Html.DropDownListFor(model => model.IdCategoria,
-                    new SelectList(new[] {
-                                new { Value = "1", Text = "Pasteles" },
-                                new { Value = "2", Text = "Panadería" },
-                                new { Value = "3", Text = "Galletas" },
-                                new { Value = "4", Text = "Postres Especiales" },
-                                new { Value = "5", Text = "Cupcakes y Muffins" }
-                                }, "Value", "Text"),
+
+                    @if (ViewBag.Categorias != null && ((List<Pasteleria.Abstracciones.ModeloUI.Categoria>)ViewBag.Categorias).Count > 0)
+                    {
+                        @Html.DropDownListFor(model => model.IdCategoria,
+                        new SelectList((List<Pasteleria.Abstracciones.ModeloUI.Categoria>)ViewBag.Categorias, "IdCategoria", "NombreCategoria"),
                                 "-- Selecciona una categoría --",
                                 new { @class = "form-control", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" })
-                @Html.ValidationMessageFor(model => model.IdCategoria, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
-            </div>
+                                }
+                    else
+                    {
+                        <select name="IdCategoria" class="form-control" style="width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;">
+                            <option value="">-- No hay categorías disponibles --</option>
+                        </select>
+                        <small style="color: #e74c3c; font-size: 0.9rem; margin-top: 0.3rem; display: block;">
+                            <i class="fas fa-exclamation-circle"></i> Por favor, crea al menos una categoría antes de agregar productos.
+                            <a href="@Url.Action("CrearCategoria", "Categoria")" style="color: var(--primary-color); text-decoration: underline;">Crear categoría</a>
+                        </small>
+                    }
 
+                    @Html.ValidationMessageFor(model => model.IdCategoria, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
+                </div>
+
+            <!-- Descripción -->
             <div style="margin-bottom: 1.5rem;">
                 @Html.LabelFor(model => model.DescripcionProducto, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
                 @Html.TextAreaFor(model => model.DescripcionProducto, new { @class = "form-control", rows = "3", placeholder = "Descripción detallada del producto...", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s; resize: vertical;" })
                 @Html.ValidationMessageFor(model => model.DescripcionProducto, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
             </div>
 
+            <!-- Cantidad y Precio -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
                 <div>
                     @Html.LabelFor(model => model.Cantidad, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
@@ -71,6 +84,7 @@
                 </div>
             </div>
 
+            <!-- Porcentaje de Impuesto -->
             <div style="margin-bottom: 1.5rem;">
                 @Html.LabelFor(model => model.PorcentajeImpuesto, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
                 @Html.EditorFor(model => model.PorcentajeImpuesto, new { htmlAttributes = new { @class = "form-control", type = "number", step = "0.01", min = "0", max = "100", placeholder = "13", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
@@ -80,12 +94,13 @@
                 </small>
             </div>
 
+            <!-- Imagen del Producto -->
             <div style="margin-bottom: 1.5rem;">
                 <label class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;">
                     <i class="fas fa-image" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
                     Imagen del Producto <span style="color: red;">*</span>
                 </label>
-                <div style="border: 2px solid var(--secondary-color); border-radius: 10px; padding: 2rem; text-align: center; background: var(--light-color);">
+                <div style="border: 2px dashed var(--secondary-color); border-radius: 10px; padding: 2rem; text-align: center; background: var(--light-color); transition: all 0.3s;" id="dropZone">
                     <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--primary-color); opacity: 0.5; margin-bottom: 1rem; display: block;"></i>
                     <input type="file" name="archivo" id="archivoImagen" accept="image/*" required
                            style="display: block; margin: 0 auto; padding: 0.5rem; border: 2px solid var(--secondary-color); border-radius: 5px; cursor: pointer;" />
@@ -119,87 +134,46 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        console.log('Script cargado');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mejorar la experiencia con los inputs
+            var inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(function(input) {
+                input.addEventListener('focus', function() {
+                    this.style.borderColor = 'var(--primary-color)';
+                    this.style.boxShadow = '0 0 0 3px rgba(212, 130, 92, 0.1)';
+                });
+                input.addEventListener('blur', function() {
+                    this.style.borderColor = 'var(--secondary-color)';
+                    this.style.boxShadow = 'none';
+                });
+            });
 
-        window.addEventListener('load', function() {
-            console.log('Página cargada');
-
+            // Preview de imagen
             var inputArchivo = document.getElementById('archivoImagen');
             var preview = document.getElementById('preview');
             var fileName = document.getElementById('fileName');
-
-            console.log('Input encontrado:', inputArchivo !== null);
-            console.log('Preview encontrado:', preview !== null);
+            var dropZone = document.getElementById('dropZone');
 
             if (inputArchivo) {
-                inputArchivo.addEventListener('change', function() {
-                    console.log('Change event disparado');
-
-                    try {
-                        // Limpiar preview anterior
-                        if (preview) {
-                            while (preview.firstChild) {
-                                preview.removeChild(preview.firstChild);
-                            }
+                inputArchivo.addEventListener('change', function(e) {
+                    var file = e.target.files[0];
+                    if (file) {
+                        // Mostrar nombre del archivo
+                        if (fileName) {
+                            fileName.textContent = file.name;
                         }
 
-                        if (this.files && this.files.length > 0) {
-                            var file = this.files[0];
-                            console.log('Archivo:', file.name, file.size);
-
-                            // Mostrar nombre
-                            if (fileName) {
-                                fileName.textContent = file.name;
-                                console.log('Nombre mostrado');
-                            }
-
-                            // Preview de imagen
-                            if (preview && file.type.match('image.*')) {
-                                var reader = new FileReader();
-
-                                reader.onload = function(e) {
-                                    console.log('Imagen cargada, creando elemento...');
-
-                                    try {
-                                        // Crear elemento img de forma segura
-                                        var img = document.createElement('img');
-                                        img.onload = function() {
-                                            console.log('Imagen renderizada exitosamente');
-                                        };
-                                        img.onerror = function() {
-                                            console.error('Error al renderizar imagen');
-                                        };
-                                        img.src = e.target.result;
-                                        img.style.maxWidth = '300px';
-                                        img.style.maxHeight = '300px';
-                                        img.style.borderRadius = '10px';
-                                        img.style.marginTop = '1rem';
-                                        img.style.display = 'block';
-
-                                        // Agregar al DOM
-                                        preview.appendChild(img);
-                                        console.log('Elemento agregado al DOM');
-
-                                    } catch (domError) {
-                                        console.error('Error al manipular DOM:', domError);
-                                    }
-                                };
-
-                                reader.onerror = function(err) {
-                                    console.error('Error FileReader:', err);
-                                };
-
-                                console.log('Iniciando lectura del archivo...');
-                                reader.readAsDataURL(file);
-                            }
+                        // Preview de imagen
+                        if (preview && file.type.match('image.*')) {
+                            var reader = new FileReader();
+                            reader.onload = function(e) {
+                                preview.innerHTML = '<img src="' + e.target.result + '" style="max-width: 300px; max-height: 300px; border-radius: 10px; box-shadow: var(--shadow); margin-top: 1rem;" />';
+                                dropZone.style.borderColor = 'var(--primary-color)';
+                            };
+                            reader.readAsDataURL(file);
                         }
-                    } catch (error) {
-                        console.error('Error en change handler:', error);
                     }
                 });
-                console.log('Event listener agregado');
-            } else {
-                console.error('Input no encontrado!');
             }
         });
     </script>
