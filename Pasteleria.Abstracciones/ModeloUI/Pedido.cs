@@ -29,5 +29,12 @@ namespace Pasteleria.Abstracciones.ModeloUI
 
         [DisplayName("Estado")]
         public int IdEstadoPedido { get; set; }
+
+        // Propiedades calculadas/adicionales para la vista
+        public string NombreCliente { get; set; }
+        public string Estado { get; set; }
+        public int CantidadProductos { get; set; }
+
+        public string FechaPedidoFormateada => Fecha.ToString("dd/MM/yyyy HH:mm");
     }
 }

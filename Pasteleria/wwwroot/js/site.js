@@ -78,15 +78,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Simulación de agregar al carrito (placeholder)
     // SOLO aplicar esto en páginas que tengan el grid de productos
+    // EXCLUIR botones que sean enlaces (tienen href) o tengan clase especial
     const productsGrid = document.querySelector('.products-grid');
     if (productsGrid) {
-        const addToCartButtons = productsGrid.querySelectorAll('.product-card .btn-primary');
+        const addToCartButtons = productsGrid.querySelectorAll('.product-card .btn-primary:not(.btn-ver-categoria)');
         const cartCount = document.querySelector('.cart-count');
         let count = 0;
 
         addToCartButtons.forEach(button => {
-            // Verificar que NO sea un botón de tipo submit
-            if (button.type !== 'submit') {
+            // Verificar que NO sea un enlace y NO sea un botón de tipo submit
+            if (button.tagName !== 'A' && button.type !== 'submit') {
                 button.addEventListener('click', function (e) {
                     e.preventDefault();
                     count++;

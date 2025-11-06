@@ -1,14 +1,14 @@
-﻿@model List<Pasteleria.Abstracciones.ModeloUI.Categoria>
+﻿@model List<Pasteleria.Abstracciones.ModeloUI.Auditoria>
 
 @{
-    ViewBag.Title = "Categorías";
+    ViewBag.Title = "Listado de Auditorías";
 }
 
 <!-- Banner Hero -->
 <section class="hero" style="padding: 3rem 0;">
     <div class="hero-content">
-        <h1 class="hero-title">Categorías</h1>
-        <p class="hero-subtitle">Administra y visualiza todas las categorías de productos</p>
+        <h1 class="hero-title">Registro de Auditorías</h1>
+        <p class="hero-subtitle">Historial completo de todas las operaciones del sistema</p>
     </div>
 </section>
 
@@ -30,106 +30,111 @@
         </div>
     }
 
-    <!-- Barra de búsqueda y botón agregar -->
+    <!-- Barra de búsqueda -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap;">
-        <form method="get" action="@Url.Action("ListadoCategorias", "Categoria")" style="position: relative; flex: 1; min-width: 300px; display: flex; gap: 0.5rem;">
+        <form method="get" action="@Url.Action("ListadoAuditorias")" style="position: relative; flex: 1; min-width: 300px; display: flex; gap: 0.5rem;">
             <div style="position: relative; flex: 1;">
                 <i class="fas fa-search" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--primary-color); z-index: 1;"></i>
                 <input type="text"
-                       id="buscar"
                        name="buscar"
+                       id="searchInput"
                        value="@ViewBag.Buscar"
-                       placeholder="Buscar por nombre..."
+                       placeholder="Buscar en auditorías..."
                        style="width: 100%; padding: 1rem 1rem 1rem 50px; border: 2px solid var(--secondary-color); border-radius: 50px; font-size: 1rem; background: var(--white); transition: all 0.3s;">
             </div>
             <button type="submit" class="btn btn-primary" style="border-radius: 50px; padding: 0 2rem;">
                 <i class="fas fa-search"></i> Buscar
             </button>
         </form>
-        <a href="@Url.Action("CrearCategoria", "Categoria")" class="btn btn-primary" style="white-space: nowrap;">
-            <i class="fas fa-plus"></i> Agregar Categoría
-        </a>
     </div>
 
     <!-- Tabla con estilo mejorado -->
     <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); overflow: hidden;">
         <div class="table-responsive">
-            <table id="laTablaDeCategor" style="margin-bottom: 0; width: 100%; border-collapse: collapse;">
+            <table id="laTablaDeAuditorias" style="margin-bottom: 0; width: 100%; border-collapse: collapse;">
                 <thead style="background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%);">
                     <tr>
                         <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">#</th>
-                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Imagen</th>
-                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Nombre</th>
-                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Estado</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Fecha</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Tabla</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">ID Registro</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Acción</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Usuario</th>
                         <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none; text-align: center;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (Model != null && Model.Count > 0)
                     {
-                        @foreach (var categoria in Model)
+                        int contador = 1;
+                        foreach (var auditoria in Model)
                         {
                             <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
                                 onmouseover="this.style.background='var(--light-color)'"
-                                onmouseout="this.style.background='transparent'">
-                                <td style="padding: 1.2rem; color: var(--text-color);">@categoria.IdCategoria</td>
-                                <td style="padding: 1.2rem;">
-                                    <img src="@Url.Action("ObtenerImagenCategoria", "Categoria", new { id = categoria.IdCategoria })"
-                                         alt="@categoria.NombreCategoria"
-                                         style="width: 60px; height: 60px; object-fit: cover; border-radius: 10px; box-shadow: var(--shadow);">
+                                onmouseout="this.style.background='transparent'"
+                                data-auditoria-id="@auditoria.IdAuditoria"
+                                data-auditoria-tabla="@auditoria.Tabla"
+                                data-auditoria-id-registro="@auditoria.IdRegistro"
+                                data-auditoria-accion="@auditoria.AccionFormateada"
+                                data-auditoria-usuario="@auditoria.UsuarioNombre"
+                                data-auditoria-descripcion="@auditoria.Descripcion"
+                                data-auditoria-valores-anteriores="@auditoria.ValoresAnteriores"
+                                data-auditoria-valores-nuevos="@auditoria.ValoresNuevos"
+                                data-auditoria-fecha="@auditoria.FechaFormateada">
+
+                                <td style="padding: 1.2rem; color: var(--text-color);">@contador</td>
+                                <td style="padding: 1.2rem; color: var(--text-color); white-space: nowrap;">
+                                    <i class="fas fa-calendar-alt" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
+                                    @auditoria.FechaFormateada
                                 </td>
-                                <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">@categoria.NombreCategoria</td>
+                                <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">
+                                    <i class="fas fa-table" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
+                                    @auditoria.Tabla
+                                </td>
+                                <td style="padding: 1.2rem; color: var(--text-color);">
+                                    @auditoria.IdRegistro
+                                </td>
                                 <td style="padding: 1.2rem;">
-                                    @if (categoria.Estado)
-                                    {
-                                        <span style="background: #27ae60; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Activo</span>
+                                    @{
+                                        string badgeColor = auditoria.Accion switch
+                                        {
+                                            "CREAR" => "#27ae60",
+                                            "ACTUALIZAR" => "#3498db",
+                                            "ELIMINAR" => "#e74c3c",
+                                            _ => "#95a5a6"
+                                        };
                                     }
-                                    else
-                                    {
-                                        <span style="background: #e74c3c; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">Inactivo</span>
-                                    }
+                                    <span style="background: @badgeColor; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">
+                                        @auditoria.AccionFormateada
+                                    </span>
+                                </td>
+                                <td style="padding: 1.2rem; color: var(--text-color);">
+                                    <i class="fas fa-user" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
+                                    @auditoria.UsuarioNombre
                                 </td>
                                 <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
                                     <button type="button"
-                                            class="btn btn-sm btn-editar"
-                                            data-id="@categoria.IdCategoria"
-                                            style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button type="button"
-                                            class="btn btn-sm btn-detalles"
-                                            data-id="@categoria.IdCategoria"
-                                            data-nombre="@categoria.NombreCategoria"
-                                            data-estado="@(categoria.Estado ? "Activo" : "Inactivo")"
+                                            class="btn btn-sm btn-ver-detalles"
                                             style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
                                             data-bs-toggle="modal"
-                                            data-bs-target="#modalDetallesCategoria">
+                                            data-bs-target="#modalDetallesAuditoria">
                                         <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button type="button"
-                                            class="btn btn-sm btn-eliminar"
-                                            data-id="@categoria.IdCategoria"
-                                            data-nombre="@categoria.NombreCategoria"
-                                            data-estado="@(categoria.Estado ? "Activo" : "Inactivo")"
-                                            style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalEliminarCategoria">
-                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
                             </tr>
+                            contador++;
                         }
                     }
                     else
                     {
                         <tr>
-                            <td colspan="5" style="padding: 3rem; text-align: center; color: var(--text-color);">
+                            <td colspan="7" style="padding: 3rem; text-align: center; color: var(--text-color);">
                                 <i class="fas fa-inbox" style="font-size: 3rem; color: var(--secondary-color); opacity: 0.5; display: block; margin-bottom: 1rem;"></i>
-                                <p style="font-size: 1.2rem; margin: 0;">No se encontraron categorías</p>
+                                <p style="font-size: 1.2rem; margin: 0;">No se encontraron registros de auditoría</p>
                                 @if (!string.IsNullOrWhiteSpace(ViewBag.Buscar as string))
                                 {
                                     <p style="margin-top: 0.5rem;">
-                                        <a href="@Url.Action("ListadoCategorias", "Categoria")" style="color: var(--primary-color);">Limpiar filtros</a>
+                                        <a href="@Url.Action("ListadoAuditorias")" style="color: var(--primary-color);">Limpiar búsqueda</a>
                                     </p>
                                 }
                             </td>
@@ -144,7 +149,7 @@
             <!-- Footer de paginación -->
             <div style="padding: 1.5rem; background: var(--light-color); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--secondary-color); flex-wrap: wrap; gap: 1rem;">
                 <div style="color: var(--text-color); font-size: 0.95rem;">
-                    Mostrando <strong><span id="startRecord">1</span>-<span id="endRecord">@Math.Min(5, Model.Count)</span></strong> de <strong id="totalRecords">@Model.Count</strong> categorías
+                    Mostrando <strong><span id="startRecord">1</span>-<span id="endRecord">@Math.Min(10, Model.Count)</span></strong> de <strong id="totalRecords">@Model.Count</strong> registros
                 </div>
                 <div style="display: flex; gap: 0.5rem;">
                     <button id="btnAnterior"
@@ -165,9 +170,8 @@
     </div>
 </div>
 
-<partial name="_ModalDetallesCategoria" />
-<partial name="_ModalEliminarCategoria" />
+<partial name="_ModalDetallesAuditoria" />
 
 @section Scripts {
-    <script src="~/js/categorias.js"></script>
+    <script src="~/js/auditorias.js"></script>
 }

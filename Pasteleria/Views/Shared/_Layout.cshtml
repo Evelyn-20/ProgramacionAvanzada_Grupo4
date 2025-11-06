@@ -10,6 +10,100 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <style>
+        /* Estilos para el menú desplegable */
+        .nav-menu > li {
+            position: relative;
+        }
+
+        .dropdown-menu-custom {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: var(--white);
+            min-width: 220px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            padding: 0.5rem 0;
+            z-index: 1000;
+            margin-top: 0.5rem;
+        }
+
+        .nav-menu > li:hover .dropdown-menu-custom {
+            display: block;
+        }
+
+        .dropdown-menu-custom li {
+            list-style: none;
+        }
+
+        .dropdown-menu-custom a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+            .dropdown-menu-custom a:hover {
+                background: var(--light-color);
+                color: var(--primary-color);
+                padding-left: 2rem;
+            }
+
+            .dropdown-menu-custom a i {
+                color: var(--primary-color);
+                font-size: 1.1rem;
+                width: 20px;
+                text-align: center;
+            }
+
+        .nav-menu > li > a.has-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+            .nav-menu > li > a.has-dropdown::after {
+                content: '\f107';
+                font-family: 'Font Awesome 6 Free';
+                font-weight: 900;
+                font-size: 0.8rem;
+                transition: transform 0.3s;
+            }
+
+        .nav-menu > li:hover > a.has-dropdown::after {
+            transform: rotate(180deg);
+        }
+
+        /* Responsive para móviles */
+        @@media (max-width: 768px) {
+            .dropdown-menu-custom
+
+        {
+            position: static;
+            box-shadow: none;
+            background: var(--light-color);
+            margin-top: 0.5rem;
+            border-left: 3px solid var(--primary-color);
+            border-radius: 0;
+        }
+
+        .dropdown-menu-custom a {
+            padding-left: 2rem;
+        }
+
+            .dropdown-menu-custom a:hover {
+                padding-left: 2.5rem;
+            }
+
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -20,13 +114,33 @@
                 </a>
                 <ul class="nav-menu">
                     <li><a href="/Catalogo/Index">Catálogo</a></li>
-                    <li><a href="/Producto/ListadoProductos">Inventario</a></li>
-                    <li><a href="/Categoria/ListadoCategorias">Categorías</a></li>
-                    <li><a href="/Cliente/ListadoClientes">Clientes</a></li>
-                    <li><a href="/Usuario/ListadoUsuarios">Usuarios</a></li>
-                    <li><a href="/Rol/ListadoRoles">Roles</a></li>
+
+                    <!-- Menú Inventario -->
+                    <li>
+                        <a href="#" class="has-dropdown">Inventario</a>
+                        <ul class="dropdown-menu-custom">
+                            <li><a href="/Producto/ListadoProductos">Productos</a></li>
+                            <li><a href="/Categoria/ListadoCategorias">Categorías</a></li>
+                        </ul>
+                    </li>
+
+                    <li><a href="/Pedido/ListadoPedidos">Pedidos</a></li>
+
+                    <!-- Menú Administración -->
+                    <li>
+                        <a href="#" class="has-dropdown">Usuarios</a>
+                        <ul class="dropdown-menu-custom">
+                            <li><a href="/Cliente/ListadoClientes">Clientes</a></li>
+                            <li><a href="/Usuario/ListadoUsuarios">Usuarios</a></li>
+                            <li><a href="/Rol/ListadoRoles">Roles</a></li>
+                        </ul>
+                    </li>
+
+                    <li><a href="/Auditoria/ListadoAuditorias">Auditorias</a></li>
+
                     <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
                     <li><a href="#contacto">Contacto</a></li>
+
                     <li>
                         <a href="@Url.Action("Carrito", "Carrito")" class="btn-cart">
                             <i class="fas fa-shopping-cart"></i>
@@ -74,7 +188,7 @@
             <div class="footer-content">
                 <div class="footer-section">
                     <div style="margin-bottom: 1rem;">
-                        <img src="~/images/logo.png" alt="Pastelería Artesanal" style="height: 80px; width: auto; object-fit: contain;" />
+                        <img src="~/images/logo.jpg" alt="Pastelería Artesanal" style="height: 80px; width: auto; object-fit: contain;" />
                     </div>
                     <p>Creando momentos dulces desde 2020</p>
                     <div class="social-links">
@@ -84,17 +198,16 @@
                     </div>
                 </div>
                 <div class="footer-section">
-                    <h4>Enlaces</h4>
+                    <h4>Compras</h4>
                     <ul>
                         <li><a href="/Catalogo/Index">Catálogo</a></li>
-                        <li><a href="/Producto/ListadoProductos">Productos</a></li>
-                        <li><a href="/Categoria/ListadoCategorias">Categorías</a></li>
-                        <li><a href="/Cliente/ListadoClientes">Clientes</a></li>
-                        <li><a href="/Usuario/Index">Usuarios</a></li>
-                        <li><a href="/Rol/ListadoRoles">Roles</a></li>
+                        <li><a href="/Pedido/ListadoPedidos">Mis Pedidos</a></li>
+                        <li><a href="@Url.Action("Carrito", "Carrito")">Carrito de Compras</a></li>
+                    </ul>
+                    <h4>Nosotros</h4>
+                    <ul>
                         <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
                         <li><a href="#contacto">Contacto</a></li>
-                        <li><a href="#">Política de Privacidad</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
@@ -104,9 +217,7 @@
                         <li><i class="fas fa-envelope"></i> info@pasteleria.com</li>
                         <li><i class="fas fa-map-marker-alt"></i> San José, Costa Rica</li>
                     </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Horarios</h4>
+                    <h4 style="margin-top: 1.5rem;">Horarios</h4>
                     <ul>
                         <li>Lunes - Viernes: 8am - 6pm</li>
                         <li>Sábado: 9am - 5pm</li>

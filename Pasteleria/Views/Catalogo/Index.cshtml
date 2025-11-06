@@ -4,14 +4,6 @@
     ViewData["Title"] = "Catálogo de Productos";
 }
 
-<!-- Banner Hero -->
-<section class="hero">
-    <div class="hero-content">
-        <h1 class="hero-title">Nuestro Catálogo</h1>
-        <p class="hero-subtitle">Explora nuestras deliciosas categorías de productos artesanales</p>
-    </div>
-</section>
-
 <!-- Categorías -->
 <section class="products" style="padding: 4rem 0;">
     <div class="container">
@@ -67,70 +59,6 @@
     </div>
 </section>
 
-<!-- Sección de Información -->
-<section style="background: var(--light-color); padding: 3rem 0;">
-    <div class="container">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
-            <div style="text-align: center; padding: 2rem;">
-                <i class="fas fa-birthday-cake" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
-                <h4 style="color: var(--dark-color); margin-bottom: 0.5rem;">Productos Artesanales</h4>
-                <p style="color: var(--text-color);">Elaborados con ingredientes de la más alta calidad</p>
-            </div>
-            <div style="text-align: center; padding: 2rem;">
-                <i class="fas fa-truck" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
-                <h4 style="color: var(--dark-color); margin-bottom: 0.5rem;">Entrega a Domicilio</h4>
-                <p style="color: var(--text-color);">Llevamos tus productos favoritos hasta tu puerta</p>
-            </div>
-            <div style="text-align: center; padding: 2rem;">
-                <i class="fas fa-heart" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
-                <h4 style="color: var(--dark-color); margin-bottom: 0.5rem;">Hecho con Amor</h4>
-                <p style="color: var(--text-color);">Cada producto es elaborado con dedicación y pasión</p>
-            </div>
-        </div>
-    </div>
-</section>
-
 @section Scripts {
-    <script>
-        // Desactivar cualquier función agregarAlCarrito que pueda estar globalmente
-        if (typeof agregarAlCarrito !== 'undefined') {
-            console.log('Función agregarAlCarrito deshabilitada en página de categorías');
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Página de categorías cargada');
-
-            // Asegurar que los botones de categoría funcionen
-            const botonesCategoria = document.querySelectorAll('.btn-ver-categoria');
-
-            botonesCategoria.forEach(function(boton) {
-                // Remover cualquier evento previo
-                boton.removeEventListener('click', agregarAlCarrito);
-
-                // Asegurar que el enlace funciona
-                boton.addEventListener('click', function(e) {
-                    // No prevenir el comportamiento por defecto
-                    const href = this.getAttribute('href');
-                    console.log('Navegando a:', href);
-                    // Dejar que el navegador maneje el enlace normalmente
-                });
-            });
-
-            // Prevenir que event listeners globales interfieran
-            const productCards = document.querySelectorAll('.categoria-card');
-            productCards.forEach(function(card) {
-                card.addEventListener('click', function(e) {
-                    // Si el click es en el enlace, dejarlo pasar
-                    if (e.target.closest('.btn-ver-categoria')) {
-                        return true;
-                    }
-                    // Si el click es en la tarjeta, redirigir
-                    const link = this.querySelector('.btn-ver-categoria');
-                    if (link) {
-                        window.location.href = link.getAttribute('href');
-                    }
-                });
-            });
-        });
-    </script>
+    <script src="~/js/catalogo.js"></script>
 }

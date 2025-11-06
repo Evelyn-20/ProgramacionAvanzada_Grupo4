@@ -141,7 +141,7 @@
                                  alt="@categoria.NombreCategoria" />
                         </div>
                         <h3>@categoria.NombreCategoria</h3>
-                        <a href="@Url.Action("ListadoProductos", "Producto", new { categoria = categoria.IdCategoria })"
+                        <a href="@Url.Action("Productos", "Catalogo", new { categoria = categoria.IdCategoria })"
                            class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
                     </div>
                 }
@@ -154,28 +154,28 @@
                         <img src="~/images/categoria-pasteles.jpg" alt="Pasteles" />
                     </div>
                     <h3>Pasteles</h3>
-                    <a href="@Url.Action("ListadoProductos", "Producto")" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
+                    <a href="@Url.Action("Index", "Catalogo")" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="category-card">
                     <div class="category-image">
                         <img src="~/images/categoria-panaderia.jpg" alt="Panadería" />
                     </div>
                     <h3>Panadería</h3>
-                    <a href="@Url.Action("ListadoProductos", "Producto")" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
+                    <a href="@Url.Action("Index", "Catalogo")" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="category-card">
                     <div class="category-image">
                         <img src="~/images/categoria-galletas.jpg" alt="Galletas" />
                     </div>
                     <h3>Galletas</h3>
-                    <a href="@Url.Action("ListadoProductos", "Producto")" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
+                    <a href="@Url.Action("Index", "Catalogo")" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
                 </div>
                 <div class="category-card">
                     <div class="category-image">
                         <img src="~/images/categoria-reposteria.jpg" alt="Repostería" />
                     </div>
                     <h3>Repostería</h3>
-                    <a href="@Url.Action("ListadoProductos", "Producto")" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
+                    <a href="@Url.Action("Index", "Catalogo")" class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
                 </div>
             }
         </div>
@@ -183,7 +183,7 @@
         @if (Model.Categorias != null && Model.Categorias.Count > 4)
         {
             <div style="text-align: center; margin-top: 2rem;">
-                <a href="@Url.Action("ListadoCategorias", "Categoria")" class="btn btn-primary btn-lg">
+                <a href="@Url.Action("Index", "Catalogo")" class="btn btn-primary btn-lg">
                     Ver Todas las Categorías <i class="fas fa-arrow-right"></i>
                 </a>
             </div>

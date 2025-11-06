@@ -118,22 +118,6 @@
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.min.js"></script>
-
-    <script>
-        // Mejorar la experiencia con los inputs
-        document.addEventListener('DOMContentLoaded', function() {
-            var inputs = document.querySelectorAll('.form-control');
-            inputs.forEach(function(input) {
-                input.addEventListener('focus', function() {
-                    this.style.borderColor = 'var(--primary-color)';
-                    this.style.boxShadow = '0 0 0 3px rgba(212, 130, 92, 0.1)';
-                });
-                input.addEventListener('blur', function() {
-                    this.style.borderColor = 'var(--secondary-color)';
-                    this.style.boxShadow = 'none';
-                });
-            });
-        });
-    </script>
+    <script src="~/js/account.js"></script>
 </body>
 </html>

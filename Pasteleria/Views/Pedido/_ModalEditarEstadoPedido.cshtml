@@ -1,0 +1,36 @@
+﻿<!-- Modal Editar Estado -->
+<div class="modal fade" id="modalEditarEstado" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border: none; border-radius: 15px; overflow: hidden; box-shadow: var(--shadow-lg);">
+            <div class="modal-header" style="background: linear-gradient(135deg, var(--primary-color) 0%, #c67d56 100%); color: var(--white); border: none; padding: 1.5rem 2rem;">
+                <h5 class="modal-title" style="font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-edit"></i> Cambiar Estado del Pedido
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="@Url.Action("ActualizarEstado", "Pedido")">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="editar-estado-id" name="IdPedido" />
+                <div class="modal-body" style="padding: 2rem; background: var(--white);">
+                    <div>
+                        <label style="display: block; color: var(--dark-color); font-weight: 500; margin-bottom: 0.5rem;">Nuevo Estado</label>
+                        <select name="Estado" id="editar-estado-select" class="form-control" style="width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem;">
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="En Proceso">En Proceso</option>
+                            <option value="Completado">Completado</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background: var(--light-color); border: none; padding: 1.5rem 2rem;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

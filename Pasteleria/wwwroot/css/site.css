@@ -1213,3 +1213,34 @@ footer {
     pointer-events: auto !important;
     cursor: pointer !important;
 }
+
+/* Responsive para detalle de producto */
+@media (max-width: 768px) {
+    .container > div > div > div:has(.product-image) {
+        grid-template-columns: 1fr !important;
+    }
+
+    .product-image {
+        min-height: 400px !important;
+        padding: 1rem !important;
+    }
+
+    .product-info {
+        padding: 2rem !important;
+    }
+}
+
+/* Transiciones suaves para imágenes de productos */
+.product-image img {
+    transition: transform 0.3s ease;
+}
+
+/* Animación para input de cantidad */
+#cantidad {
+    transition: transform 0.2s ease, border-color 0.3s ease;
+}
+
+    #cantidad:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(212, 130, 92, 0.1);
+    }

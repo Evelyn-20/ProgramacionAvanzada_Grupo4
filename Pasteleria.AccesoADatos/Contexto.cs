@@ -200,6 +200,36 @@ public class Contexto : DbContext
                 .HasDatabaseName("IX_Usuario_NombreUsuario");
         });
 
+        modelBuilder.Entity<AuditoriaAD>(entity =>
+        {
+            entity.ToTable("Auditoria", "dbo");
+            entity.HasKey(e => e.IdAuditoria);
+            entity.Property(e => e.IdAuditoria)
+                .ValueGeneratedOnAdd();
+            entity.Property(e => e.Tabla)
+                .HasMaxLength(100)
+                .IsRequired(false);
+            entity.Property(e => e.IdRegistro)
+                .IsRequired();
+            entity.Property(e => e.Accion)
+                .HasMaxLength(50)
+                .IsRequired(false);
+            entity.Property(e => e.UsuarioId)
+                .IsRequired(false);
+            entity.Property(e => e.UsuarioNombre)
+                .HasMaxLength(100)
+                .IsRequired(false);
+            entity.Property(e => e.ValoresAnteriores)
+                .IsRequired(false);
+            entity.Property(e => e.ValoresNuevos)
+                .IsRequired(false);
+            entity.Property(e => e.Descripcion)
+                .HasMaxLength(500)
+                .IsRequired(false);
+            entity.Property(e => e.FechaAccion)
+                .IsRequired();
+        });
+
         base.OnModelCreating(modelBuilder);
     }
 }

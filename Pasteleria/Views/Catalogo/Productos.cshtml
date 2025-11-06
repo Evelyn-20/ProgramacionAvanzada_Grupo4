@@ -5,18 +5,15 @@
     var categoria = ViewBag.Categoria as Pasteleria.Abstracciones.ModeloUI.Categoria;
 }
 
-<!-- Banner Hero -->
-<section class="hero">
-    <div class="hero-content">
-        <div style="margin-bottom: 1rem;">
-            <a href="@Url.Action("Index", "Catalogo")" style="color: var(--white); text-decoration: none; opacity: 0.9; font-size: 1rem;">
-                <i class="fas fa-arrow-left"></i> Volver al Catálogo
-            </a>
-        </div>
-        <h1 class="hero-title">@(categoria?.NombreCategoria ?? "Productos")</h1>
-        <p class="hero-subtitle">Explora nuestra selección de productos</p>
-    </div>
-</section>
+
+<!-- Botón de regreso inferior (para móviles) -->
+<div style="margin-bottom: 2rem;">
+    <a href="@Url.Action("Index", "Catalogo")"
+       class="btn btn-secondary"
+       style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.5rem;">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
 
 <!-- Productos -->
 <section class="products" style="padding: 4rem 0;">
@@ -85,28 +82,6 @@
     </div>
 </section>
 
-<!-- Información adicional -->
-@if (Model != null && Model.Count > 0)
-{
-    <section style="background: var(--light-color); padding: 3rem 0;">
-        <div class="container">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
-                <div style="text-align: center; padding: 2rem;">
-                    <i class="fas fa-truck" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
-                    <h4 style="color: var(--dark-color); margin-bottom: 0.5rem;">Entrega a Domicilio</h4>
-                    <p style="color: var(--text-color);">Llevamos tus productos favoritos hasta tu puerta</p>
-                </div>
-                <div style="text-align: center; padding: 2rem;">
-                    <i class="fas fa-shield-alt" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
-                    <h4 style="color: var(--dark-color); margin-bottom: 0.5rem;">Compra Segura</h4>
-                    <p style="color: var(--text-color);">Tu información está protegida</p>
-                </div>
-                <div style="text-align: center; padding: 2rem;">
-                    <i class="fas fa-heart" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
-                    <h4 style="color: var(--dark-color); margin-bottom: 0.5rem;">Hecho con Amor</h4>
-                    <p style="color: var(--text-color);">Cada producto es elaborado con dedicación y pasión</p>
-                </div>
-            </div>
-        </div>
-    </section>
+@section Scripts {
+    <script src="~/js/catalogo.js"></script>
 }

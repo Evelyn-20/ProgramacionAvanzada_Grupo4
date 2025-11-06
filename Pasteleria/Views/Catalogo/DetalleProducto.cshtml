@@ -5,37 +5,33 @@
     var categoria = ViewBag.Categoria as Pasteleria.Abstracciones.ModeloUI.Categoria;
 }
 
-<!-- Banner Hero -->
-<section class="hero" style="padding: 2rem 0;">
-    <div class="hero-content">
-        <div style="margin-bottom: 1rem;">
-            <a href="@Url.Action("Productos", "Catalogo", new { id = Model.IdCategoria })" style="color: var(--white); text-decoration: none; opacity: 0.9; font-size: 1rem;">
-                <i class="fas fa-arrow-left"></i> Volver a @categoria?.NombreCategoria
-            </a>
-        </div>
-        <h1 class="hero-title">@Model.NombreProducto</h1>
-        <p class="hero-subtitle">Detalle del Producto</p>
-    </div>
-</section>
+<!-- Botón de regreso inferior (para móviles) -->
+<div style="margin-bottom: 1rem;">
+    <a href="@Url.Action("Productos", "Catalogo", new { id = Model.IdCategoria })"
+       class="btn btn-secondary"
+       style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.5rem;">
+        <i class="fas fa-arrow-left"></i> Volver a @categoria?.NombreCategoria
+    </a>
+</div>
 
 <!-- Detalle del Producto -->
 <section style="padding: 4rem 0;">
-    <div class="container" style="max-width: 1000px;">
+    <div class="container" style="max-width: 1200px;">
         <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); overflow: hidden;">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0;">
                 <!-- Imagen del Producto -->
-                <div style="position: relative; min-height: 500px; background: var(--light-color);">
+                <div style="position: relative; min-height: 600px; background: var(--light-color); display: flex; align-items: center; justify-content: center; padding: 2rem;">
                     @if (Model.Imagen != null && Model.Imagen.Length > 0)
                     {
                         var base64 = Convert.ToBase64String(Model.Imagen);
                         var imgSrc = $"data:image/jpeg;base64,{base64}";
                         <img src="@imgSrc" alt="@Model.NombreProducto"
-                             style="width: 100%; height: 100%; object-fit: cover;" />
+                             style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; border-radius: 10px;" />
                     }
                     else
                     {
                         <img src="@Url.Content("~/images/producto-default.jpg")" alt="@Model.NombreProducto"
-                             style="width: 100%; height: 100%; object-fit: cover;" />
+                             style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;" />
                     }
 
                     @if (Model.Cantidad <= 5 && Model.Cantidad > 0)
@@ -165,60 +161,9 @@
 
 @section Scripts {
     <script>
-        const maxCantidad = @Model.Cantidad;
-
-        function cambiarCantidad(cambio) {
-            const input = document.getElementById('cantidad');
-            let cantidad = parseInt(input.value) + cambio;
-
-            if (cantidad < 1) cantidad = 1;
-            if (cantidad > maxCantidad) cantidad = maxCantidad;
-
-            input.value = cantidad;
-        }
-
-        function agregarAlCarrito() {
-            const cantidad = parseInt(document.getElementById('cantidad').value);
-
-            // TODO: Implementar lógica real para agregar al carrito
-            Swal.fire({
-                icon: 'success',
-                title: '¡Producto agregado!',
-                html: `Se agregaron <strong>${cantidad}</strong> unidad${cantidad > 1 ? 'es' : ''} de <strong>@Model.NombreProducto</strong> al carrito`,
-                showConfirmButton: true,
-                confirmButtonText: 'Continuar comprando',
-                showCancelButton: true,
-                cancelButtonText: 'Ver carrito',
-                confirmButtonColor: 'var(--primary-color)',
-                cancelButtonColor: 'var(--secondary-color)'
-            }).then((result) => {
-                if (!result.isConfirmed) {
-                    window.location.href = '@Url.Action("Carrito", "Carrito")';
-                }
-            });
-
-            // Actualizar contador del carrito
-            let cartCount = document.querySelector('.cart-count');
-            if (cartCount) {
-                let count = parseInt(cartCount.textContent) || 0;
-                cartCount.textContent = count + cantidad;
-            }
-        }
+        // Establecer la cantidad máxima disponible
+        maxCantidad = @Model.Cantidad;
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/catalogo.js"></script>
 }
-
-<style>
-    @@media (max-width: 768px) {
-        section > div > div {
-            grid-template-columns: 1fr !important;
-        }
-
-            section > div > div > div:first-child {
-                min-height: 300px !important;
-            }
-
-            section > div > div > div:last-child {
-                padding: 2rem !important;
-            }
-    }
-</style>

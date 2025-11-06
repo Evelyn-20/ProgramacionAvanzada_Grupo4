@@ -1,0 +1,49 @@
+﻿<!-- Modal Detalles Pedido -->
+<div class="modal fade" id="modalDetallesPedido" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border: none; border-radius: 15px; overflow: hidden; box-shadow: var(--shadow-lg);">
+            <div class="modal-header" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: var(--white); border: none; padding: 1.5rem 2rem;">
+                <h5 class="modal-title" style="font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-shopping-cart"></i> Detalles del Pedido
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding: 2rem; background: var(--white);">
+                <div style="background: var(--light-color); padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem; border-left: 4px solid #3498db;">
+                    <h5 id="detalles-pedido-titulo" style="color: var(--dark-color); margin: 0; font-size: 1.5rem;">Pedido #<span id="detalles-pedido-id"></span></h5>
+                </div>
+                <div style="display: grid; gap: 1.2rem;">
+                    <div>
+                        <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem;">
+                            <i class="fas fa-user" style="color: var(--primary-color); margin-right: 0.5rem;"></i> Cliente
+                        </label>
+                        <p id="detalles-pedido-cliente" style="color: var(--dark-color); font-size: 1.1rem; margin: 0;"></p>
+                    </div>
+                    <div>
+                        <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem;">
+                            <i class="fas fa-calendar" style="color: var(--primary-color); margin-right: 0.5rem;"></i> Fecha
+                        </label>
+                        <p id="detalles-pedido-fecha" style="color: var(--dark-color); font-size: 1.1rem; margin: 0;"></p>
+                    </div>
+                    <div>
+                        <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem;">
+                            <i class="fas fa-dollar-sign" style="color: var(--primary-color); margin-right: 0.5rem;"></i> Total
+                        </label>
+                        <p id="detalles-pedido-total" style="color: var(--primary-color); font-size: 1.3rem; font-weight: 700; margin: 0;"></p>
+                    </div>
+                    <div>
+                        <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem;">
+                            <i class="fas fa-toggle-on" style="color: var(--primary-color); margin-right: 0.5rem;"></i> Estado
+                        </label>
+                        <span id="detalles-pedido-estado-badge" style="padding: 0.5rem 1rem; border-radius: 20px; display: inline-block; font-weight: 600;"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="background: var(--light-color); border: none; padding: 1.5rem 2rem;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

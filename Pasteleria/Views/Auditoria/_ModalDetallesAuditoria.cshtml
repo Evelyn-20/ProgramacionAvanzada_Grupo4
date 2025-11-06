@@ -1,0 +1,105 @@
+﻿<!-- Modal Detalles Auditoría -->
+<div class="modal fade" id="modalDetallesAuditoria" tabindex="-1" aria-labelledby="modalDetallesAuditoriaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content" style="border: none; border-radius: 15px; overflow: hidden; box-shadow: var(--shadow-lg);">
+            <!-- Header -->
+            <div class="modal-header" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: var(--white); border: none; padding: 1.5rem 2rem;">
+                <h5 class="modal-title" id="modalDetallesAuditoriaLabel" style="font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-clipboard-list"></i> Detalles del Registro de Auditoría
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body" style="padding: 2rem; background: var(--white);">
+                <!-- Información principal -->
+                <div style="background: var(--light-color); padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem; border-left: 4px solid #3498db;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <h5 style="color: var(--dark-color); margin: 0 0 0.5rem 0; font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-table" style="color: var(--primary-color);"></i>
+                                <span id="detalles-tabla"></span>
+                            </h5>
+                            <p style="margin: 0; color: var(--text-color);">
+                                <i class="fas fa-calendar-alt" style="color: var(--primary-color);"></i>
+                                <span id="detalles-fecha"></span>
+                            </p>
+                        </div>
+                        <div>
+                            <span id="detalles-accion-badge" class="badge" style="font-size: 1rem; padding: 0.7rem 1.5rem;"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <!-- ID Auditoría -->
+                    <div>
+                        <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
+                            <i class="fas fa-hashtag" style="color: var(--primary-color); width: 20px;"></i> ID Auditoría
+                        </label>
+                        <p id="detalles-id" style="color: var(--dark-color); font-size: 1.1rem; margin: 0; padding-left: 26px;"></p>
+                    </div>
+
+                    <!-- ID Registro -->
+                    <div>
+                        <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
+                            <i class="fas fa-key" style="color: var(--primary-color); width: 20px;"></i> ID del Registro
+                        </label>
+                        <p id="detalles-id-registro" style="color: var(--dark-color); font-size: 1.1rem; margin: 0; padding-left: 26px;"></p>
+                    </div>
+
+                    <!-- Usuario -->
+                    <div>
+                        <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
+                            <i class="fas fa-user" style="color: var(--primary-color); width: 20px;"></i> Usuario
+                        </label>
+                        <p id="detalles-usuario" style="color: var(--dark-color); font-size: 1.1rem; margin: 0; padding-left: 26px;"></p>
+                    </div>
+
+                    <!-- Acción -->
+                    <div>
+                        <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
+                            <i class="fas fa-bolt" style="color: var(--primary-color); width: 20px;"></i> Tipo de Acción
+                        </label>
+                        <p id="detalles-accion" style="color: var(--dark-color); font-size: 1.1rem; margin: 0; padding-left: 26px;"></p>
+                    </div>
+                </div>
+
+                <!-- Descripción -->
+                <div style="background: linear-gradient(135deg, var(--light-color) 0%, #f5f5f5 100%); padding: 1.5rem; border-radius: 10px; border: 2px solid var(--secondary-color); margin-bottom: 1.5rem;">
+                    <h6 style="color: var(--dark-color); margin-bottom: 1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-info-circle" style="color: var(--primary-color);"></i> Descripción
+                    </h6>
+                    <p id="detalles-descripcion" style="color: var(--text-color); font-size: 0.95rem; margin: 0; line-height: 1.6;"></p>
+                </div>
+
+                <!-- Valores Anteriores -->
+                <div id="section-valores-anteriores" style="margin-bottom: 1.5rem; display: none;">
+                    <h6 style="color: var(--dark-color); margin-bottom: 1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-history" style="color: #e74c3c;"></i> Valores Anteriores
+                    </h6>
+                    <div style="background: #ffe6e6; border-left: 4px solid #e74c3c; border-radius: 10px; padding: 1rem; max-height: 300px; overflow-y: auto;">
+                        <pre id="detalles-valores-anteriores" style="margin: 0; white-space: pre-wrap; word-wrap: break-word; font-family: 'Courier New', monospace; font-size: 0.9rem; color: #333;"></pre>
+                    </div>
+                </div>
+
+                <!-- Valores Nuevos -->
+                <div id="section-valores-nuevos" style="margin-bottom: 1.5rem; display: none;">
+                    <h6 style="color: var(--dark-color); margin-bottom: 1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-plus-circle" style="color: #27ae60;"></i> Valores Nuevos
+                    </h6>
+                    <div style="background: #e6ffe6; border-left: 4px solid #27ae60; border-radius: 10px; padding: 1rem; max-height: 300px; overflow-y: auto;">
+                        <pre id="detalles-valores-nuevos" style="margin: 0; white-space: pre-wrap; word-wrap: break-word; font-family: 'Courier New', monospace; font-size: 0.9rem; color: #333;"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer" style="background: var(--light-color); border: none; padding: 1.5rem 2rem;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
