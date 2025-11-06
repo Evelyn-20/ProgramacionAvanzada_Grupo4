@@ -4,6 +4,7 @@ using Pasteleria.Abstracciones.ModeloUI;
 using Pasteleria.LogicaDeNegocio.Clientes;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Pasteleria.Controllers
@@ -41,12 +42,17 @@ namespace Pasteleria.Controllers
 
                 if (!string.IsNullOrWhiteSpace(buscar))
                 {
-                    // Buscar por nombre o cédula
+                    // Buscar por nombre, cédula o correo
                     var clientesPorNombre = _listarCliente.BuscarPorNombre(buscar);
                     var clientesPorCedula = _listarCliente.BuscarPorCedula(buscar);
+                    var clientesPorCorreo = _listarCliente.BuscarPorCorreo(buscar);
 
                     // Combinar resultados y eliminar duplicados
-                    clientes = clientesPorNombre.Union(clientesPorCedula).ToList();
+                    clientes = clientesPorNombre
+                        .Union(clientesPorCedula)
+                        .Union(clientesPorCorreo)
+                        .ToList();
+
                     ViewBag.Buscar = buscar;
                 }
                 else
@@ -58,7 +64,6 @@ namespace Pasteleria.Controllers
             }
             catch (Exception ex)
             {
-
                 TempData["Error"] = $"Error al cargar clientes: {ex.Message}";
                 return View(new List<Cliente>());
             }
@@ -84,6 +89,22 @@ namespace Pasteleria.Controllers
 
                 if (ModelState.IsValid)
                 {
+                    // Verificar si el correo ya existe
+                    var clienteExistentePorCorreo = _listarCliente.BuscarPorCorreo(cliente.Correo);
+                    if (clienteExistentePorCorreo != null && clienteExistentePorCorreo.Count > 0)
+                    {
+                        ModelState.AddModelError("Correo", "El correo electrónico ya está registrado");
+                        return View(cliente);
+                    }
+
+                    // Verificar si la cédula ya existe
+                    var clienteExistentePorCedula = _listarCliente.BuscarPorCedula(cliente.Cedula);
+                    if (clienteExistentePorCedula != null && clienteExistentePorCedula.Count > 0)
+                    {
+                        ModelState.AddModelError("Cedula", "La cédula ya está registrada");
+                        return View(cliente);
+                    }
+
                     // Establecer estado como activo
                     cliente.Estado = true;
 
@@ -154,6 +175,24 @@ namespace Pasteleria.Controllers
 
                 if (ModelState.IsValid)
                 {
+                    // Verificar si el correo ya existe en otro cliente
+                    var clienteExistentePorCorreo = _listarCliente.BuscarPorCorreo(cliente.Correo);
+                    if (clienteExistentePorCorreo != null &&
+                        clienteExistentePorCorreo.Any(c => c.IdCliente != cliente.IdCliente))
+                    {
+                        ModelState.AddModelError("Correo", "El correo electrónico ya está registrado por otro cliente");
+                        return View(cliente);
+                    }
+
+                    // Verificar si la cédula ya existe en otro cliente
+                    var clienteExistentePorCedula = _listarCliente.BuscarPorCedula(cliente.Cedula);
+                    if (clienteExistentePorCedula != null &&
+                        clienteExistentePorCedula.Any(c => c.IdCliente != cliente.IdCliente))
+                    {
+                        ModelState.AddModelError("Cedula", "La cédula ya está registrada por otro cliente");
+                        return View(cliente);
+                    }
+
                     int resultado = _actualizarCliente.Actualizar(cliente);
 
                     if (resultado > 0)

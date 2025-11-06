@@ -77,6 +77,28 @@ namespace Pasteleria.AccesoADatos.Clientes
             }
         }
 
+        public List<Abstracciones.ModeloUI.Cliente> BuscarPorCorreo(string correo)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(correo))
+                {
+                    return new List<Abstracciones.ModeloUI.Cliente>();
+                }
+
+                List<ClienteAD> clientesAD = _contexto.Cliente
+                    .Where(c => c.Correo.Contains(correo))
+                    .OrderBy(c => c.NombreCliente)
+                    .ToList();
+                return clientesAD.Select(c => ConvertirObjetoParaUI(c)).ToList();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al buscar clientes por correo: {ex.Message}");
+                throw new Exception("Error al buscar clientes por correo", ex);
+            }
+        }
+
         private Abstracciones.ModeloUI.Cliente ConvertirObjetoParaUI(ClienteAD clienteAD)
         {
             return new Abstracciones.ModeloUI.Cliente

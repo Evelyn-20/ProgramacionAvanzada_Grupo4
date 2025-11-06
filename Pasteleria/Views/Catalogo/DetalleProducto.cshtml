@@ -1,0 +1,224 @@
+﻿@model Pasteleria.Abstracciones.ModeloUI.Producto
+
+@{
+    ViewData["Title"] = Model.NombreProducto;
+    var categoria = ViewBag.Categoria as Pasteleria.Abstracciones.ModeloUI.Categoria;
+}
+
+<!-- Banner Hero -->
+<section class="hero" style="padding: 2rem 0;">
+    <div class="hero-content">
+        <div style="margin-bottom: 1rem;">
+            <a href="@Url.Action("Productos", "Catalogo", new { id = Model.IdCategoria })" style="color: var(--white); text-decoration: none; opacity: 0.9; font-size: 1rem;">
+                <i class="fas fa-arrow-left"></i> Volver a @categoria?.NombreCategoria
+            </a>
+        </div>
+        <h1 class="hero-title">@Model.NombreProducto</h1>
+        <p class="hero-subtitle">Detalle del Producto</p>
+    </div>
+</section>
+
+<!-- Detalle del Producto -->
+<section style="padding: 4rem 0;">
+    <div class="container" style="max-width: 1000px;">
+        <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); overflow: hidden;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0;">
+                <!-- Imagen del Producto -->
+                <div style="position: relative; min-height: 500px; background: var(--light-color);">
+                    @if (Model.Imagen != null && Model.Imagen.Length > 0)
+                    {
+                        var base64 = Convert.ToBase64String(Model.Imagen);
+                        var imgSrc = $"data:image/jpeg;base64,{base64}";
+                        <img src="@imgSrc" alt="@Model.NombreProducto"
+                             style="width: 100%; height: 100%; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <img src="@Url.Content("~/images/producto-default.jpg")" alt="@Model.NombreProducto"
+                             style="width: 100%; height: 100%; object-fit: cover;" />
+                    }
+
+                    @if (Model.Cantidad <= 5 && Model.Cantidad > 0)
+                    {
+                        <span style="position: absolute; top: 20px; right: 20px; background: #ff6b6b; color: white; padding: 0.8rem 1.5rem; border-radius: 25px; font-size: 1rem; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                            ¡Últimas @Model.Cantidad unidades!
+                        </span>
+                    }
+                    else if (Model.Cantidad == 0)
+                    {
+                        <span style="position: absolute; top: 20px; right: 20px; background: #666; color: white; padding: 0.8rem 1.5rem; border-radius: 25px; font-size: 1rem; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                            Agotado
+                        </span>
+                    }
+                </div>
+
+                <!-- Información del Producto -->
+                <div style="padding: 3rem;">
+                    <!-- Categoría -->
+                    <div style="margin-bottom: 1rem;">
+                        <span style="background: var(--secondary-color); color: var(--dark-color); padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem; font-weight: 500;">
+                            <i class="fas fa-tag"></i> @categoria?.NombreCategoria
+                        </span>
+                    </div>
+
+                    <!-- Nombre -->
+                    <h2 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--dark-color); margin-bottom: 1rem;">
+                        @Model.NombreProducto
+                    </h2>
+
+                    <!-- Descripción -->
+                    <p style="color: var(--text-color); font-size: 1.1rem; line-height: 1.8; margin-bottom: 2rem;">
+                        @Model.DescripcionProducto
+                    </p>
+
+                    <!-- Precio -->
+                    <div style="background: var(--light-color); padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <span style="color: var(--text-color); font-size: 1rem;">Precio:</span>
+                            <span style="font-size: 2.5rem; font-weight: 700; color: var(--primary-color); font-family: 'Playfair Display', serif;">
+                                ₡@Model.Precio.ToString("N0")
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Disponibilidad -->
+                    <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-color); border-radius: 10px; margin-bottom: 2rem;">
+                        <i class="fas fa-box" style="font-size: 1.5rem; color: var(--primary-color);"></i>
+                        <div>
+                            <div style="font-weight: 600; color: var(--dark-color);">Disponibilidad</div>
+                            <div style="color: var(--text-color);">
+                                @if (Model.Cantidad > 5)
+                                {
+                                    <span style="color: #28a745; font-weight: 600;">
+                                        <i class="fas fa-check-circle"></i> En stock (@Model.Cantidad unidades)
+                                    </span>
+                                }
+                                else if (Model.Cantidad > 0)
+                                {
+                                    <span style="color: #ff6b6b; font-weight: 600;">
+                                        <i class="fas fa-exclamation-circle"></i> Pocas unidades (@Model.Cantidad disponibles)
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span style="color: #666; font-weight: 600;">
+                                        <i class="fas fa-ban"></i> Agotado
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cantidad -->
+                    @if (Model.Cantidad > 0)
+                    {
+                        <div style="margin-bottom: 2rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 600;">
+                                Cantidad:
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <button onclick="cambiarCantidad(-1)" class="btn btn-secondary" style="width: 50px; height: 50px; padding: 0;">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" id="cantidad" value="1" min="1" max="@Model.Cantidad"
+                                       style="width: 80px; text-align: center; font-size: 1.5rem; font-weight: 600; padding: 0.5rem; border: 2px solid var(--secondary-color); border-radius: 10px;" readonly />
+                                <button onclick="cambiarCantidad(1)" class="btn btn-secondary" style="width: 50px; height: 50px; padding: 0;">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Botón Agregar al Carrito -->
+                        <button onclick="agregarAlCarrito()" class="btn btn-primary" style="width: 100%; padding: 1.2rem; font-size: 1.2rem; font-weight: 600;">
+                            <i class="fas fa-shopping-cart"></i> Agregar al Carrito
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-primary" style="width: 100%; padding: 1.2rem; font-size: 1.2rem; font-weight: 600; opacity: 0.5;" disabled>
+                            <i class="fas fa-ban"></i> Producto Agotado
+                        </button>
+                    }
+
+                    <!-- Información Adicional -->
+                    <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--secondary-color);">
+                        <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-color);">
+                                <i class="fas fa-truck" style="color: var(--primary-color);"></i>
+                                <span>Entrega a domicilio</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-color);">
+                                <i class="fas fa-shield-alt" style="color: var(--primary-color);"></i>
+                                <span>Compra segura</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-color);">
+                                <i class="fas fa-heart" style="color: var(--primary-color);"></i>
+                                <span>Hecho con amor</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        const maxCantidad = @Model.Cantidad;
+
+        function cambiarCantidad(cambio) {
+            const input = document.getElementById('cantidad');
+            let cantidad = parseInt(input.value) + cambio;
+
+            if (cantidad < 1) cantidad = 1;
+            if (cantidad > maxCantidad) cantidad = maxCantidad;
+
+            input.value = cantidad;
+        }
+
+        function agregarAlCarrito() {
+            const cantidad = parseInt(document.getElementById('cantidad').value);
+
+            // TODO: Implementar lógica real para agregar al carrito
+            Swal.fire({
+                icon: 'success',
+                title: '¡Producto agregado!',
+                html: `Se agregaron <strong>${cantidad}</strong> unidad${cantidad > 1 ? 'es' : ''} de <strong>@Model.NombreProducto</strong> al carrito`,
+                showConfirmButton: true,
+                confirmButtonText: 'Continuar comprando',
+                showCancelButton: true,
+                cancelButtonText: 'Ver carrito',
+                confirmButtonColor: 'var(--primary-color)',
+                cancelButtonColor: 'var(--secondary-color)'
+            }).then((result) => {
+                if (!result.isConfirmed) {
+                    window.location.href = '@Url.Action("Carrito", "Carrito")';
+                }
+            });
+
+            // Actualizar contador del carrito
+            let cartCount = document.querySelector('.cart-count');
+            if (cartCount) {
+                let count = parseInt(cartCount.textContent) || 0;
+                cartCount.textContent = count + cantidad;
+            }
+        }
+    </script>
+}
+
+<style>
+    @@media (max-width: 768px) {
+        section > div > div {
+            grid-template-columns: 1fr !important;
+        }
+
+            section > div > div > div:first-child {
+                min-height: 300px !important;
+            }
+
+            section > div > div > div:last-child {
+                padding: 2rem !important;
+            }
+    }
+</style>

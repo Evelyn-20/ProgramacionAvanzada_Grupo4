@@ -17,13 +17,24 @@ public class Contexto : DbContext
     public DbSet<AuditoriaAD> Auditoria { get; set; }
     public DbSet<CategoriaAD> Categoria { get; set; }
     public DbSet<RolAD> Rol { get; set; }
-    public DbSet<UsuarioAD> Usuario { get; set; } // AGREGADO
+    public DbSet<UsuarioAD> Usuario { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
         {
-            optionsBuilder.UseSqlServer("Data Source=EVELYN\\SQLEXPRESS;Initial Catalog=PASTELERIA;Integrated Security=True;MultipleActiveResultSets=true;TrustServerCertificate=True");
+            optionsBuilder.UseSqlServer(
+                "Data Source=EVELYN\\SQLEXPRESS;Initial Catalog=PASTELERIA;Integrated Security=True;MultipleActiveResultSets=true;TrustServerCertificate=True;Connection Timeout=60",
+                sqlServerOptions =>
+                {
+                    // Aumentar el timeout de comandos a 60 segundos
+                    sqlServerOptions.CommandTimeout(60);
+                    // Habilitar retry logic para conexiones inestables
+                    sqlServerOptions.EnableRetryOnFailure(
+                        maxRetryCount: 3,
+                        maxRetryDelay: System.TimeSpan.FromSeconds(5),
+                        errorNumbersToAdd: null);
+                });
         }
     }
 
@@ -77,8 +88,7 @@ public class Contexto : DbContext
                 .IsRequired()
                 .HasMaxLength(100);
             entity.Property(e => e.Imagen)
-                .IsRequired()
-                .HasColumnType("VARBINARY(MAX)");
+                .HasColumnType("VARBINARY(MAX)"); // Quitado IsRequired() para permitir nulls
             entity.Property(e => e.Estado)
                 .IsRequired();
         });

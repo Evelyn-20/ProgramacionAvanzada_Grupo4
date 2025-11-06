@@ -12,5 +12,6 @@ namespace Pasteleria.Abstracciones.Logica.Cliente
         List<ClienteUI> Obtener();
         List<ClienteUI> BuscarPorNombre(string nombre);
         List<ClienteUI> BuscarPorCedula(string cedula);
+        List<ClienteUI> BuscarPorCorreo(string correo);
     }
 }

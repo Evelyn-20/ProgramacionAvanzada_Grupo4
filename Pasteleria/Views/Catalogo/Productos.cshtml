@@ -1,0 +1,112 @@
+﻿@model List<Pasteleria.Abstracciones.ModeloUI.Producto>
+
+@{
+    ViewData["Title"] = "Productos";
+    var categoria = ViewBag.Categoria as Pasteleria.Abstracciones.ModeloUI.Categoria;
+}
+
+<!-- Banner Hero -->
+<section class="hero">
+    <div class="hero-content">
+        <div style="margin-bottom: 1rem;">
+            <a href="@Url.Action("Index", "Catalogo")" style="color: var(--white); text-decoration: none; opacity: 0.9; font-size: 1rem;">
+                <i class="fas fa-arrow-left"></i> Volver al Catálogo
+            </a>
+        </div>
+        <h1 class="hero-title">@(categoria?.NombreCategoria ?? "Productos")</h1>
+        <p class="hero-subtitle">Explora nuestra selección de productos</p>
+    </div>
+</section>
+
+<!-- Productos -->
+<section class="products" style="padding: 4rem 0;">
+    <div class="container">
+        @if (Model != null && Model.Count > 0)
+        {
+            <div class="products-grid">
+                @foreach (var producto in Model)
+                {
+                    <div class="product-card">
+                        <div class="product-image">
+                            @if (producto.Imagen != null && producto.Imagen.Length > 0)
+                            {
+                                var base64 = Convert.ToBase64String(producto.Imagen);
+                                var imgSrc = $"data:image/jpeg;base64,{base64}";
+                                <img src="@imgSrc" alt="@producto.NombreProducto" />
+                            }
+                            else
+                            {
+                                <img src="@Url.Content("~/images/producto-default.jpg")" alt="@producto.NombreProducto" />
+                            }
+
+                            @if (producto.Cantidad <= 5 && producto.Cantidad > 0)
+                            {
+                                <span class="badge badge-popular">¡Últimas @producto.Cantidad!</span>
+                            }
+                            else if (producto.Cantidad == 0)
+                            {
+                                <span class="badge" style="background: #666;">Agotado</span>
+                            }
+                        </div>
+                        <div class="product-info">
+                            <h3>@producto.NombreProducto</h3>
+                            <p class="product-description">@producto.DescripcionProducto</p>
+                            <div class="product-footer">
+                                <span class="price">₡@producto.Precio.ToString("N0")</span>
+                                @if (producto.Cantidad > 0)
+                                {
+                                    <a href="@Url.Action("DetalleProducto", "Catalogo", new { id = producto.IdProducto })" class="btn btn-primary">
+                                        <i class="fas fa-shopping-cart"></i> Ver Detalles
+                                    </a>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-primary" style="opacity: 0.5;" disabled>
+                                        <i class="fas fa-ban"></i> Agotado
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div style="text-align: center; padding: 3rem; background: var(--light-color); border-radius: 15px;">
+                <i class="fas fa-box-open" style="font-size: 4rem; color: var(--secondary-color); margin-bottom: 1rem;"></i>
+                <h3 style="color: var(--dark-color); margin-bottom: 0.5rem;">No hay productos disponibles</h3>
+                <p style="color: var(--text-color);">Esta categoría aún no tiene productos</p>
+                <a href="@Url.Action("Index", "Catalogo")" class="btn btn-primary" style="margin-top: 1rem;">
+                    <i class="fas fa-arrow-left"></i> Volver al Catálogo
+                </a>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Información adicional -->
+@if (Model != null && Model.Count > 0)
+{
+    <section style="background: var(--light-color); padding: 3rem 0;">
+        <div class="container">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                <div style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-truck" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                    <h4 style="color: var(--dark-color); margin-bottom: 0.5rem;">Entrega a Domicilio</h4>
+                    <p style="color: var(--text-color);">Llevamos tus productos favoritos hasta tu puerta</p>
+                </div>
+                <div style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-shield-alt" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                    <h4 style="color: var(--dark-color); margin-bottom: 0.5rem;">Compra Segura</h4>
+                    <p style="color: var(--text-color);">Tu información está protegida</p>
+                </div>
+                <div style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-heart" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                    <h4 style="color: var(--dark-color); margin-bottom: 0.5rem;">Hecho con Amor</h4>
+                    <p style="color: var(--text-color);">Cada producto es elaborado con dedicación y pasión</p>
+                </div>
+            </div>
+        </div>
+    </section>
+}

@@ -762,3 +762,454 @@ footer {
         grid-template-columns: 1fr;
     }
 }
+
+/* Login Page Styles */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f5e6d3 0%, #faf8f5 100%);
+    padding: 2rem;
+}
+
+.login-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-width: 1000px;
+    width: 100%;
+    background: var(--white);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.login-panel-left {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #c37049 100%);
+    color: var(--white);
+    padding: 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
+
+    .login-panel-left::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url('/images/hero-cake.jpg');
+        background-size: cover;
+        background-position: center;
+        opacity: 0.15;
+    }
+
+.login-brand {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 3rem;
+}
+
+    .login-brand i {
+        font-size: 4rem;
+        color: var(--white);
+    }
+
+.login-welcome {
+    position: relative;
+    z-index: 1;
+}
+
+    .login-welcome p {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-welcome h1 {
+        font-size: 2.5rem;
+        color: var(--white);
+        line-height: 1.2;
+        font-family: 'Playfair Display', serif;
+    }
+
+.login-panel-right {
+    padding: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-form-container {
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-icon {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.login-header h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--dark-color);
+}
+
+.login-header p {
+    color: var(--text-color);
+    font-size: 0.95rem;
+}
+
+.login-form {
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--dark-color);
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+.form-control {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s;
+}
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(212, 130, 92, 0.1);
+    }
+
+.btn-login {
+    width: 100%;
+    padding: 1rem;
+    background: var(--primary-color);
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 1rem;
+}
+
+    .btn-login:hover {
+        background: #c37049;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(212, 130, 92, 0.3);
+    }
+
+.login-footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+    .login-footer p {
+        color: var(--text-color);
+        font-size: 0.95rem;
+    }
+
+    .login-footer a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s;
+    }
+
+        .login-footer a:hover {
+            color: var(--dark-color);
+        }
+
+/* Responsive */
+@media (max-width: 968px) {
+    .login-card {
+        grid-template-columns: 1fr;
+    }
+
+    .login-panel-left {
+        padding: 3rem 2rem;
+        min-height: 300px;
+    }
+
+    .login-welcome h1 {
+        font-size: 2rem;
+    }
+
+    .login-panel-right {
+        padding: 3rem 2rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .login-container {
+        padding: 1rem;
+    }
+
+    .login-panel-left {
+        padding: 2rem 1.5rem;
+    }
+
+    .login-panel-right {
+        padding: 2rem 1.5rem;
+    }
+
+    .login-welcome h1 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Botón de Login en Navbar */
+.btn-login-nav {
+    background: var(--primary-color);
+    color: var(--white) !important;
+    padding: 0.5rem 1.2rem;
+    border-radius: 25px;
+    transition: all 0.3s;
+    font-weight: 500;
+}
+
+    .btn-login-nav:hover {
+        background: #c37049;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(212, 130, 92, 0.3);
+    }
+
+    .btn-login-nav i {
+        margin-right: 0.5rem;
+    }
+
+/* Ajuste para alertas en Bootstrap */
+.alert {
+    border-radius: 10px;
+    border: none;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+}
+
+    .alert i {
+        margin-right: 0.5rem;
+    }
+
+.alert-success {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+}
+
+/* Responsive para navbar con botón login */
+@media (max-width: 968px) {
+    .btn-login-nav {
+        display: block;
+        text-align: center;
+        margin: 0.5rem 2rem;
+    }
+}
+
+.registro-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--light-color) 0%, var(--secondary-color) 100%);
+}
+
+.registro-card {
+    background: var(--white);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    overflow: hidden;
+    width: 100%;
+    max-width: 900px;
+}
+
+.registro-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #c27a5c 100%);
+    padding: 2rem;
+    text-align: center;
+    color: var(--white);
+}
+
+    .registro-header i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .registro-header h2 {
+        margin: 0 0 0.5rem 0;
+        font-size: 2rem;
+        font-family: 'Playfair Display', serif;
+    }
+
+.registro-form-container {
+    padding: 2.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group-full {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--dark-color);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.form-control-registro {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border: 2px solid var(--secondary-color);
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s;
+    font-family: 'Poppins', sans-serif;
+}
+
+    .form-control-registro:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(212, 130, 92, 0.1);
+    }
+
+.btn-registro {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, #c27a5c 100%);
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+    .btn-registro:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(212, 130, 92, 0.3);
+    }
+
+.registro-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--secondary-color);
+}
+
+    .registro-footer p {
+        color: var(--text-color);
+        margin: 0.5rem 0;
+    }
+
+    .registro-footer a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+
+        .registro-footer a:hover {
+            color: var(--dark-color);
+        }
+
+.text-danger {
+    color: #c33;
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+    display: block;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.alert-danger {
+    background: #fee;
+    border: 1px solid #fcc;
+    color: #c33;
+}
+
+.alert-success {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .registro-form-container {
+        padding: 1.5rem;
+    }
+}
+
+.categoria-card {
+    display: flex;
+    flex-direction: column;
+}
+
+    .categoria-card .product-info {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+.categoria-footer {
+    margin-top: auto;
+    padding-top: 1rem;
+}
+
+.btn-ver-categoria {
+    width: 100%;
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}

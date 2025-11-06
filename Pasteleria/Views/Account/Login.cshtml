@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "Iniciar Sesión";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Pastelería</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Panel Izquierdo -->
+            <div class="login-panel-left">
+                <div class="login-welcome">
+                    <p>Bienvenido a</p>
+                    <h1>Tu espacio de dulzura y sabor</h1>
+                </div>
+            </div>
+
+            <!-- Panel Derecho -->
+            <div class="login-panel-right">
+                <div class="login-form-container">
+                    <div class="login-header">
+                        <i class="fas fa-birthday-cake login-icon"></i>
+                        <h2>Iniciar Sesión</h2>
+                        <p>Accede a tu cuenta para realizar pedidos</p>
+                    </div>
+
+                    @* Mensajes de error/éxito *@
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger" style="margin-bottom: 1.5rem; padding: 0.8rem; border-radius: 8px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">
+                            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+                        </div>
+                    }
+
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success" style="margin-bottom: 1.5rem; padding: 0.8rem; border-radius: 8px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb;">
+                            <i class="fas fa-check-circle"></i> @TempData["Success"]
+                        </div>
+                    }
+
+                    <form asp-action="Login" asp-controller="Account" method="post" class="login-form">
+                        <div class="form-group">
+                            <label for="email">Correo electrónico</label>
+                            <input type="email" id="email" name="email" class="form-control" placeholder="tucorreo@ejemplo.com" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">Contraseña</label>
+                            <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required />
+                        </div>
+
+                        <button type="submit" class="btn btn-login">Ingresar</button>
+
+                        <div class="login-footer">
+                            <p>¿No tienes una cuenta? <a asp-action="Registro" asp-controller="Account">Regístrate</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

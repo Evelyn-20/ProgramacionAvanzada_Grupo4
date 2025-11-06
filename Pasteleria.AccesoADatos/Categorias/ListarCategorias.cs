@@ -1,5 +1,7 @@
-﻿using Pasteleria.Abstracciones.Logica.Categoria;
+﻿using Microsoft.EntityFrameworkCore;
+using Pasteleria.Abstracciones.Logica.Categoria;
 using Pasteleria.AccesoADatos.Modelos;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,24 +18,57 @@ namespace Pasteleria.AccesoADatos.Categorias
 
         public List<Abstracciones.ModeloUI.Categoria> Obtener()
         {
-            List<CategoriaAD> categoriasAD = _contexto.Categoria.ToList();
-            return categoriasAD.Select(c => ConvertirObjetoParaUI(c)).ToList();
+            try
+            {
+                List<CategoriaAD> categoriasAD = _contexto.Categoria
+                    .AsNoTracking() // Mejora el rendimiento
+                    .ToList();
+                return categoriasAD.Select(c => ConvertirObjetoParaUI(c)).ToList();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al obtener categorías: {ex.Message}");
+                throw;
+            }
         }
 
         public List<Abstracciones.ModeloUI.Categoria> BuscarPorNombre(string nombre)
         {
-            List<CategoriaAD> categoriasAD = _contexto.Categoria
-                .Where(c => c.NombreCategoria.Contains(nombre))
-                .ToList();
-            return categoriasAD.Select(c => ConvertirObjetoParaUI(c)).ToList();
+            try
+            {
+                List<CategoriaAD> categoriasAD = _contexto.Categoria
+                    .AsNoTracking()
+                    .Where(c => c.NombreCategoria.Contains(nombre))
+                    .ToList();
+                return categoriasAD.Select(c => ConvertirObjetoParaUI(c)).ToList();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al buscar categorías: {ex.Message}");
+                throw;
+            }
         }
 
         public List<Abstracciones.ModeloUI.Categoria> ObtenerActivas()
         {
-            List<CategoriaAD> categoriasAD = _contexto.Categoria
-                .Where(c => c.Estado == true)
-                .ToList();
-            return categoriasAD.Select(c => ConvertirObjetoParaUI(c)).ToList();
+            try
+            {
+                // Obtener todas primero y filtrar en memoria para evitar timeout
+                List<CategoriaAD> categoriasAD = _contexto.Categoria
+                    .AsNoTracking()
+                    .ToList();
+
+                // Filtrar las activas en memoria
+                return categoriasAD
+                    .Where(c => c.Estado)
+                    .Select(c => ConvertirObjetoParaUI(c))
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al obtener categorías activas: {ex.Message}");
+                throw;
+            }
         }
 
         private Abstracciones.ModeloUI.Categoria ConvertirObjetoParaUI(CategoriaAD categoriaAD)

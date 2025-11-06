@@ -27,5 +27,10 @@ namespace Pasteleria.LogicaDeNegocio.Clientes
         {
             return _listarClientes.BuscarPorCedula(cedula);
         }
+
+        public List<Cliente> BuscarPorCorreo(string correo)
+        {
+            return _listarClientes.BuscarPorCorreo(correo);
+        }
     }
 }
