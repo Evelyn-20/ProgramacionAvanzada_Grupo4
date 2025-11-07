@@ -28,6 +28,11 @@ namespace Pasteleria.Controllers
             }
         }
 
+        //public IActionResult Test500()
+        //{
+        //    throw new Exception("Error de prueba para página 500");
+        //}
+
         public IActionResult Index()
         {
             try
