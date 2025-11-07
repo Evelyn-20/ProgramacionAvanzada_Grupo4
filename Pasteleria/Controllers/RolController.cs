@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Pasteleria.Controllers
 {
-    public class RolController : Controller
+    public class RolController : BaseController
     {
         private IListarRoles _listarRol;
         private ICrearRol _crearRol;
@@ -35,6 +35,9 @@ namespace Pasteleria.Controllers
         // GET: Rol/ListadoRoles
         public IActionResult ListadoRoles(string buscar)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 List<Rol> roles = new List<Rol>();
@@ -62,6 +65,9 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult CrearRol()
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             return View();
         }
 
@@ -70,6 +76,9 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CrearRol(Rol rol)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 System.Diagnostics.Debug.WriteLine($"Nombre: {rol?.NombreRol}");
@@ -116,6 +125,9 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult EditarRol(int id)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 var rol = _obtenerRolPorId.Obtener(id);
@@ -140,6 +152,9 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult EditarRol(Rol rol)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 System.Diagnostics.Debug.WriteLine($"ID: {rol?.IdRol}");
@@ -173,6 +188,9 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult EliminarRol(int IdRol)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 int resultado = _eliminarRol.Eliminar(IdRol);

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Pasteleria.Controllers
 {
-    public class ProductoController : Controller
+    public class ProductoController : BaseController
     {
         private IListarProductos _listarProducto;
         private ICrearProducto _crearProducto;
@@ -41,6 +41,9 @@ namespace Pasteleria.Controllers
         // GET: Producto/ListadoProductos
         public IActionResult ListadoProductos(string buscar, int? categoria)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 List<Producto> productos = new List<Producto>();
@@ -77,6 +80,9 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult CrearProducto()
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             // Cargar categorías activas para el dropdown
             var categorias = _listarCategorias.ObtenerActivas();
             ViewBag.Categorias = categorias;
@@ -88,6 +94,9 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CrearProducto(Producto producto, IFormFile archivo)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 // Remover validación automática de campos que se manejan manualmente
@@ -169,6 +178,9 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult EditarProducto(int id)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 var producto = _obtenerProductoPorId.Obtener(id);
@@ -197,6 +209,9 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditarProducto(Producto producto, IFormFile archivo)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 // Remover validación de campos que no vienen del formulario o no son requeridos en edición
@@ -319,6 +334,9 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult DetalleProducto(int id)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 var producto = _obtenerProductoPorId.Obtener(id);
@@ -343,6 +361,9 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult EliminarProducto(int IdProducto)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 int resultado = _eliminarProducto.Eliminar(IdProducto);

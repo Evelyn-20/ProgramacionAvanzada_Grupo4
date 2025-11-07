@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Pasteleria.Controllers
 {
-    public class UsuarioController : Controller
+    public class UsuarioController : BaseController
     {
         private IListarUsuarios _listarUsuarios;
         private ICrearUsuario _crearUsuario;
@@ -41,6 +41,9 @@ namespace Pasteleria.Controllers
         // GET: Usuario/ListadoUsuarios
         public IActionResult ListadoUsuarios(string buscar)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 List<Usuario> usuarios = new List<Usuario>();
@@ -78,6 +81,9 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult CrearUsuario()
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             CargarRoles();
             return View();
         }
@@ -87,6 +93,9 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CrearUsuario(Usuario usuario)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 System.Diagnostics.Debug.WriteLine($"Nombre: {usuario?.NombreUsuario}");
@@ -137,6 +146,9 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult EditarUsuario(int id)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 var usuario = _obtenerUsuarioPorId.Obtener(id);
@@ -164,6 +176,9 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult EditarUsuario(Usuario usuario)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 System.Diagnostics.Debug.WriteLine($"ID: {usuario?.IdUsuario}");
@@ -198,6 +213,9 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult DetallesUsuario(int id)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 var usuario = _obtenerUsuarioPorId.Obtener(id);
@@ -227,6 +245,9 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult EliminarUsuario(int IdUsuario)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 int resultado = _eliminarUsuario.Eliminar(IdUsuario);

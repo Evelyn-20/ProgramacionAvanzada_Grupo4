@@ -38,5 +38,8 @@ namespace Pasteleria.AccesoADatos.Modelos
         [Required]
         [Column("Estado")]
         public bool Estado { get; set; }
+
+        [ForeignKey("IdRol")]
+        public virtual RolAD Rol { get; set; }
     }
 }

@@ -24,7 +24,7 @@ public class Contexto : DbContext
         if (!optionsBuilder.IsConfigured)
         {
             optionsBuilder.UseSqlServer(
-                "Data Source=EVELYN\\SQLEXPRESS;Initial Catalog=PASTELERIA;Integrated Security=True;MultipleActiveResultSets=true;TrustServerCertificate=True;Connection Timeout=60",
+                "Data Source=localhost;Initial Catalog=PASTELERIA;Integrated Security=True;MultipleActiveResultSets=true;TrustServerCertificate=True;Connection Timeout=60",
                 sqlServerOptions =>
                 {
                     // Aumentar el timeout de comandos a 60 segundos

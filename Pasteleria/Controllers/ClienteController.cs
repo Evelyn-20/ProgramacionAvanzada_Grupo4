@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Pasteleria.Controllers
 {
-    public class ClienteController : Controller
+    public class ClienteController : BaseController
     {
         private IListarClientes _listarCliente;
         private ICrearCliente _crearCliente;
@@ -36,6 +36,9 @@ namespace Pasteleria.Controllers
         // GET: Cliente/ListadoClientes
         public IActionResult ListadoClientes(string buscar)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 List<Cliente> clientes = new List<Cliente>();
@@ -73,6 +76,9 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult CrearCliente()
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             return View();
         }
 
@@ -81,6 +87,9 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CrearCliente(Cliente cliente)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 System.Diagnostics.Debug.WriteLine($"Nombre: {cliente?.NombreCliente}");
@@ -145,6 +154,9 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult EditarCliente(int id)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 var cliente = _obtenerClientePorId.Obtener(id);
@@ -169,6 +181,9 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult EditarCliente(Cliente cliente)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 System.Diagnostics.Debug.WriteLine($"ID: {cliente?.IdCliente}");
@@ -220,6 +235,9 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult EliminarCliente(int IdCliente)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 int resultado = _eliminarCliente.Eliminar(IdCliente);

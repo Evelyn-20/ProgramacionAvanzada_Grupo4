@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Pasteleria.Abstracciones.Logica.Cliente;
+using Pasteleria.Abstracciones.Logica.Usuario;
 using Pasteleria.Abstracciones.ModeloUI;
 using Pasteleria.LogicaDeNegocio.Clientes;
+using Pasteleria.LogicaDeNegocio.Usuarios;
 using System;
 using System.Threading.Tasks;
 
@@ -11,11 +13,15 @@ namespace Pasteleria.Controllers
     {
         private readonly ICrearCliente _crearCliente;
         private readonly IListarClientes _listarClientes;
+        private readonly IAutenticarCliente _autenticarCliente;
+        private readonly IAutenticarUsuario _autenticarUsuario;
 
         public AccountController()
         {
             _crearCliente = new CrearCliente();
             _listarClientes = new ListarClientes();
+            _autenticarCliente = new AutenticarCliente();
+            _autenticarUsuario = new AutenticarUsuario();
         }
 
         // GET: Account/Login
@@ -36,10 +42,39 @@ namespace Pasteleria.Controllers
                     return View();
                 }
 
-                // TODO: Implementar validación contra la base de datos
-                // Por ahora redirigimos al inicio
-                TempData["Success"] = "Inicio de sesión exitoso. ¡Bienvenido!";
-                return RedirectToAction("Index", "Home");
+                // Primero intentar como Usuario (administrador con rol)
+                var (usuario, nombreRol) = _autenticarUsuario.Autenticar(email, password);
+
+                if (usuario != null)
+                {
+                    // Login como Usuario (admin)
+                    HttpContext.Session.SetInt32("UsuarioId", usuario.IdUsuario);
+                    HttpContext.Session.SetString("UsuarioNombre", usuario.NombreUsuario);
+                    HttpContext.Session.SetString("UsuarioEmail", usuario.Email);
+                    HttpContext.Session.SetString("UsuarioRol", nombreRol);
+                    HttpContext.Session.SetString("TipoUsuario", "Administrador");
+
+                    TempData["Success"] = $"Bienvenido {usuario.NombreUsuario} ({nombreRol})";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                // Si no es Usuario, intentar como Cliente
+                var cliente = _autenticarCliente.Autenticar(email, password);
+
+                if (cliente != null)
+                {
+                    // Login como Cliente
+                    HttpContext.Session.SetInt32("ClienteId", cliente.IdCliente);
+                    HttpContext.Session.SetString("ClienteNombre", cliente.NombreCliente);
+                    HttpContext.Session.SetString("ClienteEmail", cliente.Correo);
+                    HttpContext.Session.SetString("TipoUsuario", "Cliente");
+
+                    TempData["Success"] = "Inicio de sesión exitoso. ¡Bienvenido!";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                TempData["Error"] = "Correo o contraseña incorrectos";
+                return View();
             }
             catch (Exception ex)
             {
@@ -126,7 +161,7 @@ namespace Pasteleria.Controllers
         // GET: Account/Logout
         public IActionResult Logout()
         {
-            // TODO: Implementar lógica de cierre de sesión
+            HttpContext.Session.Clear();
             TempData["Success"] = "Has cerrado sesión exitosamente";
             return RedirectToAction("Index", "Home");
         }

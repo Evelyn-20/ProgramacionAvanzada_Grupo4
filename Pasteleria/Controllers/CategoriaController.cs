@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Pasteleria.Controllers
 {
-    public class CategoriaController : Controller
+    public class CategoriaController : BaseController
     {
         private IListarCategorias _listarCategoria;
         private ICrearCategoria _crearCategoria;
@@ -37,6 +37,9 @@ namespace Pasteleria.Controllers
         // GET: Categoria/ListadoCategorias
         public IActionResult ListadoCategorias(string buscar)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 List<Categoria> categorias = new List<Categoria>();
@@ -64,6 +67,9 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult CrearCategoria()
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             return View();
         }
 
@@ -72,6 +78,9 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CrearCategoria(Categoria categoria, IFormFile archivo)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 // Remover validación automática de la imagen
@@ -150,6 +159,9 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult EditarCategoria(int id)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 var categoria = _obtenerCategoriaPorId.Obtener(id);
@@ -174,6 +186,9 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditarCategoria(Categoria categoria, IFormFile archivo)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 // Remover validación de la imagen
@@ -278,6 +293,9 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult DetalleCategoria(int id)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 var categoria = _obtenerCategoriaPorId.Obtener(id);
@@ -302,6 +320,9 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult EliminarCategoria(int IdCategoria)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 int resultado = _eliminarCategoria.Eliminar(IdCategoria);

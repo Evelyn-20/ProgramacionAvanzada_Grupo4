@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Pasteleria.Controllers
 {
-    public class AuditoriaController : Controller
+    public class AuditoriaController : BaseController
     {
         private IListarAuditorias _listarAuditorias;
 
@@ -26,6 +26,9 @@ namespace Pasteleria.Controllers
         // GET: Auditoria/ListadoAuditorias
         public IActionResult ListadoAuditorias(string buscar, string filtro)
         {
+            if (!VerificarPermisosAdministrador())
+                return RedirectToAction("Index", "Home");
+
             try
             {
                 List<Auditoria> auditorias = new List<Auditoria>();

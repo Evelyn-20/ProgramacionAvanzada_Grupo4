@@ -7,12 +7,28 @@ namespace Pasteleria.Controllers
         // GET: Carrito
         public IActionResult Carrito()
         {
+            // Verificar si el cliente está logueado
+            var clienteId = HttpContext.Session.GetInt32("ClienteId");
+            if (clienteId == null)
+            {
+                TempData["Error"] = "Debe iniciar sesión para acceder al carrito";
+                return RedirectToAction("Login", "Account");
+            }
+
             return View();
         }
 
         // GET: Carrito/ProcederPago
         public IActionResult ProcederPago()
         {
+            // Verificar si el cliente está logueado
+            var clienteId = HttpContext.Session.GetInt32("ClienteId");
+            if (clienteId == null)
+            {
+                TempData["Error"] = "Debe iniciar sesión para proceder con el pago";
+                return RedirectToAction("Login", "Account");
+            }
+
             return View("FinalizacionCompra");
         }
 
