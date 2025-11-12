@@ -24,15 +24,15 @@ public class Contexto : DbContext
         if (!optionsBuilder.IsConfigured)
         {
             optionsBuilder.UseSqlServer(
-                "Data Source=localhost;Initial Catalog=PASTELERIA;Integrated Security=True;MultipleActiveResultSets=true;TrustServerCertificate=True;Connection Timeout=60",
+                "Data Source=localhost\\SQLEXPRESS;Initial Catalog=PASTELERIA;Integrated Security=True;MultipleActiveResultSets=true;TrustServerCertificate=True;Connection Timeout=60",
                 sqlServerOptions =>
                 {
-                    // Aumentar el timeout de comandos a 60 segundos
-                    sqlServerOptions.CommandTimeout(60);
+                    // Aumentar el timeout de comandos a 120 segundos
+                    sqlServerOptions.CommandTimeout(120);
                     // Habilitar retry logic para conexiones inestables
                     sqlServerOptions.EnableRetryOnFailure(
-                        maxRetryCount: 3,
-                        maxRetryDelay: System.TimeSpan.FromSeconds(5),
+                        maxRetryCount: 5,
+                        maxRetryDelay: System.TimeSpan.FromSeconds(10),
                         errorNumbersToAdd: null);
                 });
         }
