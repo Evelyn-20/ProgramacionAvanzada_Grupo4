@@ -1,0 +1,291 @@
+﻿@{
+    ViewData["Title"] = "Crear Pedido";
+}
+
+<div class="mb-2 d-flex gap-2 align-items-center">
+    <div class="flex-grow-1 position-relative">
+        <input id="txtBuscarProducto" class="form-control" placeholder="Buscar producto..." autocomplete="off" />
+        <div id="sugerencias" class="list-group position-absolute w-100" style="z-index:1000; max-height: 260px; overflow-y: auto;"></div>
+    </div>
+
+    <!-- Botón para ir a Verificar: primero sincroniza el carrito, luego navega -->
+    <a href="/Pedido/Verificar" id="lnkCarrito" class="btn btn-outline-secondary">
+        Ver carrito
+    </a>
+</div>
+
+<table id="tblDetalle" class="table table-sm mt-3">
+    <thead>
+        <tr>
+            <th>Producto</th>
+            <th style="width:110px;">Cant.</th>
+            <th style="width:140px;">Precio</th>
+            <th style="width:120px;">Desc. %</th>
+            <th style="width:120px;">Desc. fijo</th>
+            <th style="width:140px;">Total línea</th>
+            <th style="width:60px;"></th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<div class="text-end">
+    <div>Subtotal: <strong id="lblSubtotal">₡0.00</strong></div>
+    <div>Impuestos: <strong id="lblImpuestos">₡0.00</strong></div>
+    <div>Total: <strong id="lblTotal">₡0.00</strong></div>
+</div>
+
+<div class="mt-3 text-end">
+    <button id="btnConfirmar" class="btn btn-primary">Confirmar pedido</button>
+</div>
+
+@section Scripts {
+    <!-- Si ya tienes jQuery en tu _Layout, puedes quitar esta línea -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script>
+    // ================= Utilitarios =================
+    const curr = v => `₡${Number(v || 0).toFixed(2)}`;
+    const toDec = v => {
+      if (typeof v === "number") return v;
+      if (!v) return 0;
+      return Number(String(v).replace(",", ".").trim()) || 0;
+    };
+
+    // ================= Estado local del carrito =================
+    // { [id]: { id, nombre, precio, impuesto, stock, cantidad, dPorc, dFijo } }
+    const carrito = {};
+
+    // ================= Persistencia en sesión (API Carrito) =================
+    function snapshotCarrito() {
+      return Object.values(carrito).map(it => ({
+        productoId: it.id,
+        nombre: it.nombre,
+        precio: it.precio,
+        impuesto: it.impuesto,
+        stock: it.stock,
+        cantidad: it.cantidad,
+        descuentoPorc: it.dPorc,
+        descuentoFijo: it.dFijo
+      }));
+    }
+
+    function deSnapshot(lineas) {
+      (lineas || []).forEach(l => {
+        carrito[l.productoId] = {
+          id: l.productoId,
+          nombre: l.nombre,
+          precio: Number(l.precio || 0),
+          impuesto: Number(l.impuesto || 0),
+          stock: parseInt(l.stock || 0),
+          cantidad: Number(l.cantidad || 0),
+          dPorc: Number(l.descuentoPorc || 0),
+          dFijo: Number(l.descuentoFijo || 0)
+        };
+        renderLinea(l.productoId);
+      });
+      recalcularTotales();
+    }
+
+    async function syncCarrito() {
+      const payload = snapshotCarrito();
+      try {
+        await $.ajax({
+          url: "/api/carrito/sincronizar",
+          method: "POST",
+          contentType: "application/json",
+          data: JSON.stringify(payload)
+        });
+      } catch {
+        console.warn("Error sincronizando carrito");
+      }
+    }
+
+    // Al cargar la página: intenta hidratar desde sesión
+    $(async function() {
+      try {
+        const data = await $.getJSON("/api/carrito");
+        deSnapshot(data);
+      } catch {
+        console.log("No hay carrito previo");
+      }
+    });
+
+    // ================= Autosuggest de productos =================
+    let typingTimer;
+    $("#txtBuscarProducto").on("keyup", function () {
+      clearTimeout(typingTimer);
+      const q = $(this).val().trim();
+      if (q.length < 2) { $("#sugerencias").empty(); return; }
+      typingTimer = setTimeout(() => {
+        $.getJSON(`/api/productos/buscar?q=${encodeURIComponent(q)}`, function (data) {
+          const $s = $("#sugerencias").empty();
+          if (!data || data.length === 0) {
+            $s.append('<div class="list-group-item text-muted">Sin coincidencias…</div>');
+            return;
+          }
+          data.forEach(p => {
+            p.precio = toDec(p.precio);
+            p.impuesto = toDec(p.impuesto);
+            p.stock = parseInt(p.stock ?? 0);
+
+            const $item = $(`
+              <a href="#" class="list-group-item list-group-item-action">
+                <div class="d-flex justify-content-between align-items-center">
+                  <span>${p.nombre}</span>
+                  <small>${curr(p.precio)} · Imp: ${p.impuesto}% · Stock: ${p.stock}</small>
+                </div>
+              </a>`);
+            $item.on("click", async (e) => {
+              e.preventDefault();
+              $("#sugerencias").empty();
+              $("#txtBuscarProducto").val("");
+
+              // Revalidar producto por Id antes de agregar (precio/imp/stock current)
+              const fresh = await $.getJSON(`/api/productos/${p.id}`);
+              agregarOIncrementar(fresh);
+              await syncCarrito();
+              recalcularTotales();
+            });
+            $s.append($item);
+          });
+        });
+      }, 250);
+    });
+
+    // ================= Carrito: agregar o incrementar =================
+    function agregarOIncrementar(prod) {
+      const id = prod.id;
+      if (carrito[id]) {
+        const nueva = Math.min(carrito[id].cantidad + 1, parseInt(prod.stock ?? 0));
+        carrito[id].cantidad = nueva;
+        carrito[id].precio   = toDec(prod.precio);
+        carrito[id].impuesto = toDec(prod.impuesto);
+        carrito[id].stock    = parseInt(prod.stock ?? 0);
+        renderLinea(id);
+        recalcularTotales();
+        return;
+      }
+
+      carrito[id] = {
+        id,
+        nombre: prod.nombre,
+        precio: toDec(prod.precio),
+        impuesto: toDec(prod.impuesto),
+        stock: parseInt(prod.stock ?? 0),
+        cantidad: 1,
+        dPorc: 0,
+        dFijo: 0
+      };
+      renderLinea(id);
+    }
+
+    // ================= Renderizar una línea =================
+    function renderLinea(id) {
+      const it = carrito[id];
+      let $tr = $(`#tblDetalle tbody tr[data-id="${id}"]`);
+      if ($tr.length === 0) {
+        $tr = $(`
+          <tr data-id="${id}">
+            <td class="nombre"></td>
+            <td><input type="number" class="form-control form-control-sm qty" min="1" value="1"></td>
+            <td class="precio" data-val="0"></td>
+            <td><input type="number" class="form-control form-control-sm dporc" min="0" max="100" value="0"></td>
+            <td><input type="number" class="form-control form-control-sm dfijo" min="0" value="0"></td>
+            <td class="total-linea">₡0.00</td>
+            <td><button type="button" class="btn btn-sm btn-outline-danger del">X</button></td>
+          </tr>`);
+        $tr.find(".qty,.dporc,.dfijo").on("input", async () => {
+          const q = Math.max(1, Math.min(parseInt($tr.find(".qty").val() || "1"), it.stock || 0));
+          it.cantidad = q;
+          it.dPorc = Math.min(100, Math.max(0, toDec($tr.find(".dporc").val())));
+          it.dFijo  = Math.max(0, toDec($tr.find(".dfijo").val()));
+          $tr.find(".qty").val(q);
+          await syncCarrito();
+          recalcularTotales();
+        });
+        $tr.find(".del").on("click", async function(){
+          delete carrito[id];
+          $tr.remove();
+          await syncCarrito();
+          recalcularTotales();
+        });
+        $("#tblDetalle tbody").append($tr);
+      }
+      $tr.find(".nombre").text(it.nombre);
+      $tr.find(".qty").val(it.cantidad);
+      $tr.find(".precio").attr("data-val", it.precio).text(curr(it.precio));
+      $tr.find(".dporc").val(it.dPorc);
+      $tr.find(".dfijo").val(it.dFijo);
+    }
+
+    // ================= Recalcular totales =================
+    function obtenerLineas() {
+      const lineas = [];
+      Object.values(carrito).forEach(it => {
+        if (it.cantidad > 0) {
+          lineas.push({
+            productoId: it.id,
+            cantidad: it.cantidad,
+            descuentoPorc: it.dPorc,
+            descuentoFijo: it.dFijo
+          });
+        }
+      });
+      return lineas;
+    }
+
+    function recalcularTotales() {
+      const lineas = obtenerLineas();
+      if (lineas.length === 0) {
+        $("#lblSubtotal").text(curr(0));
+        $("#lblImpuestos").text(curr(0));
+        $("#lblTotal").text(curr(0));
+        return;
+      }
+      $.ajax({
+        url: "/api/pedidos/calcular",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({ lineas }),
+        success: (r) => {
+          $("#lblSubtotal").text(curr(toDec(r?.subtotal)));
+          $("#lblImpuestos").text(curr(toDec(r?.impuestos)));
+          $("#lblTotal").text(curr(toDec(r?.total)));
+
+          const map = {};
+          (r?.lineas ?? []).forEach(x => map[x.productoId] = toDec(x.totalLinea));
+          $("#tblDetalle tbody tr").each(function () {
+            const id = parseInt($(this).data("id"));
+            const tl = map[id] ?? 0;
+            $(this).find(".total-linea").text(curr(tl));
+          });
+        },
+        error: () => {
+          $("#lblSubtotal").text(curr(0));
+          $("#lblImpuestos").text(curr(0));
+          $("#lblTotal").text(curr(0));
+        }
+      });
+    }
+
+    // ================= Confirmar pedido (placeholder) =================
+    $("#btnConfirmar").on("click", async function(){
+      const lineas = snapshotCarrito();
+      if (lineas.length === 0) {
+        alert("Agrega al menos un producto antes de confirmar.");
+        return;
+      }
+      await syncCarrito(); // guarda estado en sesión
+      alert("Pedido confirmado (implementa guardado en base de datos)");
+    });
+
+    // ================= Navegar al carrito: primero sincroniza =================
+    $("#lnkCarrito").on("click", async function (e) {
+      e.preventDefault();
+      await syncCarrito();
+      window.location.href = this.href;
+    });
+    </script>
+}
+

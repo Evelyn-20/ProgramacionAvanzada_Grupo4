@@ -1,0 +1,203 @@
+﻿@{
+    ViewBag.Title = "Página no encontrada - 404";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .error-container {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        background: linear-gradient(135deg, var(--light-color) 0%, var(--secondary-color) 100%);
+    }
+
+    .error-content {
+        text-align: center;
+        max-width: 600px;
+        background: var(--white);
+        padding: 50px 40px;
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .error-icon {
+        font-size: 120px;
+        margin-bottom: 20px;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @@keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-20px);
+        }
+    }
+
+    .error-code {
+        font-size: 80px;
+        font-weight: bold;
+        color: var(--primary-color);
+        margin: 0;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        font-family: 'Playfair Display', serif;
+    }
+
+    .error-title {
+        font-size: 32px;
+        color: var(--dark-color);
+        margin: 20px 0;
+        font-weight: 600;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .error-message {
+        font-size: 18px;
+        color: var(--text-color);
+        margin-bottom: 30px;
+        line-height: 1.6;
+    }
+
+    .error-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-error {
+        padding: 15px 30px;
+        font-size: 16px;
+        border-radius: 50px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .btn-primary-error {
+        background: var(--primary-color);
+        color: var(--white);
+        border: none;
+    }
+
+        .btn-primary-error:hover {
+            background: #c37049;
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+    .btn-secondary-error {
+        background: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+
+        .btn-secondary-error:hover {
+            background: var(--primary-color);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+    .suggestions {
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 1px solid var(--secondary-color);
+    }
+
+        .suggestions h3 {
+            color: var(--primary-color);
+            font-size: 20px;
+            margin-bottom: 15px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .suggestions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .suggestions li {
+            padding: 8px 0;
+            color: var(--text-color);
+        }
+
+            .suggestions li a {
+                color: var(--primary-color);
+                text-decoration: none;
+                transition: color 0.3s;
+            }
+
+                .suggestions li a:hover {
+                    color: var(--dark-color);
+                    text-decoration: underline;
+                }
+
+    @@media (max-width: 600px) {
+        .error-content
+
+    {
+        padding: 30px 20px;
+    }
+
+    .error-code {
+        font-size: 60px;
+    }
+
+    .error-title {
+        font-size: 24px;
+    }
+
+    .error-message {
+        font-size: 16px;
+    }
+
+    .error-buttons {
+        flex-direction: column;
+    }
+
+    .btn-error {
+        width: 100%;
+        justify-content: center;
+    }
+
+    }
+</style>
+
+<div class="error-container">
+    <div class="error-content">
+        <div class="error-icon">🧁</div>
+        <h1 class="error-code">Error 404</h1>
+        <h2 class="error-title">¡Ups! Esta página se quemó</h2>
+        <p class="error-message">
+            Parece que el pastel que buscabas no está en nuestro mostrador.
+            <b>La página que intentas encontrar no existe o fue movida a otro lugar.</b>
+        </p>
+
+        <div class="error-buttons">
+            <a href="@Url.Action("Index", "Home")" class="btn-error btn-primary-error">
+                🏠 Volver al Inicio
+            </a>
+            <a href="@Url.Action("Index", "Catalogo")" class="btn-error btn-secondary-error">
+                🍰 Ver Catálogo
+            </a>
+        </div>
+
+        <div class="suggestions">
+            <h3>¿Qué puedes hacer?</h3>
+            <ul>
+                <li>📋 <a href="@Url.Action("Index", "Catalogo")">Explorar nuestro catálogo de productos</a></li>
+                <li>🛒 <a href="@Url.Action("Carrito", "Carrito")">Revisar tu carrito de compras</a></li>
+                <li>📞 <a href="@Url.Action("Index", "Home")#contacto">Contactarnos si necesitas ayuda</a></li>
+            </ul>
+        </div>
+    </div>
+</div>

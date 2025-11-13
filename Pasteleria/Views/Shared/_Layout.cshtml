@@ -1,0 +1,241 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Pastelería Artesanal</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <style>
+        /* Estilos para el menú desplegable */
+        .nav-menu > li {
+            position: relative;
+        }
+
+        .dropdown-menu-custom {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: var(--white);
+            min-width: 220px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            padding: 0.5rem 0;
+            z-index: 1000;
+            margin-top: 0.5rem;
+        }
+
+        .nav-menu > li:hover .dropdown-menu-custom {
+            display: block;
+        }
+
+        .dropdown-menu-custom li {
+            list-style: none;
+        }
+
+        .dropdown-menu-custom a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+            .dropdown-menu-custom a:hover {
+                background: var(--light-color);
+                color: var(--primary-color);
+                padding-left: 2rem;
+            }
+
+            .dropdown-menu-custom a i {
+                color: var(--primary-color);
+                font-size: 1.1rem;
+                width: 20px;
+                text-align: center;
+            }
+
+        .nav-menu > li > a.has-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+            .nav-menu > li > a.has-dropdown::after {
+                content: '\f107';
+                font-family: 'Font Awesome 6 Free';
+                font-weight: 900;
+                font-size: 0.8rem;
+                transition: transform 0.3s;
+            }
+
+        .nav-menu > li:hover > a.has-dropdown::after {
+            transform: rotate(180deg);
+        }
+
+        /* Responsive para móviles */
+        @@media (max-width: 768px) {
+            .dropdown-menu-custom {
+                position: static;
+                box-shadow: none;
+                background: var(--light-color);
+                margin-top: 0.5rem;
+                border-left: 3px solid var(--primary-color);
+                border-radius: 0;
+            }
+
+                .dropdown-menu-custom a {
+                    padding-left: 2rem;
+                }
+
+                    .dropdown-menu-custom a:hover {
+                        padding-left: 2.5rem;
+                    }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <a href="/" class="logo">
+                    <img src="~/images/logo.png" alt="Pastelería Artesanal" style="height: 70px; width: auto; object-fit: contain;" />
+                </a>
+                <ul class="nav-menu">
+                    <li><a href="/Catalogo/Index">Catálogo</a></li>
+
+                    <!-- Menú Inventario -->
+                    <li>
+                        <a href="#" class="has-dropdown">Inventario</a>
+                        <ul class="dropdown-menu-custom">
+                            <li><a href="/Producto/ListadoProductos">Productos</a></li>
+                            <li><a href="/Categoria/ListadoCategorias">Categorías</a></li>
+                        </ul>
+                    </li>
+
+                    <li><a href="@Url.Action("ListadoPedidos", "Pedido")">Pedidos</a></li>
+
+                    <!-- Menú Administración -->
+                    <li>
+                        <a href="#" class="has-dropdown">Usuarios</a>
+                        <ul class="dropdown-menu-custom">
+                            <li><a href="/Cliente/ListadoClientes">Clientes</a></li>
+                            <li><a href="/Usuario/ListadoUsuarios">Usuarios</a></li>
+                            <li><a href="/Rol/ListadoRoles">Roles</a></li>
+                        </ul>
+                    </li>
+
+                    <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
+                    <li><a href="#contacto">Contacto</a></li>
+
+                    <li>
+                        <a href="@Url.Action("Carrito", "Carrito")" class="btn-cart">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="cart-count">0</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="@Url.Action("Login", "Account")" class="btn-login-nav">
+                            <i class="fas fa-user"></i> Ingresar
+                        </a>
+                    </li>
+                </ul>
+                <div class="hamburger">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Mensajes de alerta -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin: 1rem auto; max-width: 1200px; margin-left: 20px; margin-right: 20px;">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin: 1rem auto; max-width: 1200px; margin-left: 20px; margin-right: 20px;">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div style="margin-bottom: 1rem;">
+                        <img src="~/images/logo.jpg" alt="Pastelería Artesanal" style="height: 80px; width: auto; object-fit: contain;" />
+                    </div>
+                    <p>Creando momentos dulces desde 2020</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Compras</h4>
+                    <ul>
+                        <li><a href="/Catalogo/Index">Catálogo</a></li>
+                        <li><a href="@Url.Action("ListadoPedidos", "Pedido")">Mis Pedidos</a></li>
+                        <li><a href="@Url.Action("Carrito", "Carrito")">Carrito de Compras</a></li>
+                    </ul>
+                    <h4>Nosotros</h4>
+                    <ul>
+                        <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
+                        <li><a href="#contacto">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contacto</h4>
+                    <ul>
+                        <li><i class="fas fa-phone"></i> +506 1234-5678</li>
+                        <li><i class="fas fa-envelope"></i> info@pasteleria.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> San José, Costa Rica</li>
+                    </ul>
+                    <h4 style="margin-top: 1.5rem;">Horarios</h4>
+                    <ul>
+                        <li>Lunes - Viernes: 8am - 6pm</li>
+                        <li>Sábado: 9am - 5pm</li>
+                        <li>Domingo: Cerrado</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Pastelería Artesanal. Todos los derechos reservados.</p>
+            </div>
+
+            <a href="/Pedido/Verificar" id="lnkCarrito" class="btn btn-outline-secondary">
+                Ver carrito
+            </a>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

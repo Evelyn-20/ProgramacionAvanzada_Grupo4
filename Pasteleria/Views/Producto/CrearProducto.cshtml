@@ -1,0 +1,137 @@
+﻿@model Pasteleria.Abstracciones.ModeloUI.Producto
+
+@{
+    ViewBag.Title = "Agregar Producto";
+}
+
+<!-- Banner Hero -->
+<section class="hero" style="padding: 3rem 0;">
+    <div class="hero-content">
+        <h1 class="hero-title">Agregar Producto</h1>
+        <p class="hero-subtitle">Registra un nuevo producto en el inventario</p>
+    </div>
+</section>
+
+<div class="container" style="padding: 3rem 20px; max-width: 800px;">
+    @using (Html.BeginForm("CrearProducto", "Producto", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); overflow: hidden;">
+            <!-- Header del formulario -->
+            <div style="background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%); padding: 1.5rem 2rem;">
+                <h4 style="color: var(--dark-color); margin: 0; font-weight: 600;">
+                    <i class="fas fa-box-open" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
+                    Datos del Producto
+                </h4>
+            </div>
+
+            <!-- Cuerpo del formulario -->
+            <div style="padding: 2rem;">
+                @Html.ValidationSummary(true, "Por favor, corrige los siguientes errores:", new { @class = "alert alert-danger", style = "margin-bottom: 1.5rem; padding: 1rem; border-radius: 10px; background: #fee; border: 1px solid #fcc; color: #c33;" })
+
+                <!-- Nombre del Producto -->
+                <div style="margin-bottom: 1.5rem;">
+                    @Html.LabelFor(model => model.NombreProducto, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
+                    @Html.EditorFor(model => model.NombreProducto, new { htmlAttributes = new { @class = "form-control", placeholder = "Ej: Pastel de Chocolate", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
+                    @Html.ValidationMessageFor(model => model.NombreProducto, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
+                </div>
+
+                <!-- Categoría -->
+                <div style="margin-bottom: 1.5rem;">
+                    @Html.LabelFor(model => model.IdCategoria, "Categoría", new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
+
+                    @if (ViewBag.Categorias != null && ((List<Pasteleria.Abstracciones.ModeloUI.Categoria>)ViewBag.Categorias).Count > 0)
+                    {
+                        @Html.DropDownListFor(model => model.IdCategoria,
+                        new SelectList((List<Pasteleria.Abstracciones.ModeloUI.Categoria>)ViewBag.Categorias, "IdCategoria", "NombreCategoria"),
+                                "-- Selecciona una categoría --",
+                                new { @class = "form-control", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" })
+                                }
+                    else
+                    {
+                        <select name="IdCategoria" class="form-control" style="width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;">
+                            <option value="">-- No hay categorías disponibles --</option>
+                        </select>
+                        <small style="color: #e74c3c; font-size: 0.9rem; margin-top: 0.3rem; display: block;">
+                            <i class="fas fa-exclamation-circle"></i> Por favor, crea al menos una categoría antes de agregar productos.
+                            <a href="@Url.Action("CrearCategoria", "Categoria")" style="color: var(--primary-color); text-decoration: underline;">Crear categoría</a>
+                        </small>
+                    }
+
+                    @Html.ValidationMessageFor(model => model.IdCategoria, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
+                </div>
+
+            <!-- Descripción -->
+            <div style="margin-bottom: 1.5rem;">
+                @Html.LabelFor(model => model.DescripcionProducto, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
+                @Html.TextAreaFor(model => model.DescripcionProducto, new { @class = "form-control", rows = "3", placeholder = "Descripción detallada del producto...", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s; resize: vertical;" })
+                @Html.ValidationMessageFor(model => model.DescripcionProducto, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
+            </div>
+
+            <!-- Cantidad y Precio -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                <div>
+                    @Html.LabelFor(model => model.Cantidad, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
+                    @Html.EditorFor(model => model.Cantidad, new { htmlAttributes = new { @class = "form-control", type = "number", min = "0", placeholder = "0", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
+                    @Html.ValidationMessageFor(model => model.Cantidad, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
+                </div>
+
+                <div>
+                    @Html.LabelFor(model => model.Precio, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
+                    @Html.EditorFor(model => model.Precio, new { htmlAttributes = new { @class = "form-control", type = "number", step = "0.01", min = "0", placeholder = "0.00", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
+                    @Html.ValidationMessageFor(model => model.Precio, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
+                </div>
+            </div>
+
+            <!-- Porcentaje de Impuesto -->
+            <div style="margin-bottom: 1.5rem;">
+                @Html.LabelFor(model => model.PorcentajeImpuesto, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
+                @Html.EditorFor(model => model.PorcentajeImpuesto, new { htmlAttributes = new { @class = "form-control", type = "number", step = "0.01", min = "0", max = "100", placeholder = "13", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
+                @Html.ValidationMessageFor(model => model.PorcentajeImpuesto, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
+                <small style="color: var(--text-color); font-size: 0.85rem; margin-top: 0.3rem; display: block;">
+                    <i class="fas fa-info-circle" style="color: var(--primary-color);"></i> Ingresa el porcentaje (ej: 13 para 13%)
+                </small>
+            </div>
+
+            <!-- Imagen del Producto -->
+            <div style="margin-bottom: 1.5rem;">
+                <label class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;">
+                    <i class="fas fa-image" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
+                    Imagen del Producto <span style="color: red;">*</span>
+                </label>
+                <div style="border: 2px dashed var(--secondary-color); border-radius: 10px; padding: 2rem; text-align: center; background: var(--light-color); transition: all 0.3s;" id="dropZone">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--primary-color); opacity: 0.5; margin-bottom: 1rem; display: block;"></i>
+                    <input type="file" name="archivo" id="archivoImagen" accept="image/*" required
+                           style="display: block; margin: 0 auto; padding: 0.5rem; border: 2px solid var(--secondary-color); border-radius: 5px; cursor: pointer;" />
+
+                    @Html.ValidationMessage("archivo", "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.5rem; display: block; font-weight: 600;" })
+
+                    <div id="preview" style="margin-top: 1rem;"></div>
+                    <div id="fileName" style="margin-top: 0.5rem; color: var(--primary-color); font-weight: 600;"></div>
+
+                    <small style="display: block; margin-top: 1rem; color: var(--text-color); font-size: 0.85rem;">
+                        <i class="fas fa-info-circle" style="color: var(--primary-color);"></i>
+                        Formatos: JPG, JPEG, PNG, GIF, BMP | Tamaño máximo: 5MB
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer del formulario -->
+        <div style="padding: 1.5rem 2rem; background: var(--light-color); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--secondary-color); gap: 1rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='@Url.Action("ListadoProductos", "Producto")'" style="display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" style="display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-save"></i> Agregar Producto
+            </button>
+        </div>
+    </div>
+        }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/producto.js"></script>
+}

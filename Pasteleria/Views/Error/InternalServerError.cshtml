@@ -1,0 +1,163 @@
+﻿@{
+    ViewBag.Title = "Error del servidor - 500";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .error-container {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        background: linear-gradient(135deg, var(--light-color) 0%, var(--secondary-color) 100%);
+    }
+
+    .error-content {
+        text-align: center;
+        max-width: 600px;
+        background: var(--white);
+        padding: 50px 40px;
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .error-icon {
+        font-size: 120px;
+        margin-bottom: 20px;
+        animation: shake 0.5s ease-in-out infinite;
+    }
+
+    @@keyframes shake {
+        0%, 100% {
+            transform: rotate(0deg);
+        }
+
+        25% {
+            transform: rotate(-5deg);
+        }
+
+        75% {
+            transform: rotate(5deg);
+        }
+    }
+
+    .error-code {
+        font-size: 80px;
+        font-weight: bold;
+        color: var(--primary-color);
+        margin: 0;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        font-family: 'Playfair Display', serif;
+    }
+
+    .error-title {
+        font-size: 32px;
+        color: var(--dark-color);
+        margin: 20px 0;
+        font-weight: 600;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .error-message {
+        font-size: 18px;
+        color: var(--text-color);
+        margin-bottom: 30px;
+        line-height: 1.6;
+    }
+
+    .btn-error {
+        padding: 15px 30px;
+        font-size: 16px;
+        border-radius: 50px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-family: 'Poppins', sans-serif;
+        background: var(--primary-color);
+        color: var(--white);
+        border: none;
+    }
+
+        .btn-error:hover {
+            background: #c37049;
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+    .error-details {
+        margin-top: 30px;
+        padding: 20px;
+        background: var(--light-color);
+        border-radius: 15px;
+        border-left: 4px solid var(--primary-color);
+    }
+
+        .error-details h4 {
+            color: var(--dark-color);
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .error-details p {
+            color: var(--text-color);
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+    @@media (max-width: 600px) {
+        .error-content
+
+    {
+        padding: 30px 20px;
+    }
+
+    .error-code {
+        font-size: 60px;
+    }
+
+    .error-title {
+        font-size: 24px;
+    }
+
+    .error-message {
+        font-size: 16px;
+    }
+
+    .btn-error {
+        width: 100%;
+        justify-content: center;
+    }
+
+    }
+</style>
+
+<div class="error-container">
+    <div class="error-content">
+        <div class="error-icon">😵</div>
+        <h1 class="error-code">Error 500</h1>
+        <h2 class="error-title">¡Se quemó el pastel!</h2>
+        <p class="error-message">
+            <b>
+                Algo salió mal en nuestro horno (servidor).</b>
+            Nuestro equipo ya está trabajando para arreglarlo.
+            Por favor, inténtalo de nuevo en unos momentos.
+        </p>
+
+        <a href="@Url.Action("Index", "Home")" class="btn-error">
+            🏠 Volver al Inicio
+        </a>
+
+        <div class="error-details">
+            <h4>¿Qué puedes hacer mientras tanto?</h4>
+            <li>🔄 <a href="#" onclick="location.reload(); return false;">Recarga la página en unos segundos</a></li>
+            <li>🏠 <a href="@Url.Action("Index", "Home")">Vuelve a la página principal</a></li>
+            <li>📧 <a href="@Url.Action("Index", "Home")#contacto">Contáctanos si el problema persiste</a></li>
+        </div>
+    </div>
+</div>

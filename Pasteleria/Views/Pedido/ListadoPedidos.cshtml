@@ -1,0 +1,226 @@
+﻿@model List<Pasteleria.Abstracciones.ModeloUI.Pedido>
+
+@{
+    ViewBag.Title = "Pedidos";
+}
+
+<!-- Banner Hero -->
+<section class="hero" style="padding: 3rem 0;">
+    <div class="hero-content">
+        <h1 class="hero-title">Pedidos</h1>
+        <p class="hero-subtitle">Administra y visualiza todos los pedidos del sistema</p>
+    </div>
+</section>
+
+<div class="container" style="padding: 3rem 20px; max-width: 1400px;">
+    <!-- Mensajes de éxito/error -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Barra de búsqueda y filtros -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap;">
+        <form method="get" action="@Url.Action("ListadoPedidos", "Pedido")" style="position: relative; flex: 1; min-width: 300px; display: flex; gap: 0.5rem;">
+            <div style="position: relative; flex: 1;">
+                <i class="fas fa-search" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--primary-color); z-index: 1;"></i>
+                <input type="text"
+                       id="buscar"
+                       name="buscar"
+                       value="@ViewBag.Buscar"
+                       placeholder="Buscar por cliente..."
+                       style="width: 100%; padding: 1rem 1rem 1rem 50px; border: 2px solid var(--secondary-color); border-radius: 50px; font-size: 1rem; background: var(--white); transition: all 0.3s;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="border-radius: 50px; padding: 0 2rem;">
+                <i class="fas fa-search"></i> Buscar
+            </button>
+        </form>
+    </div>
+
+    <!-- Filtro por estado -->
+    <div style="margin-bottom: 2rem;">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <a href="@Url.Action("ListadoPedidos", "Pedido")"
+               class="btn btn-primary"
+               style="border-radius: 50px; @(ViewBag.EstadoFiltro == null ? "" : "background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color);")">
+                Todos
+            </a>
+            <a href="@Url.Action("ListadoPedidos", "Pedido", new { estado = "Pendiente" })"
+               class="btn btn-primary"
+               style="border-radius: 50px; @(ViewBag.EstadoFiltro == "Pendiente" ? "" : "background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color);")">
+                Pendiente
+            </a>
+            <a href="@Url.Action("ListadoPedidos", "Pedido", new { estado = "En Proceso" })"
+               class="btn btn-primary"
+               style="border-radius: 50px; @(ViewBag.EstadoFiltro == "En Proceso" ? "" : "background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color);")">
+                En Proceso
+            </a>
+            <a href="@Url.Action("ListadoPedidos", "Pedido", new { estado = "Completado" })"
+               class="btn btn-primary"
+               style="border-radius: 50px; @(ViewBag.EstadoFiltro == "Completado" ? "" : "background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color);")">
+                Completado
+            </a>
+            <a href="@Url.Action("ListadoPedidos", "Pedido", new { estado = "Cancelado" })"
+               class="btn btn-primary"
+               style="border-radius: 50px; @(ViewBag.EstadoFiltro == "Cancelado" ? "" : "background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color);")">
+                Cancelado
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabla con estilo mejorado -->
+    <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); overflow: hidden;">
+        <div class="table-responsive">
+            <table id="laTablaDePedidos" style="margin-bottom: 0; width: 100%; border-collapse: collapse;">
+                <thead style="background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%);">
+                    <tr>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">#</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Cliente</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Fecha</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Productos</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Total</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Estado</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none; text-align: center;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        @foreach (var pedido in Model)
+                        {
+                            <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
+                                onmouseover="this.style.background='var(--light-color)'"
+                                onmouseout="this.style.background='transparent'">
+                                <td style="padding: 1.2rem; color: var(--text-color);">@pedido.IdPedido</td>
+                                <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">
+                                    <i class="fas fa-user" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
+                                    @pedido.NombreCliente
+                                </td>
+                                <td style="padding: 1.2rem; color: var(--text-color);">
+                                    <i class="fas fa-calendar" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
+                                    @pedido.FechaPedidoFormateada
+                                </td>
+                                <td style="padding: 1.2rem; color: var(--text-color);">
+                                    @pedido.CantidadProductos @(pedido.CantidadProductos == 1 ? "producto" : "productos")
+                                </td>
+                                <td style="padding: 1.2rem; color: var(--primary-color); font-weight: 600; font-size: 1.1rem;">₡@pedido.Total.ToString("N2")</td>
+                                <td style="padding: 1.2rem;">
+                                    @{
+                                        var estadoColor = "";
+                                        var estadoIcono = "";
+                                        switch (pedido.Estado)
+                                        {
+                                            case "Pendiente":
+                                                estadoColor = "#f39c12";
+                                                estadoIcono = "fa-clock";
+                                                break;
+                                            case "En Proceso":
+                                                estadoColor = "#3498db";
+                                                estadoIcono = "fa-spinner";
+                                                break;
+                                            case "Completado":
+                                                estadoColor = "#27ae60";
+                                                estadoIcono = "fa-check-circle";
+                                                break;
+                                            case "Cancelado":
+                                                estadoColor = "#e74c3c";
+                                                estadoIcono = "fa-times-circle";
+                                                break;
+                                            default:
+                                                estadoColor = "#95a5a6";
+                                                estadoIcono = "fa-question-circle";
+                                                break;
+                                        }
+                                    }
+                                    <span style="background: @estadoColor; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem;">
+                                        <i class="fas @estadoIcono"></i> @pedido.Estado
+                                    </span>
+                                </td>
+                                <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
+                                    <button type="button"
+                                            class="btn btn-sm btn-detalles"
+                                            data-id="@pedido.IdPedido"
+                                            data-cliente="@pedido.NombreCliente"
+                                            data-fecha="@pedido.FechaPedidoFormateada"
+                                            data-total="@pedido.Total.ToString("N2")"
+                                            data-estado="@pedido.Estado"
+                                            style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalDetallesPedido">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-sm btn-editar-estado"
+                                            data-id="@pedido.IdPedido"
+                                            data-estado="@pedido.Estado"
+                                            style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalEditarEstado">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" style="padding: 3rem; text-align: center; color: var(--text-color);">
+                                <i class="fas fa-inbox" style="font-size: 3rem; color: var(--secondary-color); opacity: 0.5; display: block; margin-bottom: 1rem;"></i>
+                                <p style="font-size: 1.2rem; margin: 0;">No se encontraron pedidos</p>
+                                @if (!string.IsNullOrWhiteSpace(ViewBag.Buscar as string) || ViewBag.EstadoFiltro != null)
+                                {
+                                    <p style="margin-top: 0.5rem;">
+                                        <a href="@Url.Action("ListadoPedidos", "Pedido")" style="color: var(--primary-color);">Limpiar filtros</a>
+                                    </p>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model != null && Model.Count > 0)
+        {
+            <!-- Footer de paginación -->
+            <div style="padding: 1.5rem; background: var(--light-color); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--secondary-color); flex-wrap: wrap; gap: 1rem;">
+                <div style="color: var(--text-color); font-size: 0.95rem;">
+                    Mostrando <strong><span id="startRecord">1</span>-<span id="endRecord">@Math.Min(10, Model.Count)</span></strong> de <strong id="totalRecords">@Model.Count</strong> pedidos
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button id="btnAnterior"
+                            class="btn"
+                            onclick="paginaAnterior()"
+                            style="border-radius: 50px; background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color); padding: 0.8rem 2rem;">
+                        &lt; Anterior
+                    </button>
+                    <button id="btnSiguiente"
+                            class="btn"
+                            onclick="paginaSiguiente()"
+                            style="border-radius: 50px; background: var(--primary-color); color: var(--white); border: none; padding: 0.8rem 2rem;">
+                        Siguiente &gt;
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<partial name="_ModalDetallesPedido" />
+<partial name="_ModalEditarEstadoPedido" />
+
+@section Scripts {
+    <script src="~/js/pedido.js"></script>
+}

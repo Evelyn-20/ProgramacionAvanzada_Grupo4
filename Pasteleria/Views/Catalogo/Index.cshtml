@@ -1,0 +1,64 @@
+﻿@model List<Pasteleria.Abstracciones.ModeloUI.Categoria>
+
+@{
+    ViewData["Title"] = "Catálogo de Productos";
+}
+
+<!-- Categorías -->
+<section class="products" style="padding: 4rem 0;">
+    <div class="container">
+        <div class="section-header" style="text-align: center; margin-bottom: 3rem;">
+            <h2 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--dark-color); margin-bottom: 1rem;">
+                Nuestras Categorías
+            </h2>
+            <p style="color: var(--text-color); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
+                Selecciona una categoría para ver todos los productos disponibles
+            </p>
+        </div>
+
+        @if (Model != null && Model.Count > 0)
+        {
+            <div class="products-grid">
+                @foreach (var categoria in Model)
+                {
+                    <div class="product-card categoria-card">
+                        <div class="product-image">
+                            @if (categoria.Imagen != null && categoria.Imagen.Length > 0)
+                            {
+                                var base64 = Convert.ToBase64String(categoria.Imagen);
+                                var imgSrc = $"data:image/jpeg;base64,{base64}";
+                                <img src="@imgSrc" alt="@categoria.NombreCategoria" />
+                            }
+                            else
+                            {
+                                <img src="@Url.Content("~/images/categoria-default.jpg")" alt="@categoria.NombreCategoria" />
+                            }
+                        </div>
+                        <div class="product-info">
+                            <h3>@categoria.NombreCategoria</h3>
+                            <div class="product-footer categoria-footer">
+                                <a href="@Url.Action("Productos", "Catalogo", new { id = categoria.IdCategoria })"
+                                   class="btn btn-primary btn-ver-categoria"
+                                   data-categoria-id="@categoria.IdCategoria">
+                                    <i class="fas fa-eye"></i> Ver Productos
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div style="text-align: center; padding: 3rem; background: var(--light-color); border-radius: 15px;">
+                <i class="fas fa-box-open" style="font-size: 4rem; color: var(--secondary-color); margin-bottom: 1rem;"></i>
+                <h3 style="color: var(--dark-color); margin-bottom: 0.5rem;">No hay categorías disponibles</h3>
+                <p style="color: var(--text-color);">Pronto agregaremos nuevas categorías de productos</p>
+            </div>
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/catalogo.js"></script>
+}

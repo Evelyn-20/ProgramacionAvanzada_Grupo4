@@ -1,0 +1,13 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Pasteleria.Abstracciones.Logica.Cliente
+{
+    public interface IEliminarCliente
+    {
+        int Eliminar(int idCliente);
+    }
+}

@@ -1,0 +1,100 @@
+﻿@model Pasteleria.Abstracciones.ModeloUI.Categoria
+
+@{
+    ViewBag.Title = "Actualizar Categoría";
+}
+
+<!-- Banner Hero -->
+<section class="hero" style="padding: 3rem 0;">
+    <div class="hero-content">
+        <h1 class="hero-title">Actualizar Categoría</h1>
+        <p class="hero-subtitle">Modifica la información de la categoría</p>
+    </div>
+</section>
+
+<div class="container" style="padding: 3rem 20px; max-width: 800px;">
+    @using (Html.BeginForm("EditarCategoria", "Categoria", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.IdCategoria)
+
+        <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); overflow: hidden;">
+            <!-- Header del formulario -->
+            <div style="background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%); padding: 1.5rem 2rem;">
+                <h4 style="color: var(--dark-color); margin: 0; font-weight: 600;">
+                    <i class="fas fa-edit" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
+                    Datos de la Categoría
+                </h4>
+            </div>
+
+            <!-- Cuerpo del formulario -->
+            <div style="padding: 2rem;">
+                @Html.ValidationSummary(true, "Por favor, corrige los siguientes errores:", new { @class = "alert alert-danger", style = "margin-bottom: 1.5rem; padding: 1rem; border-radius: 10px; background: #fee; border: 1px solid #fcc; color: #c33;" })
+
+                <!-- Nombre de la Categoría -->
+                <div style="margin-bottom: 1.5rem;">
+                    @Html.LabelFor(model => model.NombreCategoria, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
+                    @Html.EditorFor(model => model.NombreCategoria, new { htmlAttributes = new { @class = "form-control", placeholder = "Ej: Pasteles", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" } })
+                    @Html.ValidationMessageFor(model => model.NombreCategoria, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
+                </div>
+
+                <!-- Imagen de la Categoría -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;">
+                        <i class="fas fa-image" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
+                        Cambiar Imagen de la Categoría (Opcional)
+                    </label>
+
+                    <!-- Imagen actual -->
+                    @if (Model.Imagen != null && Model.Imagen.Length > 0)
+                    {
+                        <div style="margin-bottom: 1rem; text-align: center;">
+                            <p style="color: var(--text-color); margin-bottom: 0.5rem; font-weight: 500;">Imagen actual:</p>
+                            <img src="@Url.Action("ObtenerImagenCategoria", "Categoria", new { id = Model.IdCategoria })"
+                                 alt="@Model.NombreCategoria"
+                                 style="max-width: 200px; max-height: 200px; border-radius: 10px; box-shadow: var(--shadow); object-fit: cover;" />
+                        </div>
+                    }
+
+                    <div style="border: 2px dashed var(--secondary-color); border-radius: 10px; padding: 2rem; text-align: center; background: var(--light-color); transition: all 0.3s;" id="dropZone">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--primary-color); opacity: 0.5; margin-bottom: 1rem; display: block;"></i>
+                        <input type="file" name="archivo" id="archivoImagen" accept="image/*" style="display: block; margin: 0 auto; padding: 0.5rem; border: 2px solid var(--secondary-color); border-radius: 5px; cursor: pointer;" />
+                        <p style="color: var(--text-color); margin-top: 0.5rem; font-size: 0.9rem;">Dejar vacío para mantener la imagen actual</p>
+                        <div id="preview" style="margin-top: 1rem;"></div>
+                        <div id="fileName" style="margin-top: 0.5rem; color: var(--primary-color); font-weight: 600;"></div>
+                        <small style="display: block; margin-top: 1rem; color: var(--text-color); font-size: 0.85rem;">
+                            <i class="fas fa-info-circle" style="color: var(--primary-color);"></i>
+                            Formatos: JPG, JPEG, PNG, GIF, BMP | Tamaño máximo: 5MB
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Estado de la Categoría -->
+                <div style="margin-bottom: 1.5rem; padding: 1rem; background: var(--light-color); border-radius: 10px; border: 2px solid var(--secondary-color);">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        @Html.EditorFor(model => model.Estado, new { htmlAttributes = new { @class = "form-check-input", id = "estadoCheckbox", style = "width: 50px; height: 25px; cursor: pointer;" } })
+                        @Html.LabelFor(model => model.Estado, "Estado de la Categoría (Activo/Inactivo)", new { @class = "form-check-label", @for = "estadoCheckbox", style = "color: var(--dark-color); font-weight: 500; cursor: pointer; margin: 0;" })
+                    </div>
+                    @Html.ValidationMessageFor(model => model.Estado, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
+                    <small style="color: var(--text-color); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                        <i class="fas fa-toggle-on" style="color: var(--primary-color);"></i> Activa o desactiva la disponibilidad de la categoría
+                    </small>
+                </div>
+            </div>
+
+            <!-- Footer del formulario -->
+            <div style="padding: 1.5rem 2rem; background: var(--light-color); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--secondary-color); gap: 1rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='@Url.Action("ListadoCategorias", "Categoria")'" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary" style="display: flex; align-items: center; gap: 0.5rem; background: #27ae60;">
+                    <i class="fas fa-check"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/categorias.js"></script>
+}
