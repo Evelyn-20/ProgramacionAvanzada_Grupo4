@@ -1,12 +1,6 @@
-﻿// ============================================
-// ROL.JS - Funcionalidad de Roles
-// ============================================
+﻿document.addEventListener('DOMContentLoaded', function () {
 
-document.addEventListener('DOMContentLoaded', function () {
-
-    // ============================================
-    // PAGINACIÓN
-    // ============================================
+    // Paginacion
     var paginaActual = 1;
     var registrosPorPagina = 10;
     var todasLasFilas = [];
@@ -79,9 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    // ============================================
-    // BOTONES DE EDITAR
-    // ============================================
+    // Boton de editar
     var botonesEditar = document.querySelectorAll('.btn-editar');
     botonesEditar.forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -91,9 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ============================================
-    // BOTONES DE VER DETALLES
-    // ============================================
+    // Boton de detalles
     var botonesDetalles = document.querySelectorAll('.btn-ver-detalles');
     botonesDetalles.forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -133,9 +123,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ============================================
-    // BOTONES DE ELIMINAR
-    // ============================================
+    // Boton de eliminar
     var botonesEliminar = document.querySelectorAll('.btn-eliminar');
     botonesEliminar.forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -171,9 +159,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ============================================
-    // BÚSQUEDA MEJORADA
-    // ============================================
+    // Busqueda
     var searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('focus', function () {
@@ -186,9 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ============================================
-    // FORMULARIOS - MEJORA DE INPUTS
-    // ============================================
+    // Formulario
     var inputs = document.querySelectorAll('.form-control');
     inputs.forEach(function (input) {
         input.addEventListener('focus', function () {
@@ -201,9 +185,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ============================================
-    // VALIDACIÓN DE NOMBRE DE ROL
-    // ============================================
+    // Validacion del nombre del rol
     var nombreRolInput = document.querySelector('input[name="NombreRol"]');
     if (nombreRolInput) {
         nombreRolInput.addEventListener('input', function () {
@@ -236,9 +218,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // ============================================
-    // HOVER EN FILAS DE TABLA
-    // ============================================
+    // Hover sobre las filas de la tabla
     var filasTabla = document.querySelectorAll('#laTablaDeRoles tbody tr');
     filasTabla.forEach(function (fila) {
         // Solo aplicar hover si no es la fila de "no hay datos"
@@ -252,9 +232,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // ============================================
-    // ANIMACIÓN DE GUARDADO EXITOSO
-    // ============================================
+    // Animacion de guardado exitoso
     var alertas = document.querySelectorAll('.alert');
     alertas.forEach(function (alerta) {
         // Auto-cerrar después de 5 segundos
@@ -267,9 +245,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// ============================================
-// FUNCIÓN AUXILIAR: VALIDAR NOMBRE DE ROL
-// ============================================
+// Validar nombre del rol
 function validarNombreRol(nombre) {
     // Eliminar espacios en blanco al inicio y final
     nombre = nombre.trim();
@@ -298,9 +274,7 @@ function validarNombreRol(nombre) {
     return { valido: true };
 }
 
-// ============================================
-// FUNCIÓN AUXILIAR: CAPITALIZAR TEXTO
-// ============================================
+// Capitalizar texto
 function capitalizarTexto(texto) {
     return texto.split(' ').map(function (palabra) {
         if (palabra.length > 0) {

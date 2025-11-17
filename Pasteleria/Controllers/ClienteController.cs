@@ -29,6 +29,7 @@ namespace Pasteleria.Controllers
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"ERROR EN CONSTRUCTOR: {ex.Message}");
                 throw;
             }
         }
@@ -92,10 +93,6 @@ namespace Pasteleria.Controllers
 
             try
             {
-                System.Diagnostics.Debug.WriteLine($"Nombre: {cliente?.NombreCliente}");
-                System.Diagnostics.Debug.WriteLine($"Cédula: {cliente?.Cedula}");
-                System.Diagnostics.Debug.WriteLine($"Correo: {cliente?.Correo}");
-
                 if (ModelState.IsValid)
                 {
                     // Verificar si el correo ya existe
@@ -129,18 +126,7 @@ namespace Pasteleria.Controllers
                         ModelState.AddModelError("", "No se pudo crear el cliente en la base de datos");
                     }
                 }
-                else
-                {
-                    foreach (var key in ModelState.Keys)
-                    {
-                        var errors = ModelState[key].Errors;
-                        foreach (var error in errors)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"  {key}: {error.ErrorMessage}");
-                        }
-                    }
-                }
-
+                
                 return View(cliente);
             }
             catch (Exception ex)
@@ -186,8 +172,6 @@ namespace Pasteleria.Controllers
 
             try
             {
-                System.Diagnostics.Debug.WriteLine($"ID: {cliente?.IdCliente}");
-
                 if (ModelState.IsValid)
                 {
                     // Verificar si el correo ya existe en otro cliente

@@ -24,7 +24,6 @@ namespace Pasteleria.AccesoADatos.Roles
 
                 if (rolAD == null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Rol con ID {idRol} no encontrado");
                     return null;
                 }
 
@@ -32,7 +31,6 @@ namespace Pasteleria.AccesoADatos.Roles
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al obtener rol: {ex.Message}");
                 throw new Exception($"Error al obtener el rol con ID {idRol}", ex);
             }
         }

@@ -24,7 +24,6 @@ namespace Pasteleria.AccesoADatos.Usuarios
 
                 if (usuarioAD == null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Usuario con ID {idUsuario} no encontrado");
                     return null;
                 }
 
@@ -32,7 +31,6 @@ namespace Pasteleria.AccesoADatos.Usuarios
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al obtener usuario: {ex.Message}");
                 throw new Exception($"Error al obtener el usuario con ID {idUsuario}", ex);
             }
         }

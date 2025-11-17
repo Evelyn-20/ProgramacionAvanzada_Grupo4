@@ -31,7 +31,6 @@ namespace Pasteleria.AccesoADatos.Clientes
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al obtener cliente: {ex.Message}");
                 throw new Exception($"Error al obtener el cliente con ID {idCliente}", ex);
             }
         }

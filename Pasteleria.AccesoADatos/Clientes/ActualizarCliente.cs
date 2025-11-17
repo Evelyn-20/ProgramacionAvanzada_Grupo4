@@ -87,8 +87,6 @@ namespace Pasteleria.AccesoADatos.Clientes
                     );
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Cliente actualizado exitosamente. ID: {elCliente.IdCliente}");
-
                 return cantidadDeDatosActualizados;
             }
             catch (Exception ex)

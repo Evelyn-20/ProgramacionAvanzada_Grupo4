@@ -1,10 +1,10 @@
-﻿// catalogo.js - JavaScript para la gestión del catálogo de productos
-
-// Variables globales
+﻿// Variables globales
 var maxCantidad = 1;
 
 document.addEventListener('DOMContentLoaded', function () {
     inicializarCatalogo();
+    // Cargar cantidad del carrito al iniciar
+    actualizarContadorCarritoDesdeServidor();
 });
 
 // Inicializar funcionalidades del catálogo
@@ -36,23 +36,14 @@ function obtenerPaginaActual() {
     return 'unknown';
 }
 
-// ========================================
-// PÁGINA DE CATEGORÍAS (Index.cshtml)
-// ========================================
+// Página de las Categorias
 function inicializarPaginaCategorias() {
-    console.log('Página de categorías cargada');
-
-    // Desactivar función agregarAlCarrito si existe globalmente
-    if (typeof agregarAlCarrito !== 'undefined') {
-        console.log('Función agregarAlCarrito deshabilitada en página de categorías');
-    }
 
     // Asegurar que los botones de categoría funcionen correctamente
     const botonesCategoria = document.querySelectorAll('.btn-ver-categoria');
     botonesCategoria.forEach(function (boton) {
         boton.addEventListener('click', function (e) {
             const href = this.getAttribute('href');
-            console.log('Navegando a:', href);
         });
     });
 
@@ -82,11 +73,8 @@ function inicializarPaginaCategorias() {
     });
 }
 
-// ========================================
-// PÁGINA DE PRODUCTOS (Productos.cshtml)
-// ========================================
+// Página de Productos
 function inicializarPaginaProductos() {
-    console.log('Página de productos cargada');
 
     // Efectos hover en las tarjetas de productos
     const productCards = document.querySelectorAll('.product-card');
@@ -107,11 +95,8 @@ function inicializarPaginaProductos() {
     });
 }
 
-// ========================================
-// PÁGINA DE DETALLE (DetalleProducto.cshtml)
-// ========================================
+// Página de Detalles del Producto
 function inicializarPaginaDetalle() {
-    console.log('Página de detalle de producto cargada');
 
     // Obtener cantidad máxima del input
     const inputCantidad = document.getElementById('cantidad');
@@ -145,7 +130,21 @@ function cambiarCantidad(cambio) {
     let cantidad = parseInt(input.value) + cambio;
 
     if (cantidad < 1) cantidad = 1;
-    if (cantidad > maxCantidad) cantidad = maxCantidad;
+    if (cantidad > maxCantidad) {
+        cantidad = maxCantidad;
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Stock máximo',
+                text: `Solo hay ${maxCantidad} unidades disponibles`,
+                confirmButtonColor: '#d4825c',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        }
+    }
 
     input.value = cantidad;
 
@@ -159,50 +158,161 @@ function cambiarCantidad(cambio) {
 // Agregar producto al carrito
 function agregarAlCarrito() {
     const inputCantidad = document.getElementById('cantidad');
-    if (!inputCantidad) return;
-
-    const cantidad = parseInt(inputCantidad.value);
-    const nombreProducto = document.querySelector('h2')?.textContent || 'Producto';
-
-    // Verificar si SweetAlert2 está disponible
-    if (typeof Swal !== 'undefined') {
-        Swal.fire({
-            icon: 'success',
-            title: '¡Producto agregado!',
-            html: `Se agregaron <strong>${cantidad}</strong> unidad${cantidad > 1 ? 'es' : ''} de <strong>${nombreProducto}</strong> al carrito`,
-            showConfirmButton: true,
-            confirmButtonText: 'Continuar comprando',
-            showCancelButton: true,
-            cancelButtonText: 'Ver carrito',
-            confirmButtonColor: 'var(--primary-color)',
-            cancelButtonColor: 'var(--secondary-color)'
-        }).then(function (result) {
-            if (!result.isConfirmed) {
-                // Redirigir al carrito
-                window.location.href = '/Carrito/Carrito';
-            }
-        });
-    } else {
-        // Fallback si no está SweetAlert2
-        alert(`Se agregaron ${cantidad} unidad${cantidad > 1 ? 'es' : ''} de ${nombreProducto} al carrito`);
-
-        // Preguntar si quiere ir al carrito
-        if (confirm('¿Desea ver su carrito?')) {
-            window.location.href = '/Carrito/Carrito';
-        }
+    if (!inputCantidad) {
+        return;
     }
 
-    // Actualizar contador del carrito en el navbar
-    actualizarContadorCarrito(cantidad);
+    const cantidad = parseInt(inputCantidad.value) || 1;
+
+    // Obtener el ID del producto desde la URL
+    const urlParts = window.location.pathname.split('/');
+    const idProducto = parseInt(urlParts[urlParts.length - 1]);
+
+    if (!idProducto || isNaN(idProducto)) {
+        mostrarMensaje('Error al identificar el producto', 'error');
+        return;
+    }
+
+    // Mostrar loading
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'Agregando al carrito...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+    }
+
+    // Realizar peticion AJAX al servidor
+    
+    fetch('/Carrito/AgregarAlCarrito', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `idProducto=${idProducto}&cantidad=${cantidad}`
+    })
+        .then(response => {
+            console.log('Estado de respuesta:', response.status);
+
+            // Si no está autenticado, el servidor puede retornar 401
+            if (response.status === 401 || response.status === 403) {
+                throw new Error('NO_AUTH');
+            }
+
+            if (!response.ok) {
+                throw new Error('ERROR_SERVIDOR');
+            }
+
+            return response.json();
+        })
+        .then(data => {
+            console.log('Respuesta del servidor:', data);
+
+            if (data.success) {
+                // Actualizar contador del carrito
+                actualizarContadorCarrito(data.cantidadTotal);
+
+                // Obtener nombre del producto
+                const nombreProducto = document.querySelector('h2')?.textContent || 'Producto';
+
+                // Mostrar mensaje de éxito
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Producto agregado!',
+                        html: `Se agregaron <strong>${cantidad}</strong> unidad${cantidad > 1 ? 'es' : ''} de <strong>${nombreProducto}</strong> al carrito`,
+                        showConfirmButton: true,
+                        confirmButtonText: 'Continuar comprando',
+                        showCancelButton: true,
+                        cancelButtonText: 'Ver carrito',
+                        confirmButtonColor: '#d4825c',
+                        cancelButtonColor: '#6c757d'
+                    }).then((result) => {
+                        if (!result.isConfirmed) {
+                            window.location.href = '/Carrito/Carrito';
+                        } else {
+                            inputCantidad.value = 1;
+                        }
+                    });
+                }
+            } else {
+                // Manejar errores retornados por el servidor
+                manejarErrorAgregarCarrito(data.mensaje);
+            }
+        })
+        .catch(error => {
+
+            if (error.message === 'NO_AUTH') {
+                manejarErrorAgregarCarrito('Debe iniciar sesión para agregar productos al carrito');
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de conexión',
+                        text: 'No se pudo conectar con el servidor. Por favor, verifica tu conexión e intenta nuevamente.',
+                        confirmButtonColor: '#d4825c'
+                    });
+                } else {
+                    alert('Error de conexión. Por favor, intenta nuevamente.');
+                }
+            }
+        });
+}
+
+// Manejar errores al agregar al carrito
+function manejarErrorAgregarCarrito(mensaje) {
+
+    // Si el mensaje indica que debe iniciar sesión
+    if (mensaje && (mensaje.toLowerCase().includes('iniciar sesión') || mensaje.toLowerCase().includes('debe iniciar'))) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Inicia sesión',
+                text: 'Debes iniciar sesión para agregar productos al carrito',
+                showCancelButton: true,
+                confirmButtonText: 'Ir a Login',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#d4825c',
+                cancelButtonColor: '#6c757d'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Guardar URL actual para redirigir después del login
+                    sessionStorage.setItem('returnUrl', window.location.pathname);
+                    window.location.href = '/Account/Login';
+                }
+            });
+        } else {
+            if (confirm('Debes iniciar sesión para agregar productos al carrito. ¿Ir a Login?')) {
+                sessionStorage.setItem('returnUrl', window.location.pathname);
+                window.location.href = '/Account/Login';
+            }
+        }
+    } else {
+        // Otros errores
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: mensaje || 'No se pudo agregar el producto al carrito',
+                confirmButtonColor: '#d4825c'
+            });
+        } else {
+            alert(mensaje || 'No se pudo agregar el producto');
+        }
+    }
 }
 
 // Actualizar contador del carrito en el navbar
-function actualizarContadorCarrito(cantidadAgregada) {
+function actualizarContadorCarrito(cantidadTotal) {
     const cartCount = document.querySelector('.cart-count');
     if (cartCount) {
-        let count = parseInt(cartCount.textContent) || 0;
-        count += cantidadAgregada;
-        cartCount.textContent = count;
+        cartCount.textContent = cantidadTotal || 0;
+
+        if (cantidadTotal > 0) {
+            cartCount.style.display = 'flex';
+        }
 
         // Animación del contador
         cartCount.style.transform = 'scale(1.3)';
@@ -210,6 +320,52 @@ function actualizarContadorCarrito(cantidadAgregada) {
         setTimeout(function () {
             cartCount.style.transform = 'scale(1)';
         }, 300);
+    }
+}
+
+// Actualizar contador del carrito desde el servidor
+function actualizarContadorCarritoDesdeServidor() {
+    fetch('/Carrito/ObtenerCantidadProductos')
+        .then(response => response.json())
+        .then(data => {
+            const cartCount = document.querySelector('.cart-count');
+            if (cartCount) {
+                const cantidad = data.cantidad || 0;
+                cartCount.textContent = cantidad;
+
+                if (cantidad > 0) {
+                    cartCount.style.display = 'flex';
+                } else {
+                    cartCount.style.display = 'none';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error al obtener cantidad del carrito:', error);
+        });
+}
+
+// Función auxiliar para mostrar mensajes
+function mostrarMensaje(mensaje, tipo) {
+    if (typeof Swal !== 'undefined') {
+        const iconos = {
+            success: 'success',
+            error: 'error',
+            warning: 'warning',
+            info: 'info'
+        };
+
+        Swal.fire({
+            icon: iconos[tipo] || 'info',
+            title: mensaje,
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true
+        });
+    } else {
+        alert(mensaje);
     }
 }
 
@@ -221,7 +377,7 @@ function formatearPrecio(precio) {
     });
 }
 
-// Función para lazy loading de imágenes (opcional, para mejorar rendimiento)
+// Función para lazy loading de imágenes
 function inicializarLazyLoading() {
     const imagenes = document.querySelectorAll('img[data-src]');
 

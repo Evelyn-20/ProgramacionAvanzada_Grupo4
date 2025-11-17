@@ -77,8 +77,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Simulación de agregar al carrito (placeholder)
-    // SOLO aplicar esto en páginas que tengan el grid de productos
-    // EXCLUIR botones que sean enlaces (tienen href) o tengan clase especial
+    // Aplica en páginas que tengan el grid de productos
+    // Excluye botones que sean enlaces (tienen href) o tengan clase especial
     const productsGrid = document.querySelector('.products-grid');
     if (productsGrid) {
         const addToCartButtons = productsGrid.querySelectorAll('.product-card .btn-primary:not(.btn-ver-categoria)');

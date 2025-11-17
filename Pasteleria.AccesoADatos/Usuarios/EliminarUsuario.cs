@@ -28,7 +28,6 @@ namespace Pasteleria.AccesoADatos.Usuarios
 
                 if (usuarioAEliminar == null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Usuario con ID {idUsuario} no encontrado");
                     return 0;
                 }
 
@@ -51,18 +50,14 @@ namespace Pasteleria.AccesoADatos.Usuarios
                     _auditoria.RegistrarEliminacion("Usuario", idUsuario, infoUsuario);
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Usuario eliminado exitosamente. ID: {idUsuario}");
-
                 return cantidadDeDatosEliminados;
             }
             catch (DbUpdateException dbEx)
             {
-                System.Diagnostics.Debug.WriteLine($"Error de base de datos al eliminar usuario: {dbEx.Message}");
                 throw new Exception("No se puede eliminar el usuario porque tiene registros relacionados", dbEx);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al eliminar usuario: {ex.Message}");
                 throw;
             }
         }

@@ -26,7 +26,6 @@ namespace Pasteleria.AccesoADatos.Clientes
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al obtener clientes: {ex.Message}");
                 throw new Exception("Error al obtener la lista de clientes", ex);
             }
         }
@@ -50,7 +49,6 @@ namespace Pasteleria.AccesoADatos.Clientes
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al buscar clientes por nombre: {ex.Message}");
                 throw new Exception("Error al buscar clientes por nombre", ex);
             }
         }
@@ -72,7 +70,6 @@ namespace Pasteleria.AccesoADatos.Clientes
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al buscar clientes por cédula: {ex.Message}");
                 throw new Exception("Error al buscar clientes por cédula", ex);
             }
         }
@@ -94,7 +91,6 @@ namespace Pasteleria.AccesoADatos.Clientes
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al buscar clientes por correo: {ex.Message}");
                 throw new Exception("Error al buscar clientes por correo", ex);
             }
         }

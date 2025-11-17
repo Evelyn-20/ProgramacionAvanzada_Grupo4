@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
@@ -104,6 +105,15 @@
 </head>
 
 <body>
+    @{
+        var clienteId = Context.Session.GetInt32("ClienteId");
+        var usuarioId = Context.Session.GetInt32("UsuarioId");
+        var tipoUsuario = Context.Session.GetString("TipoUsuario");
+        var nombreUsuario = Context.Session.GetString("ClienteNombre") ?? Context.Session.GetString("UsuarioNombre");
+        var esAdmin = tipoUsuario == "Administrador";
+        var estaAutenticado = clienteId != null || usuarioId != null;
+    }
+
     <header>
         <nav class="navbar">
             <div class="container">
@@ -113,41 +123,75 @@
                 <ul class="nav-menu">
                     <li><a href="/Catalogo/Index">Catálogo</a></li>
 
-                    <!-- Menú Inventario -->
-                    <li>
-                        <a href="#" class="has-dropdown">Inventario</a>
-                        <ul class="dropdown-menu-custom">
-                            <li><a href="/Producto/ListadoProductos">Productos</a></li>
-                            <li><a href="/Categoria/ListadoCategorias">Categorías</a></li>
-                        </ul>
-                    </li>
+                    <!-- Menú Inventario (solo admin) -->
+                    @if (esAdmin)
+                    {
+                        <li>
+                            <a href="#" class="has-dropdown">Inventario</a>
+                            <ul class="dropdown-menu-custom">
+                                <li><a href="/Producto/ListadoProductos"><i class="fas fa-box"></i> Productos</a></li>
+                                <li><a href="/Categoria/ListadoCategorias"><i class="fas fa-tags"></i> Categorías</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="/Pedido/ListadoPedidos">Pedidos</a></li>
 
-                    <li><a href="@Url.Action("ListadoPedidos", "Pedido")">Pedidos</a></li>
+                        <!-- Menú Administración -->
+                        <li>
+                            <a href="#" class="has-dropdown">Usuarios</a>
+                            <ul class="dropdown-menu-custom">
+                                <li><a href="/Cliente/ListadoClientes"><i class="fas fa-users"></i> Clientes</a></li>
+                                <li><a href="/Usuario/ListadoUsuarios"><i class="fas fa-user-shield"></i> Usuarios</a></li>
+                                <li><a href="/Rol/ListadoRoles"><i class="fas fa-user-tag"></i> Roles</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="/Auditoria/ListadoAuditorias">Auditorias</a></li>
+                    }
 
-                    <!-- Menú Administración -->
-                    <li>
-                        <a href="#" class="has-dropdown">Usuarios</a>
-                        <ul class="dropdown-menu-custom">
-                            <li><a href="/Cliente/ListadoClientes">Clientes</a></li>
-                            <li><a href="/Usuario/ListadoUsuarios">Usuarios</a></li>
-                            <li><a href="/Rol/ListadoRoles">Roles</a></li>
-                        </ul>
-                    </li>
-
+                    <!-- Mis Pedidos (solo clientes autenticados) -->
+                    @if (clienteId != null && !esAdmin)
+                    {
+                        <li><a href="/Pedido/MisPedidos">Mis Pedidos</a></li>
+                    }
                     <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
                     <li><a href="#contacto">Contacto</a></li>
 
+                    <!-- Carrito -->
                     <li>
                         <a href="@Url.Action("Carrito", "Carrito")" class="btn-cart">
                             <i class="fas fa-shopping-cart"></i>
-                            <span class="cart-count">0</span>
+                            <span class="cart-count" style="display: none;">0</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="@Url.Action("Login", "Account")" class="btn-login-nav">
-                            <i class="fas fa-user"></i> Ingresar
-                        </a>
-                    </li>
+
+                    <!-- Login / Usuario -->
+                    @if (estaAutenticado)
+                    {
+                        <li>
+                            <a href="#" class="has-dropdown btn-login-nav" style="background: linear-gradient(135deg, var(--primary-color), #c67d56); color: var(--white); padding: 0.6rem 1.2rem; border-radius: 50px;">
+                                <i class="fas fa-user-circle"></i>
+                                @nombreUsuario
+                            </a>
+                            <ul class="dropdown-menu-custom">
+                                @if (clienteId != null && !esAdmin)
+                                {
+                                    <li><a href="/Pedido/MisPedidos"><i class="fas fa-shopping-bag"></i> Mis Pedidos</a></li>
+                                }
+                                @if (esAdmin)
+                                {
+                                    <li><a href="/Pedido/ListadoPedidos"><i class="fas fa-clipboard-list"></i> Gestionar Pedidos</a></li>
+                                }
+                                <li><a href="/Account/Logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+                            </ul>
+                        </li>
+                    }
+                    else
+                    {
+                        <li>
+                            <a href="@Url.Action("Login", "Account")" class="btn-login-nav">
+                                <i class="fas fa-user"></i> Ingresar
+                            </a>
+                        </li>
+                    }
                 </ul>
                 <div class="hamburger">
                     <span></span><span></span><span></span>
@@ -194,7 +238,10 @@
                     <h4>Compras</h4>
                     <ul>
                         <li><a href="/Catalogo/Index">Catálogo</a></li>
-                        <li><a href="@Url.Action("ListadoPedidos", "Pedido")">Mis Pedidos</a></li>
+                        @if (clienteId != null)
+                        {
+                            <li><a href="/Pedido/MisPedidos">Mis Pedidos</a></li>
+                        }
                         <li><a href="@Url.Action("Carrito", "Carrito")">Carrito de Compras</a></li>
                     </ul>
                     <h4>Nosotros</h4>
@@ -237,5 +284,23 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        // Cargar cantidad del carrito al iniciar
+        $(document).ready(function() {
+            fetch('/Carrito/ObtenerCantidadProductos')
+                .then(res => res.json())
+                .then(data => {
+                    const cartCount = document.querySelector('.cart-count');
+                    if (cartCount && data.cantidad > 0) {
+                        cartCount.textContent = data.cantidad;
+                        cartCount.style.display = 'flex';
+                    }
+                })
+                .catch(err => {
+                    console.log('No se pudo cargar el contador del carrito:', err);
+                });
+        });
+    </script>
 </body>
 </html>

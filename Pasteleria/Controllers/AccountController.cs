@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
 using Pasteleria.Abstracciones.Logica.Cliente;
 using Pasteleria.Abstracciones.Logica.Usuario;
 using Pasteleria.Abstracciones.ModeloUI;
 using Pasteleria.LogicaDeNegocio.Clientes;
 using Pasteleria.LogicaDeNegocio.Usuarios;
 using System;
+using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Pasteleria.Controllers
@@ -32,7 +35,7 @@ namespace Pasteleria.Controllers
 
         // POST: Account/Login
         [HttpPost]
-        public IActionResult Login(string email, string password)
+        public async Task<IActionResult> Login(string email, string password)
         {
             try
             {
@@ -47,12 +50,25 @@ namespace Pasteleria.Controllers
 
                 if (usuario != null)
                 {
-                    // Login como Usuario (admin)
-                    HttpContext.Session.SetInt32("UsuarioId", usuario.IdUsuario);
-                    HttpContext.Session.SetString("UsuarioNombre", usuario.NombreUsuario);
-                    HttpContext.Session.SetString("UsuarioEmail", usuario.Email);
-                    HttpContext.Session.SetString("UsuarioRol", nombreRol);
-                    HttpContext.Session.SetString("TipoUsuario", "Administrador");
+                    // Crear Claims Para Usuario
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
+                        new Claim(ClaimTypes.Name, usuario.NombreUsuario),
+                        new Claim(ClaimTypes.Email, usuario.Email),
+                        new Claim(ClaimTypes.Role, nombreRol),
+                        new Claim("TipoUsuario", "Administrador")
+                    };
+
+                    var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
+                    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+                    // Inicar Sesión con Autenticación
+                    await HttpContext.SignInAsync("CookieAuth", claimsPrincipal, new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(2)
+                    });
 
                     TempData["Success"] = $"Bienvenido {usuario.NombreUsuario} ({nombreRol})";
                     return RedirectToAction("Index", "Home");
@@ -63,11 +79,25 @@ namespace Pasteleria.Controllers
 
                 if (cliente != null)
                 {
-                    // Login como Cliente
-                    HttpContext.Session.SetInt32("ClienteId", cliente.IdCliente);
-                    HttpContext.Session.SetString("ClienteNombre", cliente.NombreCliente);
-                    HttpContext.Session.SetString("ClienteEmail", cliente.Correo);
-                    HttpContext.Session.SetString("TipoUsuario", "Cliente");
+                    // Crear Claims Para Cliente
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, cliente.IdCliente.ToString()),
+                        new Claim(ClaimTypes.Name, cliente.NombreCliente),
+                        new Claim(ClaimTypes.Email, cliente.Correo),
+                        new Claim(ClaimTypes.Role, "Cliente"),
+                        new Claim("TipoUsuario", "Cliente")
+                    };
+
+                    var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
+                    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+                    // Inicar Sesión con Autenticación
+                    await HttpContext.SignInAsync("CookieAuth", claimsPrincipal, new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(2)
+                    });
 
                     TempData["Success"] = "Inicio de sesión exitoso. ¡Bienvenido!";
                     return RedirectToAction("Index", "Home");
@@ -97,9 +127,6 @@ namespace Pasteleria.Controllers
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine($"Intentando registrar: {cliente?.NombreCliente}");
-                System.Diagnostics.Debug.WriteLine($"Email: {cliente?.Correo}");
-
                 if (ModelState.IsValid)
                 {
                     // Verificar si el correo ya existe
@@ -136,14 +163,14 @@ namespace Pasteleria.Controllers
                 else
                 {
                     // Log de errores de validación
-                    foreach (var key in ModelState.Keys)
+                    /*foreach (var key in ModelState.Keys)
                     {
                         var errors = ModelState[key].Errors;
                         foreach (var error in errors)
                         {
                             System.Diagnostics.Debug.WriteLine($"Error en {key}: {error.ErrorMessage}");
                         }
-                    }
+                    }*/
                     TempData["Error"] = "Por favor complete correctamente todos los campos requeridos";
                 }
 
@@ -159,9 +186,14 @@ namespace Pasteleria.Controllers
         }
 
         // GET: Account/Logout
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
+            // CERRAR SESIÓN DE AUTENTICACIÓN
+            await HttpContext.SignOutAsync("CookieAuth");
+
+            // LIMPIAR SESIÓN
             HttpContext.Session.Clear();
+
             TempData["Success"] = "Has cerrado sesión exitosamente";
             return RedirectToAction("Index", "Home");
         }

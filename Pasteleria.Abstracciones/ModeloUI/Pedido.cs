@@ -16,7 +16,7 @@ namespace Pasteleria.Abstracciones.ModeloUI
         public int IdCliente { get; set; }
 
         [DisplayName("Usuario")]
-        public int IdUsuario { get; set; }
+        public int? IdUsuario { get; set; }
 
         [DisplayName("Fecha")]
         public DateTime Fecha { get; set; }
@@ -30,10 +30,17 @@ namespace Pasteleria.Abstracciones.ModeloUI
         [DisplayName("Estado")]
         public int IdEstadoPedido { get; set; }
 
+        [DisplayName("Descuento")]
+        public decimal? Descuento { get; set; }
+
+        [DisplayName("Impuesto")]
+        public decimal? Impuesto { get; set; }
+
         // Propiedades calculadas/adicionales para la vista
         public string NombreCliente { get; set; }
         public string Estado { get; set; }
         public int CantidadProductos { get; set; }
+        public string MetodoPago { get; set; }
 
         public string FechaPedidoFormateada => Fecha.ToString("dd/MM/yyyy HH:mm");
     }

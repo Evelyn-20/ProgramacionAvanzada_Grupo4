@@ -53,13 +53,10 @@ namespace Pasteleria.AccesoADatos.Clientes
                     _auditoria.RegistrarEliminacion("Cliente", idCliente, infoCliente);
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Cliente eliminado exitosamente. ID: {idCliente}");
-
                 return cantidadDeDatosEliminados;
             }
             catch (DbUpdateException dbEx)
             {
-                System.Diagnostics.Debug.WriteLine($"Error de base de datos al eliminar cliente: {dbEx.Message}");
                 throw new Exception("No se puede eliminar el cliente porque tiene registros relacionados", dbEx);
             }
             catch (Exception ex)

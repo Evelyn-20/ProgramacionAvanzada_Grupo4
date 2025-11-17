@@ -1,8 +1,6 @@
-﻿// categorias.js - JavaScript para la gestión de categorías
-
-// Variables de paginación
+﻿// Variables de paginación
 var paginaActual = 1;
-var registrosPorPagina = 5;
+var registrosPorPagina = 10;
 var todasLasFilas = [];
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -34,9 +32,7 @@ function obtenerPaginaActual() {
     return 'unknown';
 }
 
-// ========================================
-// LISTADO DE CATEGORÍAS
-// ========================================
+// Listado
 function inicializarListadoCategorias() {
     inicializarPaginacion();
     inicializarBotonesListado();
@@ -206,9 +202,7 @@ function paginaSiguiente() {
     }
 }
 
-// ========================================
-// FORMULARIO DE CATEGORÍA (CREAR/EDITAR)
-// ========================================
+// Formulario 
 function inicializarFormularioCategoria() {
     deshabilitarValidacionArchivo();
     mejorarExperienciaInputs();

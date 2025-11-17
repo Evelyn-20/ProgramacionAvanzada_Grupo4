@@ -64,13 +64,10 @@ namespace Pasteleria.AccesoADatos.Roles
                     );
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Rol actualizado exitosamente. ID: {elRol.IdRol}");
-
                 return cantidadDeDatosActualizados;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al actualizar rol: {ex.Message}");
                 throw;
             }
         }

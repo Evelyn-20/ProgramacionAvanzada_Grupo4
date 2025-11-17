@@ -1,12 +1,6 @@
-﻿// ============================================
-// PEDIDO.JS - Funcionalidad de Pedidos
-// ============================================
+﻿document.addEventListener('DOMContentLoaded', function () {
 
-document.addEventListener('DOMContentLoaded', function () {
-
-    // ============================================
-    // PAGINACIÓN
-    // ============================================
+    // Paginacion
     var paginaActual = 1;
     var registrosPorPagina = 10;
     var todasLasFilas = [];
@@ -79,15 +73,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    // ============================================
-    // BOTONES DE DETALLES
-    // ============================================
+    // Boton de detalles
     var botonesDetalles = document.querySelectorAll('.btn-detalles');
     botonesDetalles.forEach(function (btn) {
         btn.addEventListener('click', function () {
             var pedidoId = this.getAttribute('data-id');
             var cliente = this.getAttribute('data-cliente');
             var fecha = this.getAttribute('data-fecha');
+            var subtotal = this.getAttribute('data-subtotal');
+            var descuento = this.getAttribute('data-descuento');
+            var impuesto = this.getAttribute('data-impuesto');
             var total = this.getAttribute('data-total');
             var estado = this.getAttribute('data-estado');
 
@@ -95,17 +90,48 @@ document.addEventListener('DOMContentLoaded', function () {
             var detallesPedidoId = document.getElementById('detalles-pedido-id');
             var detallesPedidoCliente = document.getElementById('detalles-pedido-cliente');
             var detallesPedidoFecha = document.getElementById('detalles-pedido-fecha');
+            var detallesPedidoSubtotal = document.getElementById('detalles-pedido-subtotal');
+            var detallesPedidoDescuento = document.getElementById('detalles-pedido-descuento');
+            var detallesPedidoDescuentoRow = document.getElementById('detalles-pedido-descuento-row');
+            var detallesPedidoImpuesto = document.getElementById('detalles-pedido-impuesto');
             var detallesPedidoTotal = document.getElementById('detalles-pedido-total');
             var estadoBadge = document.getElementById('detalles-pedido-estado-badge');
 
             if (detallesPedidoId) detallesPedidoId.textContent = pedidoId;
             if (detallesPedidoCliente) detallesPedidoCliente.textContent = cliente;
             if (detallesPedidoFecha) detallesPedidoFecha.textContent = fecha;
-            if (detallesPedidoTotal) detallesPedidoTotal.textContent = '₡' + total;
+
+            // Formatear y mostrar totales
+            if (detallesPedidoSubtotal) {
+                detallesPedidoSubtotal.textContent = '₡' + formatearNumero(subtotal);
+            }
+
+            if (detallesPedidoImpuesto) {
+                detallesPedidoImpuesto.textContent = '₡' + formatearNumero(impuesto);
+            }
+
+            if (detallesPedidoTotal) {
+                detallesPedidoTotal.textContent = '₡' + formatearNumero(total);
+            }
+
+            // Mostrar/ocultar descuento
+            if (descuento && parseFloat(descuento) > 0) {
+                if (detallesPedidoDescuento) {
+                    detallesPedidoDescuento.textContent = '-₡' + formatearNumero(descuento);
+                }
+                if (detallesPedidoDescuentoRow) {
+                    detallesPedidoDescuentoRow.style.display = 'flex';
+                }
+            } else {
+                if (detallesPedidoDescuentoRow) {
+                    detallesPedidoDescuentoRow.style.display = 'none';
+                }
+            }
 
             // Actualizar badge de estado
             if (estadoBadge) {
-                estadoBadge.textContent = estado;
+                var icono = obtenerIconoEstado(estado);
+                estadoBadge.innerHTML = '<i class="fas ' + icono + '"></i> ' + estado;
                 var estadoColor = obtenerColorEstado(estado);
                 estadoBadge.style.background = estadoColor;
                 estadoBadge.style.color = 'white';
@@ -117,9 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ============================================
-    // BOTONES DE EDITAR ESTADO
-    // ============================================
+    // Boton de editar estado
     var botonesEditarEstado = document.querySelectorAll('.btn-editar-estado');
     botonesEditarEstado.forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -134,9 +158,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ============================================
-    // BÚSQUEDA MEJORADA
-    // ============================================
+    // Busqueda
     var searchInput = document.getElementById('buscar');
     if (searchInput) {
         searchInput.addEventListener('focus', function () {
@@ -149,9 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ============================================
-    // SELECT DE ESTADO - MEJORA VISUAL
-    // ============================================
+    // Select del estado
     var selectEstado = document.getElementById('editar-estado-select');
     if (selectEstado) {
         selectEstado.addEventListener('focus', function () {
@@ -164,9 +184,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ============================================
-    // HOVER EN FILAS DE TABLA
-    // ============================================
+    // Hover sobre las filas de la tabla
     var filasTabla = document.querySelectorAll('#laTablaDePedidos tbody tr');
     filasTabla.forEach(function (fila) {
         // Solo aplicar hover si no es la fila de "no hay datos"
@@ -181,9 +199,13 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// ============================================
-// FUNCIÓN AUXILIAR: OBTENER COLOR POR ESTADO
-// ============================================
+// Formatear los numeros
+function formatearNumero(numero) {
+    if (!numero) return '0.00';
+    return parseFloat(numero).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+}
+
+// Obtener color segun el estado
 function obtenerColorEstado(estado) {
     switch (estado) {
         case 'Pendiente':
@@ -199,9 +221,7 @@ function obtenerColorEstado(estado) {
     }
 }
 
-// ============================================
-// FUNCIÓN AUXILIAR: OBTENER ÍCONO POR ESTADO
-// ============================================
+// Obtener Icon segun el estado
 function obtenerIconoEstado(estado) {
     switch (estado) {
         case 'Pendiente':

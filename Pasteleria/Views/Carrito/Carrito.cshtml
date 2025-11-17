@@ -2,18 +2,14 @@
 
 @{
     ViewData["Title"] = "Carrito de Compras";
-    decimal subtotal = 0;
-    decimal impuesto = 0;
-    decimal descuento = 0;
-    decimal total = 0;
 
-    if (Model != null && Model.Count > 0)
-    {
-        subtotal = Model.Sum(item => item.Subtotal);
-        descuento = Model.Sum(item => item.Descuento);
-        impuesto = subtotal * 0.13m; // 13% de IVA
-        total = subtotal - descuento + impuesto;
-    }
+    // Obtener resumen desde ViewBag (calculado en el controlador)
+    var resumen = ViewBag.Resumen as Pasteleria.Abstracciones.ModeloUI.ResumenCompra;
+
+    decimal subtotal = resumen?.Subtotal ?? 0;
+    decimal impuesto = resumen?.Impuesto ?? 0;
+    decimal descuento = resumen?.Descuento ?? 0;
+    decimal total = resumen?.Total ?? 0;
 }
 
 <!-- Banner Hero -->

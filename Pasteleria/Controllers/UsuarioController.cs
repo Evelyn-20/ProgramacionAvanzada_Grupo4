@@ -98,10 +98,6 @@ namespace Pasteleria.Controllers
 
             try
             {
-                System.Diagnostics.Debug.WriteLine($"Nombre: {usuario?.NombreUsuario}");
-                System.Diagnostics.Debug.WriteLine($"Email: {usuario?.Email}");
-                System.Diagnostics.Debug.WriteLine($"IdRol: {usuario?.IdRol}");
-
                 if (ModelState.IsValid)
                 {
                     // Establecer estado como activo

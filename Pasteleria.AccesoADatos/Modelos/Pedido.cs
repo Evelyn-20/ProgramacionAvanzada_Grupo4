@@ -1,34 +1,42 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pasteleria.AccesoADatos.Modelos
 {
     [Table("Pedido")]
-    public class Pedido
+    public class PedidoAD
     {
-        [Column("IdPedido")]
+        [Key]
         public int IdPedido { get; set; }
 
-        [Column("IdCliente")]
+        [Required]
         public int IdCliente { get; set; }
 
-        [Column("IdUsuario")]
-        public int IdUsuario { get; set; }
+        public int? IdUsuario { get; set; }
 
-        [Column("Fecha")]
+        [Required]
         public DateTime Fecha { get; set; }
 
-        [Column("Subtotal")]
+        [Required]
+        [Column(TypeName = "decimal(10,2)")]
         public decimal Subtotal { get; set; }
 
-        [Column("Total")]
+        [Required]
+        [Column(TypeName = "decimal(10,2)")]
         public decimal Total { get; set; }
 
-        [Column("IdEstadoPedido")]
+        [Required]
         public int IdEstadoPedido { get; set; }
+
+        [Column(TypeName = "decimal(10,2)")]
+        public decimal? Descuento { get; set; }
+
+        [Column(TypeName = "decimal(10,2)")]
+        public decimal? Impuesto { get; set; }
+
+        // Solo para vista
+        [NotMapped]
+        public string MetodoPago { get; set; }
     }
 }

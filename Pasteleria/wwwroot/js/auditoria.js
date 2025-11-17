@@ -1,8 +1,6 @@
-﻿// auditorias.js - JavaScript para la gestión de auditorías
-
-// Variables de paginación
+﻿// Variables de paginación
 var paginaActual = 1;
-var registrosPorPagina = 5;
+var registrosPorPagina = 10;
 var todasLasFilas = [];
 
 document.addEventListener('DOMContentLoaded', function () {

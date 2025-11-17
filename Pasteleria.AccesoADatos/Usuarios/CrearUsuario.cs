@@ -62,12 +62,10 @@ namespace Pasteleria.AccesoADatos.Usuarios
                     });
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Usuario guardado exitosamente. ID: {elUsuarioAGuardar.IdUsuario}");
                 return cantidadDeDatosAgregados;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al guardar usuario: {ex.Message}");
                 throw;
             }
         }

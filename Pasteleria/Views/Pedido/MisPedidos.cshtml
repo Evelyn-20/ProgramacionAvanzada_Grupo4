@@ -1,0 +1,148 @@
+﻿@model List<Pasteleria.Abstracciones.ModeloUI.Pedido>
+
+@{
+    ViewData["Title"] = "Mis Pedidos";
+}
+
+<!-- Banner Hero -->
+<section class="hero" style="padding: 3rem 0;">
+    <div class="hero-content">
+        <h1 class="hero-title">Mis Pedidos</h1>
+        <p class="hero-subtitle">Consulta el estado de tus pedidos</p>
+    </div>
+</section>
+
+<div class="container" style="padding: 3rem 20px; max-width: 1400px;">
+    <!-- Mensajes -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model != null && Model.Count > 0)
+    {
+        <div style="display: grid; gap: 1.5rem;">
+            @foreach (var pedido in Model)
+            {
+                <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); padding: 2rem; transition: transform 0.3s;"
+                     onmouseover="this.style.transform='translateY(-5px)'"
+                     onmouseout="this.style.transform='translateY(0)'">
+
+                    <div style="display: grid; grid-template-columns: auto 1fr auto; gap: 2rem; align-items: center;">
+                        <!-- Icono y número de pedido -->
+                        <div style="text-align: center;">
+                            <div style="width: 80px; height: 80px; background: var(--light-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 0.5rem;">
+                                <i class="fas fa-shopping-bag" style="font-size: 2rem; color: var(--primary-color);"></i>
+                            </div>
+                            <strong style="color: var(--dark-color);">Pedido #@pedido.IdPedido</strong>
+                        </div>
+
+                        <!-- Información del pedido -->
+                        <div>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                                <div>
+                                    <span style="color: var(--text-color); font-size: 0.9rem; display: block; margin-bottom: 0.25rem;">
+                                        <i class="fas fa-calendar"></i> Fecha
+                                    </span>
+                                    <strong style="color: var(--dark-color);">@pedido.FechaPedidoFormateada</strong>
+                                </div>
+                                <div>
+                                    <span style="color: var(--text-color); font-size: 0.9rem; display: block; margin-bottom: 0.25rem;">
+                                        <i class="fas fa-box"></i> Productos
+                                    </span>
+                                    <strong style="color: var(--dark-color);">@pedido.CantidadProductos</strong>
+                                </div>
+                                <div>
+                                    <span style="color: var(--text-color); font-size: 0.9rem; display: block; margin-bottom: 0.25rem;">
+                                        <i class="fas fa-dollar-sign"></i> Total
+                                    </span>
+                                    <strong style="color: var(--primary-color); font-size: 1.2rem;">₡@pedido.Total.ToString("N2")</strong>
+                                </div>
+                                <div>
+                                    <span style="color: var(--text-color); font-size: 0.9rem; display: block; margin-bottom: 0.25rem;">
+                                        <i class="fas fa-info-circle"></i> Estado
+                                    </span>
+                                    @{
+                                        var estadoColor = "";
+                                        var estadoIcono = "";
+                                        switch (pedido.Estado)
+                                        {
+                                            case "Pendiente":
+                                                estadoColor = "#f39c12";
+                                                estadoIcono = "fa-clock";
+                                                break;
+                                            case "En Proceso":
+                                                estadoColor = "#3498db";
+                                                estadoIcono = "fa-spinner";
+                                                break;
+                                            case "Completado":
+                                                estadoColor = "#27ae60";
+                                                estadoIcono = "fa-check-circle";
+                                                break;
+                                            case "Entregado":
+                                                estadoColor = "#16a085";
+                                                estadoIcono = "fa-truck";
+                                                break;
+                                            case "Cancelado":
+                                                estadoColor = "#e74c3c";
+                                                estadoIcono = "fa-times-circle";
+                                                break;
+                                            default:
+                                                estadoColor = "#95a5a6";
+                                                estadoIcono = "fa-question-circle";
+                                                break;
+                                        }
+                                    }
+                                    <span style="background: @estadoColor; color: var(--white); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem;">
+                                        <i class="fas @estadoIcono"></i> @pedido.Estado
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Acciones -->
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+
+                            @if (pedido.Estado == "Pendiente")
+                            {
+                                <form method="post" action="@Url.Action("CancelarPedido", "Pedido")" style="margin: 0;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="idPedido" value="@pedido.IdPedido" />
+                                    <button type="submit"
+                                            class="btn"
+                                            onclick="return confirm('¿Está seguro de cancelar este pedido?')"
+                                            style="width: 100%; padding: 0.75rem; background: transparent; color: #e74c3c; border: 2px solid #e74c3c; border-radius: 50px; cursor: pointer; transition: all 0.3s;">
+                                        <i class="fas fa-ban"></i> Cancelar
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- Sin pedidos -->
+        <div style="text-align: center; padding: 5rem 2rem; background: var(--white); border-radius: 15px; box-shadow: var(--shadow);">
+            <i class="fas fa-shopping-bag" style="font-size: 5rem; color: var(--secondary-color); opacity: 0.5; display: block; margin-bottom: 2rem;"></i>
+            <h2 style="color: var(--dark-color); margin-bottom: 1rem; font-family: 'Playfair Display', serif;">No tienes pedidos aún</h2>
+            <p style="color: var(--text-color); margin-bottom: 2rem; font-size: 1.1rem;">¡Realiza tu primer pedido ahora!</p>
+            <a href="@Url.Action("Index", "Catalogo")" class="btn btn-primary" style="padding: 1rem 3rem; font-size: 1.1rem; text-decoration: none;">
+                <i class="fas fa-shopping-bag"></i> Ver Catálogo
+            </a>
+        </div>
+    }
+</div>

@@ -1,14 +1,8 @@
-﻿// ============================================
-// CLIENTE.JS - Funcionalidad de Clientes
-// ============================================
+﻿document.addEventListener('DOMContentLoaded', function () {
 
-document.addEventListener('DOMContentLoaded', function () {
-
-    // ============================================
-    // PAGINACIÓN
-    // ============================================
+    // Paginacion
     var paginaActual = 1;
-    var registrosPorPagina = 5;
+    var registrosPorPagina = 10;
     var todasLasFilas = [];
 
     var table = document.getElementById('laTablaDeClientes');
@@ -79,9 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    // ============================================
-    // BOTONES DE EDITAR
-    // ============================================
+    // Boton de editar
     var botonesEditar = document.querySelectorAll('.btn-editar');
     botonesEditar.forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -91,9 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ============================================
-    // BOTONES DE VER DETALLES
-    // ============================================
+    // Boton de ver detalles
     var botonesDetalles = document.querySelectorAll('.btn-ver-detalles');
     botonesDetalles.forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -131,9 +121,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ============================================
-    // BOTONES DE ELIMINAR
-    // ============================================
+    // Boton de eliminar
     var botonesEliminar = document.querySelectorAll('.btn-eliminar');
     botonesEliminar.forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -175,9 +163,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ============================================
-    // BÚSQUEDA MEJORADA
-    // ============================================
+    // Busqueda
     var searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('focus', function () {
@@ -190,9 +176,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ============================================
-    // FORMULARIOS - MEJORA DE INPUTS
-    // ============================================
+    // Formularios
     var inputs = document.querySelectorAll('.form-control');
     inputs.forEach(function (input) {
         input.addEventListener('focus', function () {
@@ -205,9 +189,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ============================================
-    // HOVER EN FILAS DE TABLA
-    // ============================================
+    // Hover en las filas de la tabla
     var filasTabla = document.querySelectorAll('#laTablaDeClientes tbody tr');
     filasTabla.forEach(function (fila) {
         // Solo aplicar hover si no es la fila de "no hay datos"

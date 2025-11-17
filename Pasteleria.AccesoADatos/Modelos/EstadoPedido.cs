@@ -1,25 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pasteleria.AccesoADatos.Modelos
 {
     [Table("EstadoPedido")]
-    public class EstadoPedido
+    public class EstadoPedidoAD
     {
-        [Column("IdEstadoPedido")]
+        [Key]
         public int IdEstadoPedido { get; set; }
 
-        [Column("NombreEstado")]
+        [Required]
+        [MaxLength(50)]
         public string NombreEstado { get; set; }
 
-        [Column("Descripcion")]
+        [MaxLength(200)]
         public string Descripcion { get; set; }
 
-        [Column("Estado")]
         public bool Estado { get; set; }
     }
 }

@@ -28,7 +28,6 @@ namespace Pasteleria.AccesoADatos.Roles
 
                 if (rolAEliminar == null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Rol con ID {idRol} no encontrado");
                     return 0;
                 }
 
@@ -49,18 +48,14 @@ namespace Pasteleria.AccesoADatos.Roles
                     _auditoria.RegistrarEliminacion("Rol", idRol, infoRol);
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Rol eliminado exitosamente. ID: {idRol}");
-
                 return cantidadDeDatosEliminados;
             }
             catch (DbUpdateException dbEx)
             {
-                System.Diagnostics.Debug.WriteLine($"Error de base de datos al eliminar rol: {dbEx.Message}");
                 throw new Exception("No se puede eliminar el rol porque tiene registros relacionados", dbEx);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al eliminar rol: {ex.Message}");
                 throw;
             }
         }

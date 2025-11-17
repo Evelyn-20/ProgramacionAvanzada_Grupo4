@@ -91,13 +91,10 @@ namespace Pasteleria.AccesoADatos.Usuarios
                     );
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Usuario actualizado exitosamente. ID: {elUsuario.IdUsuario}");
-
                 return cantidadDeDatosActualizados;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al actualizar usuario: {ex.Message}");
                 throw;
             }
         }

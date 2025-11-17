@@ -27,7 +27,6 @@ namespace Pasteleria.AccesoADatos.Roles
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al obtener roles: {ex.Message}");
                 throw new Exception("Error al obtener la lista de roles", ex);
             }
         }
@@ -49,7 +48,6 @@ namespace Pasteleria.AccesoADatos.Roles
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al buscar roles por nombre: {ex.Message}");
                 throw new Exception("Error al buscar roles por nombre", ex);
             }
         }

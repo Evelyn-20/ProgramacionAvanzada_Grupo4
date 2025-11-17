@@ -173,8 +173,6 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // Reemplaza temporalmente tu método GET EditarProducto con este para hacer debug:
-
         [HttpGet]
         public IActionResult EditarProducto(int id)
         {
@@ -220,7 +218,7 @@ namespace Pasteleria.Controllers
                 ModelState.Remove("FechaActualizacion");
                 ModelState.Remove("archivo");
 
-                // VALIDAR EXPLÍCITAMENTE LOS VALORES CRÍTICOS
+                // Validar explicitamente los valores criticos
                 if (producto.Precio <= 0)
                 {
                     ModelState.AddModelError("Precio", "El precio debe ser mayor a 0");
@@ -404,7 +402,6 @@ namespace Pasteleria.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error obteniendo imagen: {ex.Message}");
                 return ImagenPlaceholder();
             }
         }

@@ -7,8 +7,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Folder Include="DetallePedidos\" />
-		<Folder Include="Pedidos\" />
+	  <Compile Remove="DetallePedidos\**" />
+	  <EmbeddedResource Remove="DetallePedidos\**" />
+	  <None Remove="DetallePedidos\**" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -24,6 +25,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 	</ItemGroup>
 
 </Project>

@@ -42,8 +42,6 @@ namespace Pasteleria.AccesoADatos.Auditoria
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al obtener auditorías: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
                 throw new Exception("Error al obtener la lista de auditorías", ex);
             }
         }
@@ -79,7 +77,6 @@ namespace Pasteleria.AccesoADatos.Auditoria
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al buscar auditorías por tabla: {ex.Message}");
                 throw new Exception("Error al buscar auditorías por tabla", ex);
             }
         }
@@ -115,7 +112,6 @@ namespace Pasteleria.AccesoADatos.Auditoria
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al buscar auditorías por acción: {ex.Message}");
                 throw new Exception("Error al buscar auditorías por acción", ex);
             }
         }
@@ -151,7 +147,6 @@ namespace Pasteleria.AccesoADatos.Auditoria
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al buscar auditorías por usuario: {ex.Message}");
                 throw new Exception("Error al buscar auditorías por usuario", ex);
             }
         }
@@ -190,7 +185,6 @@ namespace Pasteleria.AccesoADatos.Auditoria
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al buscar auditorías: {ex.Message}");
                 throw new Exception("Error al buscar auditorías", ex);
             }
         }

@@ -55,7 +55,6 @@ namespace Pasteleria.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"ERROR EN INDEX: {ex.Message}");
                 // Retornar vista con listas vacías en caso de error
                 var viewModel = new HomeViewModel
                 {

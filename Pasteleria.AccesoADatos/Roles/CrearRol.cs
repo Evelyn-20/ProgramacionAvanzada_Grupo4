@@ -46,12 +46,10 @@ namespace Pasteleria.AccesoADatos.Roles
                     });
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Rol guardado exitosamente. ID: {elRolAGuardar.IdRol}");
                 return cantidadDeDatosAgregados;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al guardar rol: {ex.Message}");
                 throw;
             }
         }

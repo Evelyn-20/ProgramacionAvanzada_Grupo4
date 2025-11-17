@@ -25,12 +25,29 @@
                         </label>
                         <p id="detalles-pedido-fecha" style="color: var(--dark-color); font-size: 1.1rem; margin: 0;"></p>
                     </div>
-                    <div>
-                        <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem;">
-                            <i class="fas fa-dollar-sign" style="color: var(--primary-color); margin-right: 0.5rem;"></i> Total
-                        </label>
-                        <p id="detalles-pedido-total" style="color: var(--primary-color); font-size: 1.3rem; font-weight: 700; margin: 0;"></p>
+
+                    <!-- Sección de Totales -->
+                    <div style="background: var(--light-color); padding: 1rem; border-radius: 10px; margin-top: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="color: var(--text-color);">Subtotal:</span>
+                            <span id="detalles-pedido-subtotal" style="color: var(--dark-color); font-weight: 600;"></span>
+                        </div>
+                        <div id="detalles-pedido-descuento-row" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="color: var(--text-color);">Descuento:</span>
+                            <span id="detalles-pedido-descuento" style="color: #27ae60; font-weight: 600;"></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--secondary-color);">
+                            <span style="color: var(--text-color);">Impuesto (13%):</span>
+                            <span id="detalles-pedido-impuesto" style="color: var(--dark-color); font-weight: 600;"></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--dark-color); font-weight: 700; font-size: 1.2rem;">
+                                <i class="fas fa-dollar-sign" style="color: var(--primary-color); margin-right: 0.5rem;"></i> Total
+                            </span>
+                            <span id="detalles-pedido-total" style="color: var(--primary-color); font-size: 1.3rem; font-weight: 700;"></span>
+                        </div>
                     </div>
+
                     <div>
                         <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem;">
                             <i class="fas fa-toggle-on" style="color: var(--primary-color); margin-right: 0.5rem;"></i> Estado

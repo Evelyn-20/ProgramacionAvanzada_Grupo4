@@ -27,7 +27,6 @@ namespace Pasteleria.AccesoADatos.Usuarios
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al obtener usuarios: {ex.Message}");
                 throw new Exception("Error al obtener la lista de usuarios", ex);
             }
         }
@@ -49,7 +48,6 @@ namespace Pasteleria.AccesoADatos.Usuarios
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al buscar usuarios por nombre: {ex.Message}");
                 throw new Exception("Error al buscar usuarios por nombre", ex);
             }
         }
@@ -71,7 +69,6 @@ namespace Pasteleria.AccesoADatos.Usuarios
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al buscar usuarios por email: {ex.Message}");
                 throw new Exception("Error al buscar usuarios por email", ex);
             }
         }

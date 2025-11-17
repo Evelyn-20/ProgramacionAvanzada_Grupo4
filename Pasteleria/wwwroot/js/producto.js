@@ -1,14 +1,8 @@
-﻿// ============================================
-// PRODUCTO.JS - Funcionalidad de Productos
-// ============================================
+﻿document.addEventListener('DOMContentLoaded', function () {
 
-document.addEventListener('DOMContentLoaded', function () {
-
-    // ============================================
-    // PAGINACIÓN (solo para listado)
-    // ============================================
+    // Paginacion
     var paginaActual = 1;
-    var registrosPorPagina = 5;
+    var registrosPorPagina = 10;
     var todasLasFilas = [];
 
     var table = document.getElementById('laTablaDeProductos');
@@ -79,9 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    // ============================================
-    // BOTONES DE EDITAR
-    // ============================================
+    // Boton de detalles
     var botonesEditar = document.querySelectorAll('.btn-editar');
     botonesEditar.forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -91,9 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ============================================
-    // BOTONES DE VER DETALLES
-    // ============================================
+    // Boton de detalles
     var botonesDetalles = document.querySelectorAll('.btn-detalles');
     botonesDetalles.forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -148,9 +138,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ============================================
-    // BOTONES DE ELIMINAR
-    // ============================================
+    // Boton de eliminar
     var botonesEliminar = document.querySelectorAll('.btn-eliminar');
     botonesEliminar.forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -194,9 +182,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ============================================
-    // BÚSQUEDA MEJORADA
-    // ============================================
+    // Busqueda
     var searchInput = document.getElementById('buscar');
     if (searchInput) {
         searchInput.addEventListener('focus', function () {
@@ -209,9 +195,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ============================================
-    // FORMULARIOS - MEJORA DE INPUTS
-    // ============================================
+    // Formulario
     var inputs = document.querySelectorAll('.form-control');
     inputs.forEach(function (input) {
         input.addEventListener('focus', function () {
@@ -224,9 +208,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ============================================
-    // PREVIEW DE IMAGEN
-    // ============================================
+    // Preview de la imagen
     var inputArchivo = document.getElementById('archivoImagen');
     var preview = document.getElementById('preview');
     var fileName = document.getElementById('fileName');
@@ -283,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // Drag and Drop (opcional)
+        // Drag and Drop
         if (dropZone) {
             dropZone.addEventListener('dragover', function (e) {
                 e.preventDefault();
@@ -312,9 +294,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // ============================================
-    // DESHABILITAR VALIDACIÓN DE ARCHIVO EN EDICIÓN
-    // ============================================
+    // Deshabilitar validar el formato del archivo al editar
     var form = document.querySelector('form');
     if (form && inputArchivo) {
         // Si estamos en la página de edición, remover validación requerida del archivo
@@ -326,9 +306,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // ============================================
-    // HOVER EN FILAS DE TABLA
-    // ============================================
+    // Hover en las filas de la tabla
     var filasTabla = document.querySelectorAll('#laTablaDeProductos tbody tr');
     filasTabla.forEach(function (fila) {
         // Solo aplicar hover si no es la fila de "no hay datos"
@@ -343,9 +321,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// ============================================
-// FUNCIÓN AUXILIAR: FORMATEAR PRECIO
-// ============================================
+// Fomatear el Precio en colones
 function formatearPrecio(precio) {
     return parseFloat(precio).toLocaleString('es-CR', {
         minimumFractionDigits: 2,
@@ -353,9 +329,7 @@ function formatearPrecio(precio) {
     });
 }
 
-// ============================================
-// FUNCIÓN AUXILIAR: VALIDAR IMAGEN
-// ============================================
+// Validar Imagen
 function validarImagen(file) {
     var maxSize = 5 * 1024 * 1024; // 5MB
     var validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp'];

@@ -58,7 +58,6 @@ namespace Pasteleria.AccesoADatos.Clientes
                     });
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Cliente guardado exitosamente. ID: {elClienteAGuardar.IdCliente}");
                 return cantidadDeDatosAgregados;
             }
             catch (Exception ex)

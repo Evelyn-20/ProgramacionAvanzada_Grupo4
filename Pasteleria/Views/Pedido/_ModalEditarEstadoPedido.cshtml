@@ -10,15 +10,17 @@
             </div>
             <form method="post" action="@Url.Action("ActualizarEstado", "Pedido")">
                 @Html.AntiForgeryToken()
-                <input type="hidden" id="editar-estado-id" name="IdPedido" />
+                <input type="hidden" id="editar-estado-id" name="idPedido" />
                 <div class="modal-body" style="padding: 2rem; background: var(--white);">
                     <div>
                         <label style="display: block; color: var(--dark-color); font-weight: 500; margin-bottom: 0.5rem;">Nuevo Estado</label>
-                        <select name="Estado" id="editar-estado-select" class="form-control" style="width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem;">
+                        <select name="estado" id="editar-estado-select" class="form-control" required style="width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem;">
+                            <option value="">-- Seleccione un estado --</option>
                             <option value="Pendiente">Pendiente</option>
                             <option value="En Proceso">En Proceso</option>
                             <option value="Completado">Completado</option>
                             <option value="Cancelado">Cancelado</option>
+                            <option value="Entregado">Entregado</option>
                         </select>
                     </div>
                 </div>

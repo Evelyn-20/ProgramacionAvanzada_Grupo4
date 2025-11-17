@@ -7,12 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Logica\DetallePedido\" />
-    <Folder Include="Logica\Pedido\" />
+    <Compile Remove="Logica\DetallePedido\**" />
+    <EmbeddedResource Remove="Logica\DetallePedido\**" />
+    <None Remove="Logica\DetallePedido\**" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
 </Project>

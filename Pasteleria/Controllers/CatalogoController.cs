@@ -34,8 +34,6 @@ namespace Pasteleria.Controllers
             }
             catch (Exception ex)
             {
-                // Log del error
-                System.Diagnostics.Debug.WriteLine($"Error en Catalogo/Index: {ex.Message}");
                 TempData["Error"] = "Error al cargar las categorías. Por favor, intenta nuevamente.";
 
                 // Retornar lista vacía en lugar de error
