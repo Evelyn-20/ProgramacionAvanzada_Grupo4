@@ -22,7 +22,6 @@ namespace Pasteleria.AccesoADatos.Pedidos
         {
             try
             {
-                // Leer directamente permitiendo NULL en IdUsuario
                 var pedidoData = _contexto.Pedido
                     .AsNoTracking()
                     .Where(p => p.IdPedido == idPedido)
@@ -30,11 +29,11 @@ namespace Pasteleria.AccesoADatos.Pedidos
                     {
                         p.IdPedido,
                         p.IdCliente,
-                        p.IdUsuario,  // Esto es int? (nullable), SQL Server puede retornar NULL
+                        p.IdUsuario,
                         p.Fecha,
                         p.Subtotal,
-                        p.Descuento,  // decimal? (nullable)
-                        p.Impuesto,   // decimal? (nullable)
+                        p.Descuento,
+                        p.Impuesto,
                         p.Total,
                         p.IdEstadoPedido
                     })
@@ -42,27 +41,22 @@ namespace Pasteleria.AccesoADatos.Pedidos
 
                 if (pedidoData == null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Pedido {idPedido} no encontrado");
                     return null;
                 }
 
-                // Obtener cliente
                 var cliente = _contexto.Cliente
                     .AsNoTracking()
                     .FirstOrDefault(c => c.IdCliente == pedidoData.IdCliente);
 
-                // Obtener estado
                 var estado = _contexto.EstadoPedido
                     .AsNoTracking()
                     .FirstOrDefault(e => e.IdEstadoPedido == pedidoData.IdEstadoPedido);
 
-                // Calcular cantidad de productos
                 var cantidadProductos = _contexto.DetallePedido
                     .AsNoTracking()
                     .Where(d => d.IdPedido == pedidoData.IdPedido)
                     .Sum(d => (int?)d.Cantidad) ?? 0;
 
-                // Crear objeto Pedido UI con valores seguros
                 return new PedidoUI
                 {
                     IdPedido = pedidoData.IdPedido,
@@ -89,14 +83,14 @@ namespace Pasteleria.AccesoADatos.Pedidos
         {
             try
             {
-                var detallesAD = _contexto.DetallePedido
+                var detalles = _contexto.DetallePedido
                     .AsNoTracking()
                     .Where(d => d.IdPedido == idPedido)
                     .ToList();
 
                 var detallesUI = new List<DetallePedidoUI>();
 
-                foreach (var detalle in detallesAD)
+                foreach (var detalle in detalles)
                 {
                     if (detalle == null) continue;
 
@@ -112,7 +106,8 @@ namespace Pasteleria.AccesoADatos.Pedidos
                         Cantidad = detalle.Cantidad,
                         Precio = detalle.Precio,
                         Descuento = detalle.Descuento,
-                        Subtotal = detalle.Subtotal
+                        Subtotal = detalle.Subtotal,
+                        NombreProducto = producto?.NombreProducto ?? "Producto no disponible"
                     });
                 }
 

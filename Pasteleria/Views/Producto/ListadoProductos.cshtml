@@ -13,22 +13,6 @@
 </section>
 
 <div class="container" style="padding: 3rem 20px; max-width: 1400px;">
-    <!-- Mensajes de éxito/error -->
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
-            <i class="fas fa-check-circle"></i> @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
-            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
 
     <!-- Barra de búsqueda y botón agregar -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap;">
@@ -36,28 +20,43 @@
             <div style="position: relative; flex: 1;">
                 <i class="fas fa-search" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--primary-color); z-index: 1;"></i>
                 <input type="text"
-                       id="buscar"
                        name="buscar"
                        value="@ViewBag.Buscar"
-                       placeholder="Buscar por nombre..."
+                       placeholder="Buscar por nombre, descripción, precio, cantidad o ID..."
                        style="width: 100%; padding: 1rem 1rem 1rem 50px; border: 2px solid var(--secondary-color); border-radius: 50px; font-size: 1rem; background: var(--white); transition: all 0.3s;">
             </div>
-            <button type="submit" class="btn btn-primary" style="border-radius: 50px; padding: 0 2rem;">
+            <button type="submit" class="btn btn-primary" style="border-radius: 50px; padding: 0 2rem; white-space: nowrap;">
                 <i class="fas fa-search"></i> Buscar
             </button>
         </form>
+
         <a href="@Url.Action("CrearProducto", "Producto")" class="btn btn-primary" style="white-space: nowrap;">
             <i class="fas fa-plus"></i> Agregar Producto
         </a>
     </div>
 
+    <!-- Información de búsqueda -->
+    @if (!string.IsNullOrWhiteSpace(ViewBag.Buscar as string))
+    {
+        <div style="background: var(--light-color); padding: 1rem 1.5rem; border-radius: 10px; margin-bottom: 1.5rem; border-left: 4px solid var(--primary-color);">
+            <p style="margin: 0; color: var(--text-color);">
+                <i class="fas fa-info-circle" style="color: var(--primary-color);"></i>
+                Mostrando resultados para <strong style="color: var(--primary-color);">"@ViewBag.Buscar"</strong>
+                - <strong>@(Model?.Count ?? 0)</strong> producto(s) encontrado(s)
+            </p>
+        </div>
+    }
+
     <!-- Filtro por categoría -->
     <div style="margin-bottom: 2rem;">
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+            <span style="color: var(--text-color); font-weight: 600; margin-right: 0.5rem;">
+                <i class="fas fa-filter" style="color: var(--primary-color);"></i> Filtrar por categoría:
+            </span>
             <a href="@Url.Action("ListadoProductos", "Producto")"
                class="btn btn-primary"
-               style="border-radius: 50px; @(ViewBag.Categoria == null ? "" : "background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color);")">
-                Todas
+               style="border-radius: 50px; padding: 0.6rem 1.5rem; font-size: 0.9rem; @(ViewBag.Categoria == null && string.IsNullOrWhiteSpace(ViewBag.Buscar as string) ? "" : "background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color);")">
+                <i class="fas fa-th"></i> Todas
             </a>
 
             @if (ViewBag.TodasCategorias != null)
@@ -66,7 +65,7 @@
                 {
                     <a href="@Url.Action("ListadoProductos", "Producto", new { categoria = categoria.IdCategoria })"
                        class="btn btn-primary"
-                       style="border-radius: 50px; @(ViewBag.Categoria == categoria.IdCategoria ? "" : "background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color);")">
+                       style="border-radius: 50px; padding: 0.6rem 1.5rem; font-size: 0.9rem; @(ViewBag.Categoria == categoria.IdCategoria ? "" : "background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color);")">
                         @categoria.NombreCategoria
                     </a>
                 }
@@ -97,9 +96,7 @@
                     {
                         @foreach (var producto in Model)
                         {
-                            <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;"
-                                onmouseover="this.style.background='var(--light-color)'"
-                                onmouseout="this.style.background='transparent'">
+                            <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;">
                                 <td style="padding: 1.2rem; color: var(--text-color);">@producto.IdProducto</td>
                                 <td style="padding: 1.2rem;">
                                     <img src="@Url.Action("ObtenerImagenProducto", "Producto", new { id = producto.IdProducto })"
@@ -125,7 +122,6 @@
                                         }
                                     }
                                     @nombreCategoria
-
                                 </td>
                                 <td style="padding: 1.2rem; color: var(--text-color); max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                     @producto.DescripcionProducto
@@ -185,21 +181,6 @@
                             </tr>
                         }
                     }
-                    else
-                    {
-                        <tr>
-                            <td colspan="10" style="padding: 3rem; text-align: center; color: var(--text-color);">
-                                <i class="fas fa-inbox" style="font-size: 3rem; color: var(--secondary-color); opacity: 0.5; display: block; margin-bottom: 1rem;"></i>
-                                <p style="font-size: 1.2rem; margin: 0;">No se encontraron productos</p>
-                                @if (!string.IsNullOrWhiteSpace(ViewBag.Buscar as string) || ViewBag.Categoria != null)
-                                {
-                                    <p style="margin-top: 0.5rem;">
-                                        <a href="@Url.Action("ListadoProductos", "Producto")" style="color: var(--primary-color);">Limpiar filtros</a>
-                                    </p>
-                                }
-                            </td>
-                        </tr>
-                    }
                 </tbody>
             </table>
         </div>
@@ -209,7 +190,7 @@
             <!-- Footer de paginación -->
             <div style="padding: 1.5rem; background: var(--light-color); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--secondary-color); flex-wrap: wrap; gap: 1rem;">
                 <div style="color: var(--text-color); font-size: 0.95rem;">
-                    Mostrando <strong><span id="startRecord">1</span>-<span id="endRecord">@Math.Min(5, Model.Count)</span></strong> de <strong id="totalRecords">@Model.Count</strong> productos
+                    Mostrando <strong><span id="startRecord">1</span>-<span id="endRecord">@Math.Min(10, Model.Count)</span></strong> de <strong id="totalRecords">@Model.Count</strong> productos
                 </div>
                 <div style="display: flex; gap: 0.5rem;">
                     <button id="btnAnterior"
@@ -235,4 +216,75 @@
 
 @section Scripts {
     <script src="~/js/producto.js"></script>
+
+    <script>
+        // Modal de notificación automático
+        document.addEventListener('DOMContentLoaded', function() {
+            function mostrarNotificacion(mensaje, tipo) {
+                const iconos = {
+                    'success': 'fa-check-circle',
+                    'error': 'fa-exclamation-triangle'
+                };
+
+                const colores = {
+                    'success': '#27ae60',
+                    'error': '#e74c3c'
+                };
+
+                const modalHtml = `
+                    <div class="modal fade" id="modalNotificacion" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content" style="border: none; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                                <div class="modal-body" style="padding: 2rem; text-align: center; background: white;">
+                                    <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem; background: ${colores[tipo]}; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas ${iconos[tipo]}" style="font-size: 2.5rem; color: white;"></i>
+                                    </div>
+                                    <h5 style="color: #2c3e50; margin-bottom: 1rem; font-weight: 600;">${mensaje}</h5>
+                                    <div style="width: 100%; height: 4px; background: #e0e0e0; border-radius: 2px; overflow: hidden; margin-top: 1.5rem;">
+                                        <div id="barraProgreso" style="width: 100%; height: 100%; background: ${colores[tipo]}; transition: width 3s linear;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                const modalAnterior = document.getElementById('modalNotificacion');
+                if (modalAnterior) {
+                    modalAnterior.remove();
+                }
+
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+                const modalElement = document.getElementById('modalNotificacion');
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+
+                setTimeout(function () {
+                    const barra = document.getElementById('barraProgreso');
+                    if (barra) {
+                        barra.style.width = '0%';
+                    }
+                }, 100);
+
+                setTimeout(function () {
+                    modal.hide();
+                    setTimeout(function () {
+                        modalElement.remove();
+                    }, 300);
+                }, 3000);
+            }
+
+            // Verificar mensajes de TempData
+            @if (TempData["Success"] != null)
+            {
+                    <text>mostrarNotificacion('@TempData["Success"]', 'success');</text>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                    <text>mostrarNotificacion('@TempData["Error"]', 'error');</text>
+            }
+        });
+    </script>
 }

@@ -1,11 +1,10 @@
 ﻿document.addEventListener('DOMContentLoaded', function () {
 
-    // Paginacion
     var paginaActual = 1;
     var registrosPorPagina = 10;
     var todasLasFilas = [];
-
     var table = document.getElementById('laTablaDeProductos');
+
     if (table && table.getElementsByTagName('tbody')[0]) {
         todasLasFilas = Array.from(table.getElementsByTagName('tbody')[0].getElementsByTagName('tr'));
         if (todasLasFilas.length > 0 && !todasLasFilas[0].querySelector('td[colspan]')) {
@@ -13,6 +12,99 @@
         }
     }
 
+    // Modal auto-closed
+    function mostrarNotificacion(mensaje, tipo) {
+        const iconos = {
+            'success': 'fa-check-circle',
+            'error': 'fa-exclamation-triangle',
+            'warning': 'fa-exclamation-circle',
+            'info': 'fa-info-circle'
+        };
+
+        const colores = {
+            'success': '#27ae60',
+            'error': '#e74c3c',
+            'warning': '#f39c12',
+            'info': '#3498db'
+        };
+
+        const modalHtml = `
+            <div class="modal fade" id="modalNotificacion" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content" style="border: none; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                        <div class="modal-body" style="padding: 2rem; text-align: center; background: var(--white);">
+                            <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem; background: ${colores[tipo]}; border-radius: 50%; display: flex; align-items: center; justify-content: center; animation: scaleIn 0.3s ease-out;">
+                                <i class="fas ${iconos[tipo]}" style="font-size: 2.5rem; color: white;"></i>
+                            </div>
+                            <h5 style="color: var(--dark-color); margin-bottom: 1rem; font-weight: 600;">${mensaje}</h5>
+                            <div style="width: 100%; height: 4px; background: #e0e0e0; border-radius: 2px; overflow: hidden; margin-top: 1.5rem;">
+                                <div id="barraProgreso" style="width: 100%; height: 100%; background: ${colores[tipo]}; transition: width 3s linear;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        if (!document.getElementById('notificacion-styles')) {
+            const styles = document.createElement('style');
+            styles.id = 'notificacion-styles';
+            styles.textContent = `
+                @keyframes scaleIn {
+                    from {
+                        transform: scale(0);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: scale(1);
+                        opacity: 1;
+                    }
+                }
+            `;
+            document.head.appendChild(styles);
+        }
+
+        const modalAnterior = document.getElementById('modalNotificacion');
+        if (modalAnterior) {
+            modalAnterior.remove();
+        }
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        const modalElement = document.getElementById('modalNotificacion');
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+
+        setTimeout(function () {
+            const barra = document.getElementById('barraProgreso');
+            if (barra) {
+                barra.style.width = '0%';
+            }
+        }, 100);
+
+        setTimeout(function () {
+            modal.hide();
+            setTimeout(function () {
+                modalElement.remove();
+            }, 300);
+        }, 3000);
+    }
+
+    // Verificar mensajes de TempData
+    const successMessage = document.querySelector('[data-success-message]');
+    const errorMessage = document.querySelector('[data-error-message]');
+
+    if (successMessage) {
+        const mensaje = successMessage.getAttribute('data-success-message');
+        mostrarNotificacion(mensaje, 'success');
+    }
+
+    if (errorMessage) {
+        const mensaje = errorMessage.getAttribute('data-error-message');
+        mostrarNotificacion(mensaje, 'error');
+    }
+
+    // Paginacion
     function mostrarPagina(pagina) {
         if (todasLasFilas.length === 0 || todasLasFilas[0].querySelector('td[colspan]')) {
             return;
@@ -57,7 +149,6 @@
         }
     }
 
-    // Funciones globales para los botones de paginación
     window.paginaAnterior = function () {
         if (paginaActual > 1) {
             paginaActual--;
@@ -73,7 +164,139 @@
         }
     };
 
-    // Boton de detalles
+    // Busqueda
+    const inputBuscar = document.getElementById('buscar');
+
+    function buscarEnTabla(texto) {
+        texto = texto.toLowerCase().trim();
+
+        if (!texto) {
+            todasLasFilas.forEach(function (fila) {
+                if (!fila.querySelector('td[colspan]')) {
+                    fila.style.display = '';
+                }
+            });
+            actualizarContadores();
+            paginaActual = 1;
+            mostrarPagina(paginaActual);
+            return;
+        }
+
+        let filasVisibles = 0;
+        todasLasFilas.forEach(function (fila) {
+            if (fila.querySelector('td[colspan]')) {
+                return;
+            }
+
+            const celdas = fila.getElementsByTagName('td');
+            let coincide = false;
+
+            const nombre = celdas[2] ? celdas[2].textContent.toLowerCase() : '';
+            if (nombre.includes(texto)) {
+                coincide = true;
+            }
+
+            const categoria = celdas[3] ? celdas[3].textContent.toLowerCase() : '';
+            if (categoria.includes(texto)) {
+                coincide = true;
+            }
+
+            const descripcion = celdas[4] ? celdas[4].textContent.toLowerCase() : '';
+            if (descripcion.includes(texto)) {
+                coincide = true;
+            }
+
+            const cantidad = celdas[5] ? celdas[5].textContent.toLowerCase() : '';
+            if (cantidad.includes(texto)) {
+                coincide = true;
+            }
+
+            const precio = celdas[6] ? celdas[6].textContent.toLowerCase().replace('₡', '').replace(',', '') : '';
+            if (precio.includes(texto)) {
+                coincide = true;
+            }
+
+            const id = celdas[0] ? celdas[0].textContent.toLowerCase() : '';
+            if (id.includes(texto)) {
+                coincide = true;
+            }
+
+            if (coincide) {
+                fila.style.display = '';
+                filasVisibles++;
+            } else {
+                fila.style.display = 'none';
+            }
+        });
+
+        actualizarContadores();
+
+        const tbody = table.getElementsByTagName('tbody')[0];
+        let filaNoResultados = tbody.querySelector('.fila-no-resultados');
+
+        if (filasVisibles === 0) {
+            if (!filaNoResultados) {
+                filaNoResultados = document.createElement('tr');
+                filaNoResultados.className = 'fila-no-resultados';
+                filaNoResultados.innerHTML = `
+                    <td colspan="10" style="padding: 3rem; text-align: center; color: var(--text-color);">
+                        <i class="fas fa-search" style="font-size: 3rem; color: var(--secondary-color); opacity: 0.5; display: block; margin-bottom: 1rem;"></i>
+                        <p style="font-size: 1.2rem; margin: 0;">No se encontraron resultados para "<strong>${texto}</strong>"</p>
+                        <p style="margin-top: 0.5rem; color: var(--text-color); opacity: 0.7;">Intenta con otro término de búsqueda</p>
+                    </td>
+                `;
+                tbody.appendChild(filaNoResultados);
+            }
+        } else {
+            if (filaNoResultados) {
+                filaNoResultados.remove();
+            }
+        }
+    }
+
+    function actualizarContadores() {
+        const filasVisibles = todasLasFilas.filter(function (fila) {
+            return !fila.querySelector('td[colspan]') && fila.style.display !== 'none';
+        });
+
+        const totalVisibles = filasVisibles.length;
+        const startRecord = document.getElementById('startRecord');
+        const endRecord = document.getElementById('endRecord');
+        const totalRecordsEl = document.getElementById('totalRecords');
+
+        if (startRecord) startRecord.textContent = totalVisibles > 0 ? '1' : '0';
+        if (endRecord) endRecord.textContent = totalVisibles;
+        if (totalRecordsEl) totalRecordsEl.textContent = totalVisibles;
+
+        const btnAnterior = document.getElementById('btnAnterior');
+        const btnSiguiente = document.getElementById('btnSiguiente');
+        const textoBusqueda = inputBuscar ? inputBuscar.value.trim() : '';
+
+        if (textoBusqueda) {
+            if (btnAnterior) btnAnterior.style.display = 'none';
+            if (btnSiguiente) btnSiguiente.style.display = 'none';
+        } else {
+            if (btnAnterior) btnAnterior.style.display = '';
+            if (btnSiguiente) btnSiguiente.style.display = '';
+            paginaActual = 1;
+            mostrarPagina(paginaActual);
+        }
+    }
+
+    if (inputBuscar) {
+        inputBuscar.addEventListener('input', function () {
+            buscarEnTabla(this.value);
+        });
+
+        inputBuscar.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                buscarEnTabla(this.value);
+            }
+        });
+    }
+
+    // Botones
     var botonesEditar = document.querySelectorAll('.btn-editar');
     botonesEditar.forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -83,13 +306,11 @@
         });
     });
 
-    // Boton de detalles
     var botonesDetalles = document.querySelectorAll('.btn-detalles');
     botonesDetalles.forEach(function (btn) {
         btn.addEventListener('click', function () {
             var productoId = this.getAttribute('data-id');
 
-            // Cargar información básica
             var detallesId = document.getElementById('detalles-id');
             var detallesNombre = document.getElementById('detalles-nombre');
             var detallesCategoria = document.getElementById('detalles-categoria');
@@ -112,14 +333,12 @@
             if (detallesFechaCreacion) detallesFechaCreacion.textContent = this.getAttribute('data-fecha-creacion');
             if (detallesFechaActualizacion) detallesFechaActualizacion.textContent = this.getAttribute('data-fecha-actualizacion');
 
-            // Cargar imagen
             if (imagenElement) {
                 var imageUrl = this.getAttribute('data-image-url') || '/Producto/ObtenerImagenProducto?id=' + productoId;
                 imagenElement.src = imageUrl;
                 imagenElement.alt = this.getAttribute('data-nombre');
             }
 
-            // Actualizar badge de estado
             if (estadoBadge) {
                 var estado = this.getAttribute('data-estado');
                 estadoBadge.textContent = estado;
@@ -138,7 +357,6 @@
         });
     });
 
-    // Boton de eliminar
     var botonesEliminar = document.querySelectorAll('.btn-eliminar');
     botonesEliminar.forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -182,7 +400,7 @@
         });
     });
 
-    // Busqueda
+    // Efectos
     var searchInput = document.getElementById('buscar');
     if (searchInput) {
         searchInput.addEventListener('focus', function () {
@@ -195,7 +413,6 @@
         });
     }
 
-    // Formulario
     var inputs = document.querySelectorAll('.form-control');
     inputs.forEach(function (input) {
         input.addEventListener('focus', function () {
@@ -208,7 +425,7 @@
         });
     });
 
-    // Preview de la imagen
+    // Preview de imagen
     var inputArchivo = document.getElementById('archivoImagen');
     var preview = document.getElementById('preview');
     var fileName = document.getElementById('fileName');
@@ -218,30 +435,26 @@
         inputArchivo.addEventListener('change', function (e) {
             var file = e.target.files[0];
             if (file) {
-                // Validar tamaño (5MB máximo)
-                var maxSize = 5 * 1024 * 1024; // 5MB en bytes
+                var maxSize = 5 * 1024 * 1024;
                 if (file.size > maxSize) {
-                    alert('El archivo es demasiado grande. El tamaño máximo es 5MB.');
+                    mostrarNotificacion('El archivo es demasiado grande. El tamaño máximo es 5MB.', 'error');
                     this.value = '';
                     return;
                 }
 
-                // Validar tipo de archivo
                 var validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp'];
                 if (!validTypes.includes(file.type)) {
-                    alert('Tipo de archivo no válido. Solo se permiten: JPG, JPEG, PNG, GIF, BMP');
+                    mostrarNotificacion('Tipo de archivo no válido. Solo se permiten: JPG, JPEG, PNG, GIF, BMP', 'error');
                     this.value = '';
                     return;
                 }
 
-                // Mostrar nombre del archivo
                 if (fileName) {
                     fileName.textContent = '📁 ' + file.name;
                     fileName.style.color = 'var(--primary-color)';
                     fileName.style.fontWeight = '600';
                 }
 
-                // Preview de imagen
                 if (preview && file.type.match('image.*')) {
                     var reader = new FileReader();
                     reader.onload = function (e) {
@@ -255,7 +468,6 @@
                     reader.readAsDataURL(file);
                 }
             } else {
-                // Limpiar preview si no hay archivo
                 if (preview) preview.innerHTML = '';
                 if (fileName) fileName.textContent = '';
                 if (dropZone) {
@@ -265,7 +477,6 @@
             }
         });
 
-        // Drag and Drop
         if (dropZone) {
             dropZone.addEventListener('dragover', function (e) {
                 e.preventDefault();
@@ -286,7 +497,6 @@
 
                 if (e.dataTransfer.files.length > 0) {
                     inputArchivo.files = e.dataTransfer.files;
-                    // Disparar el evento change manualmente
                     var event = new Event('change', { bubbles: true });
                     inputArchivo.dispatchEvent(event);
                 }
@@ -294,10 +504,8 @@
         }
     }
 
-    // Deshabilitar validar el formato del archivo al editar
     var form = document.querySelector('form');
     if (form && inputArchivo) {
-        // Si estamos en la página de edición, remover validación requerida del archivo
         var esEdicion = window.location.href.indexOf('Editar') > -1;
         if (esEdicion) {
             inputArchivo.removeAttribute('data-val');
@@ -306,10 +514,8 @@
         }
     }
 
-    // Hover en las filas de la tabla
     var filasTabla = document.querySelectorAll('#laTablaDeProductos tbody tr');
     filasTabla.forEach(function (fila) {
-        // Solo aplicar hover si no es la fila de "no hay datos"
         if (!fila.querySelector('td[colspan]')) {
             fila.addEventListener('mouseenter', function () {
                 this.style.background = 'var(--light-color)';
@@ -321,7 +527,6 @@
     });
 });
 
-// Fomatear el Precio en colones
 function formatearPrecio(precio) {
     return parseFloat(precio).toLocaleString('es-CR', {
         minimumFractionDigits: 2,
@@ -329,9 +534,8 @@ function formatearPrecio(precio) {
     });
 }
 
-// Validar Imagen
 function validarImagen(file) {
-    var maxSize = 5 * 1024 * 1024; // 5MB
+    var maxSize = 5 * 1024 * 1024;
     var validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp'];
 
     if (file.size > maxSize) {

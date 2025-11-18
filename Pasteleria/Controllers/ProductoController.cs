@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using System.Globalization;
 
 namespace Pasteleria.Controllers
 {
@@ -50,7 +51,32 @@ namespace Pasteleria.Controllers
 
                 if (!string.IsNullOrWhiteSpace(buscar))
                 {
-                    productos = _listarProducto.BuscarPorNombre(buscar);
+                    // Búsqueda inteligente en todos los campos
+                    var terminoBusqueda = buscar.Trim();
+
+                    // Obtener todos los productos
+                    var todosProductos = _listarProducto.Obtener();
+
+                    // Buscar en múltiples campos simultáneamente
+                    productos = todosProductos.Where(p =>
+                        // Buscar en nombre
+                        p.NombreProducto.Contains(terminoBusqueda, StringComparison.OrdinalIgnoreCase) ||
+
+                        // Buscar en descripción
+                        p.DescripcionProducto.Contains(terminoBusqueda, StringComparison.OrdinalIgnoreCase) ||
+
+                        // Buscar en ID (convertir a string)
+                        p.IdProducto.ToString().Contains(terminoBusqueda) ||
+
+                        // Buscar en cantidad (convertir a string)
+                        p.Cantidad.ToString().Contains(terminoBusqueda) ||
+
+                        // Buscar en precio (convertir a string y permitir búsqueda con o sin decimales)
+                        p.Precio.ToString().Contains(terminoBusqueda) ||
+                        p.Precio.ToString("N2").Contains(terminoBusqueda) ||
+                        p.Precio.ToString("F0").Contains(terminoBusqueda)
+                    ).ToList();
+
                     ViewBag.Buscar = buscar;
                 }
                 else if (categoria.HasValue && categoria.Value > 0)
@@ -63,7 +89,6 @@ namespace Pasteleria.Controllers
                     productos = _listarProducto.Obtener();
                 }
 
-                // Pasar categorías activas a la vista para el filtro
                 var categorias = _listarCategorias.ObtenerActivas();
                 ViewBag.TodasCategorias = categorias;
 
@@ -83,7 +108,6 @@ namespace Pasteleria.Controllers
             if (!VerificarPermisosAdministrador())
                 return RedirectToAction("Index", "Home");
 
-            // Cargar categorías activas para el dropdown
             var categorias = _listarCategorias.ObtenerActivas();
             ViewBag.Categorias = categorias;
             return View();
@@ -99,69 +123,63 @@ namespace Pasteleria.Controllers
 
             try
             {
-                // Remover validación automática de campos que se manejan manualmente
                 ModelState.Remove("Imagen");
                 ModelState.Remove("FechaCreacion");
                 ModelState.Remove("FechaActualizacion");
 
-                // Validar que se haya subido un archivo
                 if (archivo == null || archivo.Length == 0)
                 {
                     ModelState.AddModelError("archivo", "La imagen del producto es obligatoria");
+                    var categorias = _listarCategorias.ObtenerActivas();
+                    ViewBag.Categorias = categorias;
                     return View(producto);
                 }
 
-                // Validar tipo de archivo
                 var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
                 var extension = Path.GetExtension(archivo.FileName).ToLowerInvariant();
 
                 if (string.IsNullOrEmpty(extension) || !extensionesPermitidas.Contains(extension))
                 {
                     ModelState.AddModelError("archivo", "Solo se permiten archivos de imagen (JPG, JPEG, PNG, GIF, BMP)");
+                    var categorias = _listarCategorias.ObtenerActivas();
+                    ViewBag.Categorias = categorias;
                     return View(producto);
                 }
 
-                // Validar tamaño (máximo 5MB)
                 if (archivo.Length > 5 * 1024 * 1024)
                 {
                     ModelState.AddModelError("archivo", "La imagen no puede superar los 5MB");
+                    var categorias = _listarCategorias.ObtenerActivas();
+                    ViewBag.Categorias = categorias;
                     return View(producto);
                 }
 
-                // Validar el resto del modelo
                 if (!ModelState.IsValid)
                 {
-                    foreach (var key in ModelState.Keys)
-                    {
-                        var errors = ModelState[key].Errors;
-                        foreach (var error in errors)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"  {key}: {error.ErrorMessage}");
-                        }
-                    }
+                    var categorias = _listarCategorias.ObtenerActivas();
+                    ViewBag.Categorias = categorias;
                     return View(producto);
                 }
 
-                // Procesar el archivo
                 using (var memoryStream = new MemoryStream())
                 {
                     await archivo.CopyToAsync(memoryStream);
                     producto.Imagen = memoryStream.ToArray();
                 }
 
-                // Establecer estado como activo
                 producto.Estado = true;
 
                 int resultado = await _crearProducto.Guardar(producto);
 
                 if (resultado > 0)
                 {
-                    TempData["Success"] = "Producto creado exitosamente";
                     return RedirectToAction(nameof(ListadoProductos));
                 }
                 else
                 {
                     ModelState.AddModelError("", "No se pudo crear el producto en la base de datos");
+                    var categorias = _listarCategorias.ObtenerActivas();
+                    ViewBag.Categorias = categorias;
                 }
 
                 return View(producto);
@@ -169,6 +187,8 @@ namespace Pasteleria.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError("", $"Error: {ex.Message}");
+                var categorias = _listarCategorias.ObtenerActivas();
+                ViewBag.Categorias = categorias;
                 return View(producto);
             }
         }
@@ -189,7 +209,6 @@ namespace Pasteleria.Controllers
                     return RedirectToAction(nameof(ListadoProductos));
                 }
 
-                // Cargar categorías activas para el dropdown
                 var categorias = _listarCategorias.ObtenerActivas();
                 ViewBag.Categorias = categorias;
 
@@ -205,20 +224,48 @@ namespace Pasteleria.Controllers
         // POST: Producto/EditarProducto
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditarProducto(Producto producto, IFormFile archivo)
+        public async Task<IActionResult> EditarProducto(Producto producto, IFormFile archivo, string PrecioStr, string PorcentajeImpuestoStr)
         {
             if (!VerificarPermisosAdministrador())
                 return RedirectToAction("Index", "Home");
 
             try
             {
-                // Remover validación de campos que no vienen del formulario o no son requeridos en edición
+                // Remover validación de campos que no vienen del formulario
                 ModelState.Remove("Imagen");
                 ModelState.Remove("FechaCreacion");
                 ModelState.Remove("FechaActualizacion");
                 ModelState.Remove("archivo");
+                ModelState.Remove("Precio");
+                ModelState.Remove("PorcentajeImpuesto");
 
-                // Validar explicitamente los valores criticos
+                // Parsear Precio desde el string
+                if (!string.IsNullOrEmpty(PrecioStr))
+                {
+                    if (decimal.TryParse(PrecioStr, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal precioParseado))
+                    {
+                        producto.Precio = precioParseado;
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("Precio", "El precio no tiene un formato válido");
+                    }
+                }
+
+                // Parsear PorcentajeImpuesto desde el string
+                if (!string.IsNullOrEmpty(PorcentajeImpuestoStr))
+                {
+                    if (decimal.TryParse(PorcentajeImpuestoStr, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal impuestoParseado))
+                    {
+                        producto.PorcentajeImpuesto = impuestoParseado;
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("PorcentajeImpuesto", "El porcentaje de impuesto no tiene un formato válido");
+                    }
+                }
+
+                // Validar valores
                 if (producto.Precio <= 0)
                 {
                     ModelState.AddModelError("Precio", "El precio debe ser mayor a 0");
@@ -231,28 +278,20 @@ namespace Pasteleria.Controllers
 
                 if (!ModelState.IsValid)
                 {
-                    foreach (var key in ModelState.Keys)
-                    {
-                        var errors = ModelState[key].Errors;
-                        foreach (var error in errors)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"  {key}: {error.ErrorMessage}");
-                        }
-                    }
-
-                    // Recargar el producto para mostrar la imagen actual
                     var productoParaVista = _obtenerProductoPorId.Obtener(producto.IdProducto);
                     if (productoParaVista != null)
                     {
-                        // Mantener los valores del formulario pero recuperar la imagen
                         producto.Imagen = productoParaVista.Imagen;
                         producto.FechaCreacion = productoParaVista.FechaCreacion;
                     }
 
+                    // Recargar las categorías
+                    var categorias = _listarCategorias.ObtenerActivas();
+                    ViewBag.Categorias = categorias;
+
                     return View(producto);
                 }
 
-                // Obtener producto existente
                 var productoExistente = _obtenerProductoPorId.Obtener(producto.IdProducto);
                 if (productoExistente == null)
                 {
@@ -260,10 +299,8 @@ namespace Pasteleria.Controllers
                     return RedirectToAction(nameof(ListadoProductos));
                 }
 
-                // Mantener fecha de creación original
                 producto.FechaCreacion = productoExistente.FechaCreacion;
 
-                // Procesar imagen nueva si se proporcionó
                 if (archivo != null && archivo.Length > 0)
                 {
                     var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
@@ -273,6 +310,8 @@ namespace Pasteleria.Controllers
                     {
                         ModelState.AddModelError("archivo", "Solo se permiten archivos de imagen");
                         producto.Imagen = productoExistente.Imagen;
+                        var categorias = _listarCategorias.ObtenerActivas();
+                        ViewBag.Categorias = categorias;
                         return View(producto);
                     }
 
@@ -280,6 +319,8 @@ namespace Pasteleria.Controllers
                     {
                         ModelState.AddModelError("archivo", "La imagen no puede superar los 5MB");
                         producto.Imagen = productoExistente.Imagen;
+                        var categorias2 = _listarCategorias.ObtenerActivas();
+                        ViewBag.Categorias = categorias2;
                         return View(producto);
                     }
 
@@ -298,13 +339,14 @@ namespace Pasteleria.Controllers
 
                 if (resultado > 0)
                 {
-                    TempData["Success"] = "Producto actualizado exitosamente";
                     return RedirectToAction(nameof(ListadoProductos));
                 }
                 else
                 {
                     ModelState.AddModelError("", "No se pudo actualizar el producto");
                     producto.Imagen = productoExistente.Imagen;
+                    var categorias = _listarCategorias.ObtenerActivas();
+                    ViewBag.Categorias = categorias;
                 }
 
                 return View(producto);
@@ -313,7 +355,6 @@ namespace Pasteleria.Controllers
             {
                 ModelState.AddModelError("", $"Error al actualizar el producto: {ex.Message}");
 
-                // Intentar recargar la imagen
                 try
                 {
                     var productoTemp = _obtenerProductoPorId.Obtener(producto.IdProducto);
@@ -324,11 +365,13 @@ namespace Pasteleria.Controllers
                 }
                 catch { }
 
+                var categoriasError = _listarCategorias.ObtenerActivas();
+                ViewBag.Categorias = categoriasError;
+
                 return View(producto);
             }
         }
 
-        // GET: Producto/DetalleProducto/5
         [HttpGet]
         public IActionResult DetalleProducto(int id)
         {
@@ -341,7 +384,6 @@ namespace Pasteleria.Controllers
 
                 if (producto == null)
                 {
-                    TempData["Error"] = "Producto no encontrado";
                     return RedirectToAction(nameof(ListadoProductos));
                 }
 
@@ -354,7 +396,6 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // POST: Producto/EliminarProducto
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult EliminarProducto(int IdProducto)
@@ -366,11 +407,7 @@ namespace Pasteleria.Controllers
             {
                 int resultado = _eliminarProducto.Eliminar(IdProducto);
 
-                if (resultado > 0)
-                {
-                    TempData["Success"] = "Producto eliminado exitosamente";
-                }
-                else
+                if (resultado < 0)
                 {
                     TempData["Error"] = "No se pudo eliminar el producto";
                 }
@@ -384,7 +421,6 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Producto/ObtenerImagenProducto/5
         [HttpGet]
         public IActionResult ObtenerImagenProducto(int id)
         {
@@ -416,7 +452,6 @@ namespace Pasteleria.Controllers
                 return File(bytes, "image/png");
             }
 
-            // Imagen base64 de 1x1 pixel transparente
             byte[] emptyImage = Convert.FromBase64String("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=");
             return File(emptyImage, "image/png");
         }
@@ -426,19 +461,15 @@ namespace Pasteleria.Controllers
             if (imageBytes == null || imageBytes.Length < 4)
                 return "image/png";
 
-            // JPEG
             if (imageBytes[0] == 0xFF && imageBytes[1] == 0xD8)
                 return "image/jpeg";
 
-            // PNG
             if (imageBytes[0] == 0x89 && imageBytes[1] == 0x50 && imageBytes[2] == 0x4E && imageBytes[3] == 0x47)
                 return "image/png";
 
-            // GIF
             if (imageBytes[0] == 0x47 && imageBytes[1] == 0x49 && imageBytes[2] == 0x46)
                 return "image/gif";
 
-            // BMP
             if (imageBytes[0] == 0x42 && imageBytes[1] == 0x4D)
                 return "image/bmp";
 

@@ -50,23 +50,27 @@ namespace Pasteleria.Controllers
 
                 if (usuario != null)
                 {
+                    // Generar SessionId único
+                    var sessionId = Guid.NewGuid().ToString();
+                    HttpContext.Session.SetString("SessionId", sessionId);
+
                     // Crear Claims Para Usuario
                     var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
-                        new Claim(ClaimTypes.Name, usuario.NombreUsuario),
-                        new Claim(ClaimTypes.Email, usuario.Email),
-                        new Claim(ClaimTypes.Role, nombreRol),
-                        new Claim("TipoUsuario", "Administrador")
-                    };
+            {
+                new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
+                new Claim(ClaimTypes.Name, usuario.NombreUsuario),
+                new Claim(ClaimTypes.Email, usuario.Email),
+                new Claim(ClaimTypes.Role, nombreRol),
+                new Claim("TipoUsuario", "Administrador"),
+                new Claim("SessionId", sessionId) // Vincula con Session
+            };
 
                     var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
                     var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
-                    // Inicar Sesión con Autenticación
                     await HttpContext.SignInAsync("CookieAuth", claimsPrincipal, new AuthenticationProperties
                     {
-                        IsPersistent = true,
+                        IsPersistent = false,
                         ExpiresUtc = DateTimeOffset.UtcNow.AddHours(2)
                     });
 
@@ -79,23 +83,27 @@ namespace Pasteleria.Controllers
 
                 if (cliente != null)
                 {
+                    // Generar SessionId para Cliente también
+                    var sessionId = Guid.NewGuid().ToString();
+                    HttpContext.Session.SetString("SessionId", sessionId);
+
                     // Crear Claims Para Cliente
                     var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.NameIdentifier, cliente.IdCliente.ToString()),
-                        new Claim(ClaimTypes.Name, cliente.NombreCliente),
-                        new Claim(ClaimTypes.Email, cliente.Correo),
-                        new Claim(ClaimTypes.Role, "Cliente"),
-                        new Claim("TipoUsuario", "Cliente")
-                    };
+            {
+                new Claim(ClaimTypes.NameIdentifier, cliente.IdCliente.ToString()),
+                new Claim(ClaimTypes.Name, cliente.NombreCliente),
+                new Claim(ClaimTypes.Email, cliente.Correo),
+                new Claim(ClaimTypes.Role, "Cliente"),
+                new Claim("TipoUsuario", "Cliente"),
+                new Claim("SessionId", sessionId)
+            };
 
                     var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
                     var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
-                    // Inicar Sesión con Autenticación
                     await HttpContext.SignInAsync("CookieAuth", claimsPrincipal, new AuthenticationProperties
                     {
-                        IsPersistent = true,
+                        IsPersistent = false,
                         ExpiresUtc = DateTimeOffset.UtcNow.AddHours(2)
                     });
 
@@ -162,15 +170,6 @@ namespace Pasteleria.Controllers
                 }
                 else
                 {
-                    // Log de errores de validación
-                    /*foreach (var key in ModelState.Keys)
-                    {
-                        var errors = ModelState[key].Errors;
-                        foreach (var error in errors)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Error en {key}: {error.ErrorMessage}");
-                        }
-                    }*/
                     TempData["Error"] = "Por favor complete correctamente todos los campos requeridos";
                 }
 
@@ -191,7 +190,7 @@ namespace Pasteleria.Controllers
             // CERRAR SESIÓN DE AUTENTICACIÓN
             await HttpContext.SignOutAsync("CookieAuth");
 
-            // LIMPIAR SESIÓN
+            // LIMPIAR SESIÓN (carrito)
             HttpContext.Session.Clear();
 
             TempData["Success"] = "Has cerrado sesión exitosamente";

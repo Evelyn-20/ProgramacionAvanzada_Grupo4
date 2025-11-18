@@ -1,0 +1,79 @@
+﻿<!-- Modal Detalles Pedido para Cliente -->
+<div class="modal fade" id="modalDetallesPedidoCliente" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border: none; border-radius: 15px; overflow: hidden; box-shadow: var(--shadow-lg);">
+            <div class="modal-header" style="background: linear-gradient(135deg, var(--primary-color) 0%, #c46d4a 100%); color: var(--white); border: none; padding: 1.5rem 2rem;">
+                <h5 class="modal-title" style="font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-receipt"></i> Detalles de tu Pedido
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding: 2rem; background: var(--white);">
+                <!-- Encabezado del pedido -->
+                <div style="background: linear-gradient(135deg, var(--light-color) 0%, #fef5f1 100%); padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem; border-left: 4px solid var(--primary-color); display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h5 style="color: var(--dark-color); margin: 0 0 0.5rem 0; font-size: 1.5rem;">Pedido #<span id="cliente-pedido-id"></span></h5>
+                        <div style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
+                            <span style="color: var(--text-color); font-size: 0.9rem;">
+                                <i class="fas fa-calendar" style="color: var(--primary-color);"></i>
+                                <span id="cliente-pedido-fecha"></span>
+                            </span>
+                            <span id="cliente-pedido-estado-badge" style="padding: 0.4rem 1rem; border-radius: 20px; font-weight: 600; font-size: 0.85rem;"></span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: var(--text-color); font-size: 0.85rem; margin-bottom: 0.25rem;">Total a pagar</div>
+                        <div id="cliente-pedido-total-header" style="color: var(--primary-color); font-size: 2rem; font-weight: 700; line-height: 1;"></div>
+                    </div>
+                </div>
+
+                <!-- Productos del Pedido -->
+                <div style="margin-bottom: 1.5rem;">
+                    <h6 style="color: var(--dark-color); font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-shopping-basket" style="color: var(--primary-color);"></i>
+                        Tus Productos
+                    </h6>
+                    <div id="cliente-pedido-productos" style="background: var(--light-color); border-radius: 10px; padding: 1rem; max-height: 350px; overflow-y: auto;">
+                        <!-- Los productos se cargarán dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Resumen de Pago -->
+                <div style="background: var(--light-color); padding: 1.5rem; border-radius: 10px; border: 2px solid var(--secondary-color);">
+                    <h6 style="color: var(--dark-color); font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-file-invoice-dollar" style="color: var(--primary-color);"></i>
+                        Resumen de Pago
+                    </h6>
+                    <div style="display: grid; gap: 0.75rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;">
+                            <span style="color: var(--text-color); font-size: 1rem;">Subtotal:</span>
+                            <span id="cliente-pedido-subtotal" style="color: var(--dark-color); font-weight: 600; font-size: 1.1rem;"></span>
+                        </div>
+                        <div id="cliente-pedido-descuento-row" style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-radius: 5px;">
+                            <span style="color: var(--text-color); font-size: 1rem;">
+                                <i class="fas fa-tag" style="color: #27ae60;"></i> Descuento aplicado:
+                            </span>
+                            <span id="cliente-pedido-descuento" style="color: #27ae60; font-weight: 600; font-size: 1.1rem;"></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 2px solid var(--secondary-color);">
+                            <span style="color: var(--text-color); font-size: 1rem;">IVA (13%):</span>
+                            <span id="cliente-pedido-impuesto" style="color: var(--dark-color); font-weight: 600; font-size: 1.1rem;"></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0 0 0;">
+                            <span style="color: var(--dark-color); font-weight: 700; font-size: 1.3rem;">
+                                <i class="fas fa-money-bill-wave" style="color: var(--primary-color);"></i> Total a Pagar
+                            </span>
+                            <span id="cliente-pedido-total" style="color: var(--primary-color); font-size: 1.5rem; font-weight: 700;"></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer" style="background: var(--light-color); border: none; padding: 1.5rem 2rem;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 50px; padding: 0.75rem 2rem;">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

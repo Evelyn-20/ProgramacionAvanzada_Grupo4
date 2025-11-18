@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Pasteleria.Controllers
 {
@@ -6,7 +7,8 @@ namespace Pasteleria.Controllers
     {
         protected bool VerificarPermisosAdministrador()
         {
-            var tipoUsuario = HttpContext.Session.GetString("TipoUsuario");
+            // Leer desde Claims en lugar de Session
+            var tipoUsuario = User.FindFirst("TipoUsuario")?.Value;
 
             if (tipoUsuario != "Administrador")
             {
@@ -19,8 +21,8 @@ namespace Pasteleria.Controllers
 
         protected bool VerificarSesionActiva()
         {
-            var nombreUsuario = HttpContext.Session.GetString("UsuarioNombre") ??
-                               HttpContext.Session.GetString("ClienteNombre");
+            // Leer desde Claims en lugar de Session
+            var nombreUsuario = User.Identity?.Name;
 
             if (string.IsNullOrEmpty(nombreUsuario))
             {

@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Pasteleria.Abstracciones.Logica.Pedido;
 using Pasteleria.Abstracciones.ModeloUI;
 using Pasteleria.LogicaDeNegocio.Pedidos;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Pasteleria.Controllers
@@ -13,44 +15,84 @@ namespace Pasteleria.Controllers
     {
         private readonly IBuscarProductosParaPedido _buscarProductos;
         private readonly ICalcularTotales _calcularTotales;
-        private const string CarritoSessionKey = "CarritoCompras";
 
-        public CarritoController()
+        public CarritoController(
+            IBuscarProductosParaPedido buscarProductos,
+            ICalcularTotales calcularTotales)
         {
-            _buscarProductos = new BuscarProductosParaPedido();
-            _calcularTotales = new CalcularTotales();
+            _buscarProductos = buscarProductos;
+            _calcularTotales = calcularTotales;
         }
 
-        // OBTENER CARRITO DE LA SESIÓN
+        // OBTENER CARRITO DESDE COOKIE (no Session)
         private List<CarritoItem> ObtenerCarrito()
         {
-            var carritoJson = HttpContext.Session.GetString(CarritoSessionKey);
+            var carritoJson = Request.Cookies["CarritoCompras"];
 
             if (string.IsNullOrEmpty(carritoJson))
             {
                 return new List<CarritoItem>();
             }
 
-            var carrito = JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
-
-            return carrito;
+            try
+            {
+                var carrito = JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
+                return carrito ?? new List<CarritoItem>();
+            }
+            catch
+            {
+                return new List<CarritoItem>();
+            }
         }
 
-        // GUARDAR CARRITO EN LA SESIÓN
+        // GUARDAR CARRITO EN COOKIE (no Session)
         private void GuardarCarrito(List<CarritoItem> carrito)
         {
             var carritoJson = JsonConvert.SerializeObject(carrito);
-            HttpContext.Session.SetString(CarritoSessionKey, carritoJson);
+
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                IsEssential = true,
+                Expires = DateTimeOffset.UtcNow.AddDays(7), // Expira en 7 días
+                SameSite = SameSiteMode.Lax
+            };
+
+            Response.Cookies.Append("CarritoCompras", carritoJson, cookieOptions);
         }
 
-        // GET: Carrito (Vista principal)
+        // LIMPIAR CARRITO
+        private void LimpiarCarrito()
+        {
+            Response.Cookies.Delete("CarritoCompras");
+        }
+
+        // OBTENER ID DEL CLIENTE DESDE CLAIMS
+        private int? ObtenerClienteId()
+        {
+            if (!User.Identity?.IsAuthenticated ?? true)
+                return null;
+
+            var tipoUsuario = User.FindFirst("TipoUsuario")?.Value;
+            if (tipoUsuario != "Cliente")
+                return null;
+
+            var clienteIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(clienteIdClaim, out int clienteId))
+                return clienteId;
+
+            return null;
+        }
+
+        // GET: Carrito
+        [Authorize]
         public IActionResult Carrito()
         {
-            var clienteId = HttpContext.Session.GetInt32("ClienteId");
+            var clienteId = ObtenerClienteId();
 
             if (clienteId == null)
             {
-                TempData["Error"] = "Debe iniciar sesión para acceder al carrito";
+                TempData["Error"] = "Debe iniciar sesión como cliente para acceder al carrito";
                 return RedirectToAction("Login", "Account");
             }
 
@@ -67,16 +109,17 @@ namespace Pasteleria.Controllers
 
         // POST: AgregarAlCarrito
         [HttpPost]
+        [Authorize]
         public IActionResult AgregarAlCarrito(int idProducto, int cantidad = 1)
         {
             try
             {
-                // Verificar autenticación
-                var clienteId = HttpContext.Session.GetInt32("ClienteId");
+                // Verificar autenticación desde Claims
+                var clienteId = ObtenerClienteId();
 
                 if (clienteId == null)
                 {
-                    return Json(new { success = false, mensaje = "Debe iniciar sesión para agregar productos al carrito" });
+                    return Json(new { success = false, mensaje = "Debe iniciar sesión como cliente para agregar productos al carrito" });
                 }
 
                 // Obtener producto
@@ -155,6 +198,7 @@ namespace Pasteleria.Controllers
 
         // POST: ActualizarCantidad
         [HttpPost]
+        [Authorize]
         public IActionResult ActualizarCantidad(int idProducto, string accion)
         {
             try
@@ -219,6 +263,7 @@ namespace Pasteleria.Controllers
 
         // POST: EliminarDelCarrito
         [HttpPost]
+        [Authorize]
         public IActionResult EliminarDelCarrito(int idProducto)
         {
             try
@@ -248,20 +293,22 @@ namespace Pasteleria.Controllers
 
         // POST: VaciarCarrito
         [HttpPost]
+        [Authorize]
         public IActionResult VaciarCarrito()
         {
-            GuardarCarrito(new List<CarritoItem>());
+            LimpiarCarrito();
             TempData["Success"] = "Carrito vaciado correctamente";
             return RedirectToAction("Carrito");
         }
 
         // GET: FinalizacionCompra
+        [Authorize]
         public IActionResult FinalizacionCompra()
         {
-            var clienteId = HttpContext.Session.GetInt32("ClienteId");
+            var clienteId = ObtenerClienteId();
             if (clienteId == null)
             {
-                TempData["Error"] = "Debe iniciar sesión para proceder con el pago";
+                TempData["Error"] = "Debe iniciar sesión como cliente para proceder con el pago";
                 return RedirectToAction("Login", "Account");
             }
 
@@ -300,15 +347,16 @@ namespace Pasteleria.Controllers
         // POST: ProcesarPago
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> ProcesarPago()
         {
             try
             {
-                var clienteId = HttpContext.Session.GetInt32("ClienteId");
+                var clienteId = ObtenerClienteId();
 
                 if (clienteId == null)
                 {
-                    TempData["Error"] = "Debe iniciar sesión";
+                    TempData["Error"] = "Debe iniciar sesión como cliente";
                     return RedirectToAction("Login", "Account");
                 }
 
@@ -350,7 +398,7 @@ namespace Pasteleria.Controllers
                 var pedido = new Pedido
                 {
                     IdCliente = clienteId.Value,
-                    IdUsuario = 0, // Se guardará como NULL en la BD
+                    IdUsuario = null,
                     Subtotal = resumen.Subtotal,
                     Descuento = resumen.Descuento,
                     Impuesto = resumen.Impuesto,
@@ -369,14 +417,14 @@ namespace Pasteleria.Controllers
                 }).ToList();
 
                 // Guardar pedido en la base de datos
-                var crearPedido = new Pasteleria.LogicaDeNegocio.Pedidos.CrearPedido();
+                var crearPedido = new CrearPedido();
 
                 var idPedido = await crearPedido.Guardar(pedido, detalles);
 
                 if (idPedido > 0)
                 {
                     // Limpiar carrito
-                    GuardarCarrito(new List<CarritoItem>());
+                    LimpiarCarrito();
 
                     TempData["Success"] = $"¡Pedido #{idPedido} creado exitosamente! Total: ₡{resumen.Total:N2}";
                     return RedirectToAction("Index", "Home");

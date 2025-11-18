@@ -2,6 +2,7 @@ using Pasteleria.Abstracciones.Logica.Producto;
 using Pasteleria.Abstracciones.Logica.Pedido;
 using Pasteleria.LogicaDeNegocio.Productos;
 using Pasteleria.LogicaDeNegocio.Pedidos;
+using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,16 @@ builder.Services.AddControllersWithViews()
         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
         options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
     });
+
+// CONFIGURAR SESIONES PRIMERO (Para Carrito y validación de login)
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.Name = ".Pasteleria.Session";
+});
 
 // CONFIGURAR AUTENTICACIÓN CON COOKIES
 builder.Services.AddAuthentication("CookieAuth")
@@ -24,17 +35,22 @@ builder.Services.AddAuthentication("CookieAuth")
         options.Cookie.Name = ".Pasteleria.Auth";
         options.Cookie.HttpOnly = true;
         options.Cookie.IsEssential = true;
-    });
 
-// CONFIGURAR SESIONES (Para Carrito y Login)
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-    options.Cookie.Name = ".Pasteleria.Session";
-});
+        // EVENTO: Validar sesión en cada request
+        options.Events.OnValidatePrincipal = async context =>
+        {
+            var sessionKey = "SessionId";
+            var sessionId = context.HttpContext.Session.GetString(sessionKey);
+            var userSessionId = context.Principal?.FindFirst("SessionId")?.Value;
+
+            // Si no hay session activa en el servidor, cerrar sesión
+            if (string.IsNullOrEmpty(sessionId) || sessionId != userSessionId)
+            {
+                context.RejectPrincipal();
+                await context.HttpContext.SignOutAsync("CookieAuth");
+            }
+        };
+    });
 
 // REGISTRAR SERVICIOS DE PRODUCTOS
 builder.Services.AddScoped<IListarProductos, ListarProductos>();

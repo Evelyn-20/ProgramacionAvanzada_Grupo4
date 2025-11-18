@@ -82,12 +82,11 @@
                     <div>
                         @Html.LabelFor(model => model.Precio, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
                         <input type="text"
-                               name="Precio"
+                               name="PrecioStr"
                                id="Precio"
-                               value="@Model.Precio.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)"
+                               value="@Model.Precio.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
                                class="form-control"
                                placeholder="0.00"
-                               pattern="[0-9]+([.][0-9]{1,2})?"
                                style="width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" />
                         @Html.ValidationMessageFor(model => model.Precio, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
                     </div>
@@ -96,7 +95,13 @@
                 <!-- Porcentaje de Impuesto -->
                 <div style="margin-bottom: 1.5rem;">
                     @Html.LabelFor(model => model.PorcentajeImpuesto, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
-                    @Html.TextBoxFor(model => model.PorcentajeImpuesto, "{0:0.00}", new { @class = "form-control", type = "number", step = "0.01", min = "0", max = "100", placeholder = "13", style = "width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" })
+                    <input type="text"
+                           name="PorcentajeImpuestoStr"
+                           id="PorcentajeImpuesto"
+                           value="@Model.PorcentajeImpuesto.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
+                           class="form-control"
+                           placeholder="13.00"
+                           style="width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" />
                     @Html.ValidationMessageFor(model => model.PorcentajeImpuesto, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
                     <small style="color: var(--text-color); font-size: 0.85rem; margin-top: 0.3rem; display: block;">
                         <i class="fas fa-info-circle" style="color: var(--primary-color);"></i> Ingresa el porcentaje (ej: 13 para 13%)

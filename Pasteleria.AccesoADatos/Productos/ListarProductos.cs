@@ -36,6 +36,35 @@ namespace Pasteleria.AccesoADatos.Productos
             return productosAD.Select(p => ConvertirObjetoParaUI(p)).ToList();
         }
 
+        public List<Abstracciones.ModeloUI.Producto> BuscarPorDescripcion(string descripcion)
+        {
+            List<ProductoAD> productosAD = _contexto.Producto
+                .Where(p => p.DescripcionProducto.Contains(descripcion))
+                .ToList();
+            return productosAD.Select(p => ConvertirObjetoParaUI(p)).ToList();
+        }
+
+        public List<Abstracciones.ModeloUI.Producto> BuscarPorPrecio(decimal precio)
+        {
+            // Buscar productos con precio igual o cercano (±10% del precio buscado)
+            decimal rangoMin = precio * 0.9m;
+            decimal rangoMax = precio * 1.1m;
+
+            List<ProductoAD> productosAD = _contexto.Producto
+                .Where(p => p.Precio >= rangoMin && p.Precio <= rangoMax)
+                .ToList();
+            return productosAD.Select(p => ConvertirObjetoParaUI(p)).ToList();
+        }
+
+        public List<Abstracciones.ModeloUI.Producto> BuscarPorCantidad(int cantidad)
+        {
+            // Buscar productos con cantidad igual o mayor
+            List<ProductoAD> productosAD = _contexto.Producto
+                .Where(p => p.Cantidad >= cantidad)
+                .ToList();
+            return productosAD.Select(p => ConvertirObjetoParaUI(p)).ToList();
+        }
+
         private Abstracciones.ModeloUI.Producto ConvertirObjetoParaUI(ProductoAD productoAD)
         {
             return new Abstracciones.ModeloUI.Producto

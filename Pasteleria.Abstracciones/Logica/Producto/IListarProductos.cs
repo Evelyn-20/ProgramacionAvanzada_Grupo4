@@ -12,5 +12,8 @@ namespace Pasteleria.Abstracciones.Logica.Producto
         List<ProductoUI> Obtener();
         List<ProductoUI> BuscarPorNombre(string nombre);
         List<ProductoUI> BuscarPorCategoria(int idCategoria);
+        List<ProductoUI> BuscarPorDescripcion(string descripcion);
+        List<ProductoUI> BuscarPorPrecio(decimal precio);
+        List<ProductoUI> BuscarPorCantidad(int cantidad);
     }
 }

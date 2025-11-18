@@ -27,5 +27,20 @@ namespace Pasteleria.LogicaDeNegocio.Productos
         {
             return _listarProductos.BuscarPorCategoria(idCategoria);
         }
+
+        public List<Producto> BuscarPorDescripcion(string descripcion)
+        {
+            return _listarProductos.BuscarPorDescripcion(descripcion);
+        }
+
+        public List<Producto> BuscarPorPrecio(decimal precio)
+        {
+            return _listarProductos.BuscarPorPrecio(precio);
+        }
+
+        public List<Producto> BuscarPorCantidad(int cantidad)
+        {
+            return _listarProductos.BuscarPorCantidad(cantidad);
+        }
     }
 }

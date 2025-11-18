@@ -113,6 +113,14 @@
 
                         <!-- Acciones -->
                         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <button type="button"
+                                    class="btn btn-detalles-cliente"
+                                    data-id="@pedido.IdPedido"
+                                    style="width: 100%; padding: 0.75rem; background: var(--primary-color); color: var(--white); border: none; border-radius: 50px; cursor: pointer; transition: all 0.3s;"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalDetallesPedidoCliente">
+                                <i class="fas fa-eye"></i> Ver Detalles
+                            </button>
 
                             @if (pedido.Estado == "Pendiente")
                             {
@@ -146,3 +154,9 @@
         </div>
     }
 </div>
+
+<partial name="_ModalDetallesPedidoCliente" />
+
+@section Scripts {
+    <script src="~/js/pedido.js"></script>
+}

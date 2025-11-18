@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Http
+@using System.Security.Claims
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -84,34 +85,37 @@
 
         /* Responsive para móviles */
         @@media (max-width: 768px) {
-            .dropdown-menu-custom {
-                position: static;
-                box-shadow: none;
-                background: var(--light-color);
-                margin-top: 0.5rem;
-                border-left: 3px solid var(--primary-color);
-                border-radius: 0;
+            .dropdown-menu-custom
+
+        {
+            position: static;
+            box-shadow: none;
+            background: var(--light-color);
+            margin-top: 0.5rem;
+            border-left: 3px solid var(--primary-color);
+            border-radius: 0;
+        }
+
+        .dropdown-menu-custom a {
+            padding-left: 2rem;
+        }
+
+            .dropdown-menu-custom a:hover {
+                padding-left: 2.5rem;
             }
 
-                .dropdown-menu-custom a {
-                    padding-left: 2rem;
-                }
-
-                    .dropdown-menu-custom a:hover {
-                        padding-left: 2.5rem;
-                    }
         }
     </style>
 </head>
 
 <body>
     @{
-        var clienteId = Context.Session.GetInt32("ClienteId");
-        var usuarioId = Context.Session.GetInt32("UsuarioId");
-        var tipoUsuario = Context.Session.GetString("TipoUsuario");
-        var nombreUsuario = Context.Session.GetString("ClienteNombre") ?? Context.Session.GetString("UsuarioNombre");
+        // LEER DESDE CLAIMS (Cookie Authentication) en lugar de Session
+        var estaAutenticado = User.Identity?.IsAuthenticated ?? false;
+        var tipoUsuario = User.FindFirst("TipoUsuario")?.Value;
+        var nombreUsuario = User.Identity?.Name;
+        var clienteId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var esAdmin = tipoUsuario == "Administrador";
-        var estaAutenticado = clienteId != null || usuarioId != null;
     }
 
     <header>
@@ -147,8 +151,8 @@
                         <li><a href="/Auditoria/ListadoAuditorias">Auditorias</a></li>
                     }
 
-                    <!-- Mis Pedidos (solo clientes autenticados) -->
-                    @if (clienteId != null && !esAdmin)
+                    <!-- Mis Pedidos (solo clientes autenticados no admin) -->
+                    @if (estaAutenticado && !esAdmin)
                     {
                         <li><a href="/Pedido/MisPedidos">Mis Pedidos</a></li>
                     }
@@ -172,7 +176,7 @@
                                 @nombreUsuario
                             </a>
                             <ul class="dropdown-menu-custom">
-                                @if (clienteId != null && !esAdmin)
+                                @if (!esAdmin)
                                 {
                                     <li><a href="/Pedido/MisPedidos"><i class="fas fa-shopping-bag"></i> Mis Pedidos</a></li>
                                 }
@@ -238,7 +242,7 @@
                     <h4>Compras</h4>
                     <ul>
                         <li><a href="/Catalogo/Index">Catálogo</a></li>
-                        @if (clienteId != null)
+                        @if (estaAutenticado && !esAdmin)
                         {
                             <li><a href="/Pedido/MisPedidos">Mis Pedidos</a></li>
                         }
