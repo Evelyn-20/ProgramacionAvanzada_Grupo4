@@ -41,7 +41,7 @@ namespace Pasteleria.Controllers
         // GET: Producto/ListadoProductos
         public IActionResult ListadoProductos(string buscar, int? categoria)
         {
-            if (!VerificarPermisosAdministrador())
+            if (!PuedeVerCatalogo())
                 return RedirectToAction("Index", "Home");
 
             try
@@ -80,8 +80,8 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult CrearProducto()
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarInventario())
+                return RedirectToAction("ListadoProductos");
 
             // Cargar categorías activas para el dropdown
             var categorias = _listarCategorias.ObtenerActivas();
@@ -94,8 +94,8 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CrearProducto(Producto producto, IFormFile archivo)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarInventario())
+                return RedirectToAction("ListadoProductos");
 
             try
             {
@@ -178,8 +178,8 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult EditarProducto(int id)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarInventario())
+                return RedirectToAction("ListadoProductos");
 
             try
             {
@@ -209,8 +209,8 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditarProducto(Producto producto, IFormFile archivo)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarInventario())
+                return RedirectToAction("ListadoProductos");
 
             try
             {
@@ -334,7 +334,7 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult DetalleProducto(int id)
         {
-            if (!VerificarPermisosAdministrador())
+            if (!PuedeVerCatalogo())
                 return RedirectToAction("Index", "Home");
 
             try
@@ -361,8 +361,8 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult EliminarProducto(int IdProducto)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeEliminarProductos())
+                return RedirectToAction("ListadoProductos");
 
             try
             {

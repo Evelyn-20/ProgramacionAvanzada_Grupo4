@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Pasteleria.Controllers
 {
-    public class PedidoController : Controller
+    public class PedidoController : BaseController
     {
         // GET: /Pedido/Verificar
         [HttpGet]
@@ -31,8 +31,10 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult ListadoPedidos()
         {
-            
-            return View(); // busca Views/Pedido/ListadoPedidos.cshtml
+            if (!PuedeGestionarPedidos())
+                return RedirectToAction("Index", "Home");
+
+            return View();
         }
     }
 }

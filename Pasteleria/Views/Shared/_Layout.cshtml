@@ -110,44 +110,79 @@
                 <a href="/" class="logo">
                     <img src="~/images/logo.png" alt="Pastelería Artesanal" style="height: 70px; width: auto; object-fit: contain;" />
                 </a>
+                @{
+                    var tipoUsuario = Context.Session.GetString("TipoUsuario");
+                    var rolUsuario = Context.Session.GetString("UsuarioRol");
+                    var nombreUsuario = Context.Session.GetString("UsuarioNombre") ?? Context.Session.GetString("ClienteNombre");
+                }
+
                 <ul class="nav-menu">
                     <li><a href="/Catalogo/Index">Catálogo</a></li>
 
-                    <!-- Menú Inventario -->
-                    <li>
-                        <a href="#" class="has-dropdown">Inventario</a>
-                        <ul class="dropdown-menu-custom">
-                            <li><a href="/Producto/ListadoProductos">Productos</a></li>
-                            <li><a href="/Categoria/ListadoCategorias">Categorías</a></li>
-                        </ul>
-                    </li>
+                    @if (tipoUsuario == "Administrador" && (rolUsuario == "Admin" || rolUsuario == "Operaciones"))
+                    {
+                        <li>
+                            <a href="#" class="has-dropdown">Inventario</a>
+                            <ul class="dropdown-menu-custom">
+                                <li><a href="/Producto/ListadoProductos">Productos</a></li>
+                                <li><a href="/Categoria/ListadoCategorias">Categorías</a></li>
+                            </ul>
+                        </li>
+                    }
 
-                    <li><a href="@Url.Action("ListadoPedidos", "Pedido")">Pedidos</a></li>
+                    @if (tipoUsuario == "Administrador" && (rolUsuario == "Admin" || rolUsuario == "Ventas"))
+                    {
+                        <li><a href="@Url.Action("ListadoPedidos", "Pedido")">Pedidos</a></li>
+                    }
 
-                    <!-- Menú Administración -->
-                    <li>
-                        <a href="#" class="has-dropdown">Usuarios</a>
-                        <ul class="dropdown-menu-custom">
-                            <li><a href="/Cliente/ListadoClientes">Clientes</a></li>
-                            <li><a href="/Usuario/ListadoUsuarios">Usuarios</a></li>
-                            <li><a href="/Rol/ListadoRoles">Roles</a></li>
-                        </ul>
-                    </li>
+                    @if (tipoUsuario == "Administrador" && rolUsuario == "Admin")
+                    {
+                        <li>
+                            <a href="#" class="has-dropdown">Usuarios</a>
+                            <ul class="dropdown-menu-custom">
+                                <li><a href="/Cliente/ListadoClientes">Clientes</a></li>
+                                <li><a href="/Usuario/ListadoUsuarios">Usuarios</a></li>
+                                <li><a href="/Rol/ListadoRoles">Roles</a></li>
+                            </ul>
+                        </li>
+                    }
 
-                    <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
-                    <li><a href="#contacto">Contacto</a></li>
+                    <li><a href="/#sobre-nosotros">Sobre Nosotros</a></li>
+                    <li><a href="/#contacto">Contacto</a></li>
 
-                    <li>
-                        <a href="@Url.Action("Carrito", "Carrito")" class="btn-cart">
-                            <i class="fas fa-shopping-cart"></i>
-                            <span class="cart-count">0</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="@Url.Action("Login", "Account")" class="btn-login-nav">
-                            <i class="fas fa-user"></i> Ingresar
-                        </a>
-                    </li>
+                    @if (tipoUsuario == "Cliente" || string.IsNullOrEmpty(tipoUsuario))
+                    {
+                        <li>
+                            <a href="@Url.Action("Carrito", "Carrito")" class="btn-cart">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="cart-count">0</span>
+                            </a>
+                        </li>
+                    }
+
+                    @if (string.IsNullOrEmpty(nombreUsuario))
+                    {
+                        <li>
+                            <a href="@Url.Action("Login", "Account")" class="btn-login-nav">
+                                <i class="fas fa-user"></i> Ingresar
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li>
+                            <a href="#" class="has-dropdown btn-login-nav">
+                                <i class="fas fa-user-circle"></i> @nombreUsuario
+                            </a>
+                            <ul class="dropdown-menu-custom">
+                                <li>
+                                    <a href="@Url.Action("Logout", "Account")">
+                                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
                 </ul>
                 <div class="hamburger">
                     <span></span><span></span><span></span>
@@ -199,8 +234,8 @@
                     </ul>
                     <h4>Nosotros</h4>
                     <ul>
-                        <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
-                        <li><a href="#contacto">Contacto</a></li>
+                        <li><a href="/#sobre-nosotros">Sobre Nosotros</a></li>
+                        <li><a href="/#contacto">Contacto</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">

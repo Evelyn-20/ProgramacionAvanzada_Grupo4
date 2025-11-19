@@ -13,9 +13,14 @@ namespace Pasteleria.LogicaDeNegocio.Clientes
             using (var context = new Contexto())
             {
                 var clienteAD = context.Cliente
-                    .FirstOrDefault(c => c.Correo == correo && c.Contrasenna == contrasenna && c.Estado == true);
+                    .FirstOrDefault(c => c.Correo == correo && c.Estado == true);
 
                 if (clienteAD == null)
+                    return null;
+
+                bool esPasswordValida = BCrypt.Net.BCrypt.Verify(contrasenna, clienteAD.Contrasenna);
+
+                if (!esPasswordValida)
                     return null;
 
                 return new Cliente
