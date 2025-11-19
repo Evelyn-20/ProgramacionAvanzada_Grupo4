@@ -169,5 +169,124 @@
 <partial name="_ModalEliminarCategoria" />
 
 @section Scripts {
-    <script src="~/js/categorias.js"></script>
+    <script>
+        // Variables globales de paginación
+        var paginaActual = 1;
+        var registrosPorPagina = 10;
+        var todasLasFilas = [];
+
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('Inicializando categorías...');
+
+            // Inicializar tabla
+            var table = document.getElementById('laTablaDeCategor');
+            if (table && table.getElementsByTagName('tbody')[0]) {
+                todasLasFilas = Array.from(table.getElementsByTagName('tbody')[0].getElementsByTagName('tr'));
+                console.log('Filas encontradas:', todasLasFilas.length);
+                if (todasLasFilas.length > 0 && !todasLasFilas[0].querySelector('td[colspan]')) {
+                    mostrarPagina(paginaActual);
+                }
+            }
+
+            // Boton de Editar
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.btn-editar')) {
+                    e.preventDefault();
+                    var btn = e.target.closest('.btn-editar');
+                    var id = btn.getAttribute('data-id');
+                    console.log('Editando categoría:', id);
+                    window.location.href = '/Categoria/EditarCategoria?id=' + id;
+                }
+            });
+
+            // Boton de detalles
+            var botonesDetalles = document.querySelectorAll('.btn-detalles');
+            botonesDetalles.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.getAttribute('data-id');
+                    var nombre = this.getAttribute('data-nombre');
+                    var estado = this.getAttribute('data-estado');
+
+                    document.getElementById('detalles-id').textContent = id;
+                    document.getElementById('detalles-nombre').textContent = nombre;
+                    document.getElementById('detalles-imagen').src = '/Categoria/ObtenerImagenCategoria?id=' + id;
+
+                    var badge = document.getElementById('detalles-estado-badge');
+                    badge.textContent = estado;
+                    badge.style.background = estado === 'Activo' ? '#27ae60' : '#e74c3c';
+                    badge.style.color = 'white';
+                    badge.style.padding = '0.5rem 1rem';
+                    badge.style.borderRadius = '20px';
+                });
+            });
+
+            // Boton de eliminar
+            var botonesEliminar = document.querySelectorAll('.btn-eliminar');
+            botonesEliminar.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.getAttribute('data-id');
+                    var nombre = this.getAttribute('data-nombre');
+                    var estado = this.getAttribute('data-estado');
+
+                    document.getElementById('eliminar-id').value = id;
+                    document.getElementById('eliminar-id-display').textContent = id;
+                    document.getElementById('eliminar-nombre').textContent = nombre;
+
+                    var badge = document.getElementById('eliminar-estado-badge');
+                    badge.textContent = estado;
+                    badge.style.background = estado === 'Activo' ? '#27ae60' : '#e74c3c';
+                    badge.style.color = 'white';
+                    badge.style.padding = '0.5rem 1rem';
+                    badge.style.borderRadius = '20px';
+
+                    document.getElementById('formEliminarCategoria').action = '/Categoria/EliminarCategoria';
+                });
+            });
+        });
+
+        function mostrarPagina(pagina) {
+            if (todasLasFilas.length === 0) return;
+
+            var inicio = (pagina - 1) * registrosPorPagina;
+            var fin = inicio + registrosPorPagina;
+            var totalRegistros = todasLasFilas.length;
+
+            todasLasFilas.forEach(function (row, index) {
+                row.style.display = (index >= inicio && index < fin) ? '' : 'none';
+            });
+
+            document.getElementById('startRecord').textContent = inicio + 1;
+            document.getElementById('endRecord').textContent = Math.min(fin, totalRegistros);
+            document.getElementById('totalRecords').textContent = totalRegistros;
+
+            var btnAnterior = document.getElementById('btnAnterior');
+            var btnSiguiente = document.getElementById('btnSiguiente');
+
+            if (btnAnterior) {
+                btnAnterior.disabled = pagina === 1;
+                btnAnterior.style.opacity = pagina === 1 ? '0.5' : '1';
+            }
+
+            if (btnSiguiente) {
+                var deshabilitado = fin >= totalRegistros;
+                btnSiguiente.disabled = deshabilitado;
+                btnSiguiente.style.opacity = deshabilitado ? '0.5' : '1';
+            }
+        }
+
+        function paginaAnterior() {
+            if (paginaActual > 1) {
+                paginaActual--;
+                mostrarPagina(paginaActual);
+            }
+        }
+
+        function paginaSiguiente() {
+            var totalPaginas = Math.ceil(todasLasFilas.length / registrosPorPagina);
+            if (paginaActual < totalPaginas) {
+                paginaActual++;
+                mostrarPagina(paginaActual);
+            }
+        }
+    </script>
 }

@@ -5,8 +5,8 @@
     var categoria = ViewBag.Categoria as Pasteleria.Abstracciones.ModeloUI.Categoria;
 }
 
-<!-- Botón de regreso inferior (para móviles) -->
-<div style="margin-bottom: 1rem;">
+<!-- Botón de regreso con mejor espaciado -->
+<div style="margin: 2rem 0; padding: 0 1rem;">
     <a href="@Url.Action("Productos", "Catalogo", new { id = Model.IdCategoria })"
        class="btn btn-secondary"
        style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.5rem;">
@@ -15,7 +15,7 @@
 </div>
 
 <!-- Detalle del Producto -->
-<section style="padding: 4rem 0;">
+<section style="padding: 2rem 0 4rem 0;">
     <div class="container" style="max-width: 1200px;">
         <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); overflow: hidden;">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0;">
@@ -237,7 +237,7 @@
                     // Obtener nombre del producto
                     const nombreProducto = '@Model.NombreProducto';
 
-                    // Mostrar mensaje de éxito
+                    // Mostrar mensaje de éxito con opción de continuar o ir al carrito
                     Swal.fire({
                         icon: 'success',
                         title: '¡Producto agregado!',
@@ -247,11 +247,14 @@
                         showCancelButton: true,
                         cancelButtonText: 'Ver carrito',
                         confirmButtonColor: '#d4825c',
-                        cancelButtonColor: '#6c757d'
+                        cancelButtonColor: '#6c757d',
+                        reverseButtons: true
                     }).then((result) => {
-                        if (!result.isConfirmed) {
+                        if (result.isDismissed && result.dismiss === Swal.DismissReason.cancel) {
+                            // Si presiona "Ver carrito"
                             window.location.href = '/Carrito/Carrito';
                         } else {
+                            // Si presiona "Continuar comprando" o cierra el modal
                             inputCantidad.value = 1;
                         }
                     });

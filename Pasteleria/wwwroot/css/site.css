@@ -1244,3 +1244,20 @@ footer {
         border-color: var(--primary-color);
         box-shadow: 0 0 0 3px rgba(212, 130, 92, 0.1);
     }
+
+/* Espaciado para los botones de volver */
+.btn-volver-container {
+    margin: 2rem 0;
+    padding: 0 1rem;
+}
+
+@media (max-width: 768px) {
+    .btn-volver-container {
+        margin: 1.5rem 0;
+    }
+}
+
+/* Mejorar el espaciado del contenedor principal */
+.container-with-back-button {
+    padding-top: 1rem;
+}

@@ -185,7 +185,7 @@ function agregarAlCarrito() {
     }
 
     // Realizar peticion AJAX al servidor
-    
+
     fetch('/Carrito/AgregarAlCarrito', {
         method: 'POST',
         headers: {
@@ -217,7 +217,7 @@ function agregarAlCarrito() {
                 // Obtener nombre del producto
                 const nombreProducto = document.querySelector('h2')?.textContent || 'Producto';
 
-                // Mostrar mensaje de éxito
+                // Mostrar mensaje de éxito con opción de continuar o ir al carrito
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
                         icon: 'success',
@@ -228,11 +228,14 @@ function agregarAlCarrito() {
                         showCancelButton: true,
                         cancelButtonText: 'Ver carrito',
                         confirmButtonColor: '#d4825c',
-                        cancelButtonColor: '#6c757d'
+                        cancelButtonColor: '#6c757d',
+                        reverseButtons: true
                     }).then((result) => {
-                        if (!result.isConfirmed) {
+                        if (result.isDismissed && result.dismiss === Swal.DismissReason.cancel) {
+                            // Si presiona "Ver carrito"
                             window.location.href = '/Carrito/Carrito';
                         } else {
+                            // Si presiona "Continuar comprando" o cierra el modal
                             inputCantidad.value = 1;
                         }
                     });

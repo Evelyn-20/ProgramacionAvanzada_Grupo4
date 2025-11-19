@@ -5,9 +5,8 @@
     var categoria = ViewBag.Categoria as Pasteleria.Abstracciones.ModeloUI.Categoria;
 }
 
-
-<!-- Botón de regreso inferior (para móviles) -->
-<div style="margin-bottom: 2rem;">
+<!-- Botón de regreso con mejor espaciado -->
+<div style="margin: 2rem 0; padding: 0 1rem;">
     <a href="@Url.Action("Index", "Catalogo")"
        class="btn btn-secondary"
        style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.5rem;">
@@ -16,7 +15,7 @@
 </div>
 
 <!-- Productos -->
-<section class="products" style="padding: 4rem 0;">
+<section class="products" style="padding: 2rem 0 4rem 0;">
     <div class="container">
         @if (Model != null && Model.Count > 0)
         {

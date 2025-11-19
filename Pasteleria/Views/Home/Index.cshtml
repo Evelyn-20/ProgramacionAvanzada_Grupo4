@@ -97,7 +97,11 @@
                             <p>@producto.DescripcionProducto</p>
                             <div class="product-footer">
                                 <span class="price">₡@producto.Precio.ToString("N0")</span>
-                                <button class="btn btn-sm btn-primary" onclick="agregarAlCarrito(@producto.IdProducto)">Agregar</button>
+                                <button class="btn btn-sm btn-primary btn-agregar-home"
+                                        data-producto-id="@producto.IdProducto"
+                                        data-producto-nombre="@producto.NombreProducto">
+                                    Agregar
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -115,7 +119,7 @@
         @if (Model.Productos != null && Model.Productos.Count > 6)
         {
             <div style="text-align: center; margin-top: 2rem;">
-                <a href="@Url.Action("Productos", "Catalogo")" class="btn btn-primary btn-lg">
+                <a href="@Url.Action("Index", "Catalogo")" class="btn btn-primary btn-lg">
                     Ver Todos los Productos <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
@@ -141,7 +145,7 @@
                                  alt="@categoria.NombreCategoria" />
                         </div>
                         <h3>@categoria.NombreCategoria</h3>
-                        <a href="@Url.Action("Productos", "Catalogo", new { categoria = categoria.IdCategoria })"
+                        <a href="@Url.Action("Productos", "Catalogo", new { id = categoria.IdCategoria })"
                            class="category-link">Ver más <i class="fas fa-arrow-right"></i></a>
                     </div>
                 }
@@ -281,3 +285,122 @@
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Función para agregar al carrito desde el home
+        document.addEventListener('DOMContentLoaded', function() {
+            const botonesAgregar = document.querySelectorAll('.btn-agregar-home');
+
+            botonesAgregar.forEach(boton => {
+                boton.addEventListener('click', function() {
+                    const productoId = this.getAttribute('data-producto-id');
+                    const productoNombre = this.getAttribute('data-producto-nombre');
+
+                    agregarAlCarritoHome(productoId, productoNombre, this);
+                });
+            });
+        });
+
+        function agregarAlCarritoHome(idProducto, nombreProducto, botonElement) {
+            // Mostrar loading
+            Swal.fire({
+                title: 'Agregando al carrito...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Petición AJAX
+            fetch('/Carrito/AgregarAlCarrito', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `idProducto=${idProducto}&cantidad=1`
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Actualizar contador del carrito
+                    actualizarContadorCarrito(data.cantidadTotal);
+
+                    // Mostrar mensaje de éxito
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Producto agregado!',
+                        html: `<strong>${nombreProducto}</strong> se agregó al carrito`,
+                        showConfirmButton: true,
+                        confirmButtonText: 'Continuar comprando',
+                        showCancelButton: true,
+                        cancelButtonText: 'Ver carrito',
+                        confirmButtonColor: '#d4825c',
+                        cancelButtonColor: '#6c757d',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isDismissed && result.dismiss === Swal.DismissReason.cancel) {
+                            window.location.href = '/Carrito/Carrito';
+                        }
+                    });
+                } else {
+                    if (data.mensaje && data.mensaje.toLowerCase().includes('iniciar sesión')) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Inicia sesión',
+                            text: 'Debes iniciar sesión para agregar productos al carrito',
+                            showCancelButton: true,
+                            confirmButtonText: 'Ir a Login',
+                            cancelButtonText: 'Cancelar',
+                            confirmButtonColor: '#d4825c',
+                            cancelButtonColor: '#6c757d'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '/Account/Login';
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.mensaje || 'No se pudo agregar el producto al carrito',
+                            confirmButtonColor: '#d4825c'
+                        });
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de conexión',
+                    text: 'No se pudo conectar con el servidor. Por favor, verifica tu conexión e intenta nuevamente.',
+                    confirmButtonColor: '#d4825c'
+                });
+            });
+        }
+
+        function actualizarContadorCarrito(cantidadTotal) {
+            const cartCount = document.querySelector('.cart-count');
+            if (cartCount) {
+                cartCount.textContent = cantidadTotal || 0;
+
+                if (cantidadTotal > 0) {
+                    cartCount.style.display = 'flex';
+                }
+
+                // Animación
+                cartCount.style.transform = 'scale(1.3)';
+                setTimeout(function () {
+                    cartCount.style.transform = 'scale(1)';
+                }, 300);
+            }
+        }
+    </script>
+}

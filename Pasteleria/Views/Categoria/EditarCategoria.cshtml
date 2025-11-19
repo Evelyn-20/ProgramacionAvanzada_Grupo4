@@ -97,4 +97,44 @@
 
 @section Scripts {
     <script src="~/js/categorias.js"></script>
+
+    <script>
+        // Preview de la imagen
+        var inputArchivo = document.getElementById('archivoImagen');
+        if (inputArchivo) {
+            inputArchivo.addEventListener('change', function (e) {
+                var file = e.target.files[0];
+                if (file) {
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('El archivo es demasiado grande. Máximo 5MB.');
+                        this.value = '';
+                        return;
+                    }
+
+                    var validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp'];
+                    if (!validTypes.includes(file.type)) {
+                        alert('Tipo de archivo no válido.');
+                        this.value = '';
+                        return;
+                    }
+
+                    var fileName = document.getElementById('fileName');
+                    var preview = document.getElementById('preview');
+
+                    if (fileName) {
+                        fileName.textContent = '📁 ' + file.name;
+                        fileName.style.color = 'var(--primary-color)';
+                    }
+
+                    if (preview) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            preview.innerHTML = '<img src="' + e.target.result + '" style="max-width: 300px; max-height: 300px; border-radius: 10px; box-shadow: var(--shadow); margin-top: 1rem;" />';
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }
+            });
+        }
+    </script>
 }
