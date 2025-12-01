@@ -1,13 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Pasteleria.Abstracciones.Logica.Rol;
 using Pasteleria.Abstracciones.ModeloUI;
 using Pasteleria.LogicaDeNegocio.Roles;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Pasteleria.Controllers
 {
+    [Authorize]
     public class RolController : BaseController
     {
         private IListarRoles _listarRol;
@@ -32,11 +35,13 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Rol/ListadoRoles
+        [HttpGet]
         public IActionResult ListadoRoles(string buscar)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarUsuarios())
+            {
+                return RedirectSinPermiso();
+            }
 
             try
             {
@@ -61,31 +66,40 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Rol/CrearRol
         [HttpGet]
         public IActionResult CrearRol()
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarUsuarios())
+            {
+                return RedirectSinPermiso();
+            }
+
+            if (!EsAdministrador())
+            {
+                return RedirectSinPermiso("Solo los administradores pueden crear roles");
+            }
 
             return View();
         }
 
-        // POST: Rol/CrearRol
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CrearRol(Rol rol)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarUsuarios())
+            {
+                return RedirectSinPermiso();
+            }
+
+            if (!EsAdministrador())
+            {
+                return RedirectSinPermiso("Solo los administradores pueden crear roles");
+            }
 
             try
             {
-                System.Diagnostics.Debug.WriteLine($"Nombre: {rol?.NombreRol}");
-
                 if (ModelState.IsValid)
                 {
-                    // Establecer estado como activo
                     rol.Estado = true;
 
                     int resultado = await _crearRol.Guardar(rol);
@@ -100,17 +114,6 @@ namespace Pasteleria.Controllers
                         ModelState.AddModelError("", "No se pudo crear el rol en la base de datos");
                     }
                 }
-                else
-                {
-                    foreach (var key in ModelState.Keys)
-                    {
-                        var errors = ModelState[key].Errors;
-                        foreach (var error in errors)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"  {key}: {error.ErrorMessage}");
-                        }
-                    }
-                }
 
                 return View(rol);
             }
@@ -121,12 +124,18 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Rol/EditarRol/5
         [HttpGet]
         public IActionResult EditarRol(int id)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarUsuarios())
+            {
+                return RedirectSinPermiso();
+            }
+
+            if (!EsAdministrador())
+            {
+                return RedirectSinPermiso("Solo los administradores pueden editar roles");
+            }
 
             try
             {
@@ -147,18 +156,22 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // POST: Rol/EditarRol
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult EditarRol(Rol rol)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarUsuarios())
+            {
+                return RedirectSinPermiso();
+            }
+
+            if (!EsAdministrador())
+            {
+                return RedirectSinPermiso("Solo los administradores pueden editar roles");
+            }
 
             try
             {
-                System.Diagnostics.Debug.WriteLine($"ID: {rol?.IdRol}");
-
                 if (ModelState.IsValid)
                 {
                     int resultado = _actualizarRol.Actualizar(rol);
@@ -183,13 +196,14 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // POST: Rol/EliminarRol
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult EliminarRol(int IdRol)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarUsuarios())
+            {
+                return RedirectSinPermiso();
+            }
 
             try
             {

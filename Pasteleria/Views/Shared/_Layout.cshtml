@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
     <style>
-        /* Estilos para el menú desplegable */
         .nav-menu > li {
             position: relative;
         }
@@ -83,39 +82,45 @@
             transform: rotate(180deg);
         }
 
-        /* Responsive para móviles */
         @@media (max-width: 768px) {
-            .dropdown-menu-custom
-
-        {
-            position: static;
-            box-shadow: none;
-            background: var(--light-color);
-            margin-top: 0.5rem;
-            border-left: 3px solid var(--primary-color);
-            border-radius: 0;
-        }
-
-        .dropdown-menu-custom a {
-            padding-left: 2rem;
-        }
-
-            .dropdown-menu-custom a:hover {
-                padding-left: 2.5rem;
+            .dropdown-menu-custom {
+                position: static;
+                box-shadow: none;
+                background: var(--light-color);
+                margin-top: 0.5rem;
+                border-left: 3px solid var(--primary-color);
+                border-radius: 0;
             }
 
+                .dropdown-menu-custom a {
+                    padding-left: 2rem;
+                }
+
+                    .dropdown-menu-custom a:hover {
+                        padding-left: 2.5rem;
+                    }
         }
     </style>
 </head>
 
 <body>
     @{
-        // LEER DESDE CLAIMS (Cookie Authentication) en lugar de Session
         var estaAutenticado = User.Identity?.IsAuthenticated ?? false;
         var tipoUsuario = User.FindFirst("TipoUsuario")?.Value;
         var nombreUsuario = User.Identity?.Name;
-        var clienteId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        // Roles según el proyecto
         var esAdmin = tipoUsuario == "Administrador";
+        var esVentas = tipoUsuario == "Ventas" || tipoUsuario == "Vendedor" || tipoUsuario == "Supervisor";
+        var esOperaciones = tipoUsuario == "Operaciones" || tipoUsuario == "Operador";
+        var esCliente = tipoUsuario == "Cliente";
+
+        // Permisos específicos
+        var puedeGestionarInventario = esAdmin || esOperaciones;
+        var puedeGestionarPedidos = esAdmin || esVentas || esOperaciones;
+        var puedeCrearPedidos = esAdmin || esVentas;
+        var puedeGestionarClientes = esAdmin || esVentas;
+        var puedeGestionarUsuarios = esAdmin;
     }
 
     <header>
@@ -127,47 +132,70 @@
                 <ul class="nav-menu">
                     <li><a href="/Catalogo/Index">Catálogo</a></li>
 
-                    <!-- Menú Inventario (solo admin) -->
-                    @if (esAdmin)
+                    <!-- MENÚ INVENTARIO: Admin y Operaciones -->
+                    @if (puedeGestionarInventario)
                     {
                         <li>
                             <a href="#" class="has-dropdown">Inventario</a>
                             <ul class="dropdown-menu-custom">
-                                <li><a href="/Producto/ListadoProductos"><i class="fas fa-box"></i> Productos</a></li>
-                                <li><a href="/Categoria/ListadoCategorias"><i class="fas fa-tags"></i> Categorías</a></li>
+                                <li><a href="/Producto/ListadoProductos">Productos</a></li>
+                                <li><a href="/Categoria/ListadoCategorias">Categorías</a></li>
                             </ul>
                         </li>
-                        <li><a href="/Pedido/ListadoPedidos">Pedidos</a></li>
-
-                        <!-- Menú Administración -->
-                        <li>
-                            <a href="#" class="has-dropdown">Usuarios</a>
-                            <ul class="dropdown-menu-custom">
-                                <li><a href="/Cliente/ListadoClientes"><i class="fas fa-users"></i> Clientes</a></li>
-                                <li><a href="/Usuario/ListadoUsuarios"><i class="fas fa-user-shield"></i> Usuarios</a></li>
-                                <li><a href="/Rol/ListadoRoles"><i class="fas fa-user-tag"></i> Roles</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="/Auditoria/ListadoAuditorias">Auditorias</a></li>
                     }
 
-                    <!-- Mis Pedidos (solo clientes autenticados no admin) -->
-                    @if (estaAutenticado && !esAdmin)
+                    <!-- MENÚ PEDIDOS: Admin, Ventas y Operaciones -->
+                    @if (puedeGestionarPedidos)
+                    {
+                        <li>
+                            <a href="#" class="has-dropdown">Pedidos</a>
+                            <ul class="dropdown-menu-custom">
+                                <li><a href="/Pedido/ListadoPedidos">Pedidos</a></li>
+                                <li><a href="/Pedido/CrearPedido">Crear Pedido</a></li>
+                            </ul>
+                        </li>
+                    }
+
+                    <!-- MENÚ CLIENTES: Admin y Ventas -->
+                    @if (puedeGestionarClientes)
+                    {
+                        <li><a href="/Cliente/ListadoClientes">Clientes</a></li>
+                    }
+
+                    <!-- MENÚ ADMINISTRACIÓN: Solo Admin -->
+                    @if (puedeGestionarUsuarios)
+                    {
+                        <li>
+                            <a href="#" class="has-dropdown">Administración</a>
+                            <ul class="dropdown-menu-custom">
+                                <li><a href="/Usuario/ListadoUsuarios">Usuarios</a></li>
+                                <li><a href="/Rol/ListadoRoles">Roles</a></li>
+                                <li><a href="/Auditoria/ListadoAuditorias">Auditorías</a></li>
+                            </ul>
+                        </li>
+                    }
+
+                    <!-- MIS PEDIDOS: Solo clientes -->
+                    @if (esCliente)
                     {
                         <li><a href="/Pedido/MisPedidos">Mis Pedidos</a></li>
                     }
+
                     <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
                     <li><a href="#contacto">Contacto</a></li>
 
-                    <!-- Carrito -->
-                    <li>
-                        <a href="@Url.Action("Carrito", "Carrito")" class="btn-cart">
-                            <i class="fas fa-shopping-cart"></i>
-                            <span class="cart-count" style="display: none;">0</span>
-                        </a>
-                    </li>
+                    <!-- CARRITO: Solo clientes -->
+                    @if (esCliente || !estaAutenticado)
+                    {
+                        <li>
+                            <a href="@Url.Action("Carrito", "Carrito")" class="btn-cart">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="cart-count" style="display: none;">0</span>
+                            </a>
+                        </li>
+                    }
 
-                    <!-- Login / Usuario -->
+                    <!-- LOGIN / USUARIO -->
                     @if (estaAutenticado)
                     {
                         <li>
@@ -176,11 +204,15 @@
                                 @nombreUsuario
                             </a>
                             <ul class="dropdown-menu-custom">
-                                @if (!esAdmin)
+                                @if (esCliente)
                                 {
                                     <li><a href="/Pedido/MisPedidos"><i class="fas fa-shopping-bag"></i> Mis Pedidos</a></li>
                                 }
                                 @if (esAdmin)
+                                {
+                                    <li><a href="/Auditoria/ListadoAuditorias"><i class="fas fa-history"></i> Auditorías</a></li>
+                                }
+                                @if (esVentas || esOperaciones)
                                 {
                                     <li><a href="/Pedido/ListadoPedidos"><i class="fas fa-clipboard-list"></i> Gestionar Pedidos</a></li>
                                 }
@@ -204,7 +236,6 @@
         </nav>
     </header>
 
-    <!-- Mensajes de alerta -->
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin: 1rem auto; max-width: 1200px; margin-left: 20px; margin-right: 20px;">
@@ -242,11 +273,11 @@
                     <h4>Compras</h4>
                     <ul>
                         <li><a href="/Catalogo/Index">Catálogo</a></li>
-                        @if (estaAutenticado && !esAdmin)
+                        @if (esCliente)
                         {
                             <li><a href="/Pedido/MisPedidos">Mis Pedidos</a></li>
+                            <li><a href="@Url.Action("Carrito", "Carrito")">Carrito de Compras</a></li>
                         }
-                        <li><a href="@Url.Action("Carrito", "Carrito")">Carrito de Compras</a></li>
                     </ul>
                     <h4>Nosotros</h4>
                     <ul>
@@ -272,10 +303,6 @@
             <div class="footer-bottom">
                 <p>&copy; 2025 Pastelería Artesanal. Todos los derechos reservados.</p>
             </div>
-
-            <a href="/Pedido/Verificar" id="lnkCarrito" class="btn btn-outline-secondary">
-                Ver carrito
-            </a>
         </div>
     </footer>
 
@@ -284,26 +311,29 @@
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script src="~/js/site.js" asp-append-version="true"></script>
-
     @await RenderSectionAsync("Scripts", required: false)
 
     <script>
-        // Cargar cantidad del carrito al iniciar
         $(document).ready(function() {
-            fetch('/Carrito/ObtenerCantidadProductos')
-                .then(res => res.json())
-                .then(data => {
-                    const cartCount = document.querySelector('.cart-count');
-                    if (cartCount && data.cantidad > 0) {
-                        cartCount.textContent = data.cantidad;
-                        cartCount.style.display = 'flex';
-                    }
-                })
-                .catch(err => {
-                    console.log('No se pudo cargar el contador del carrito:', err);
-                });
+            // Solo cargar carrito si es cliente
+            @if (esCliente || !estaAutenticado)
+            {
+                    <text>
+                    fetch('/Carrito/ObtenerCantidadProductos')
+                        .then(res => res.json())
+                        .then(data => {
+                            const cartCount = document.querySelector('.cart-count');
+                            if (cartCount && data.cantidad > 0) {
+                                cartCount.textContent = data.cantidad;
+                                cartCount.style.display = 'flex';
+                            }
+                        })
+                        .catch(err => {
+                            console.log('No se pudo cargar el contador del carrito:', err);
+                        });
+                    </text>
+            }
         });
     </script>
 </body>

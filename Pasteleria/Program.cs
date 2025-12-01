@@ -3,6 +3,7 @@ using Pasteleria.Abstracciones.Logica.Pedido;
 using Pasteleria.LogicaDeNegocio.Productos;
 using Pasteleria.LogicaDeNegocio.Pedidos;
 using Microsoft.AspNetCore.Authentication;
+using Pasteleria.AccesoADatos.Modelos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,8 @@ builder.Services.AddControllersWithViews()
         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
         options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
     });
+
+builder.Services.AddScoped<Contexto>();
 
 // CONFIGURAR SESIONES PRIMERO (Para Carrito y validación de login)
 builder.Services.AddDistributedMemoryCache();

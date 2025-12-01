@@ -2,6 +2,11 @@
 
 @{
     ViewBag.Title = "Categorías";
+
+    // Permisos
+    var tipoUsuario = User.FindFirst("TipoUsuario")?.Value;
+    var puedeGestionarCategorias = tipoUsuario == "Administrador" || tipoUsuario == "Operaciones" || tipoUsuario == "Supervisor" || tipoUsuario == "Operador";
+    var puedeEliminar = tipoUsuario == "Administrador";
 }
 
 <!-- Banner Hero -->
@@ -46,9 +51,12 @@
                 <i class="fas fa-search"></i> Buscar
             </button>
         </form>
-        <a href="@Url.Action("CrearCategoria", "Categoria")" class="btn btn-primary" style="white-space: nowrap;">
-            <i class="fas fa-plus"></i> Agregar Categoría
-        </a>
+        @if (puedeGestionarCategorias)
+        {
+            <a href="@Url.Action("CrearCategoria", "Categoria")" class="btn btn-primary" style="white-space: nowrap;">
+                <i class="fas fa-plus"></i> Agregar Categoría
+            </a>
+        }
     </div>
 
     <!-- Tabla con estilo mejorado -->
@@ -90,12 +98,15 @@
                                     }
                                 </td>
                                 <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
-                                    <button type="button"
-                                            class="btn btn-sm btn-editar"
-                                            data-id="@categoria.IdCategoria"
-                                            style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
+                                    @if (puedeGestionarCategorias)
+                                    {
+                                        <button type="button"
+                                                class="btn btn-sm btn-editar"
+                                                data-id="@categoria.IdCategoria"
+                                                style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    }
                                     <button type="button"
                                             class="btn btn-sm btn-detalles"
                                             data-id="@categoria.IdCategoria"
@@ -106,16 +117,19 @@
                                             data-bs-target="#modalDetallesCategoria">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button type="button"
-                                            class="btn btn-sm btn-eliminar"
-                                            data-id="@categoria.IdCategoria"
-                                            data-nombre="@categoria.NombreCategoria"
-                                            data-estado="@(categoria.Estado ? "Activo" : "Inactivo")"
-                                            style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalEliminarCategoria">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    @if (puedeEliminar)
+                                    {
+                                        <button type="button"
+                                                class="btn btn-sm btn-eliminar"
+                                                data-id="@categoria.IdCategoria"
+                                                data-nombre="@categoria.NombreCategoria"
+                                                data-estado="@(categoria.Estado ? "Activo" : "Inactivo")"
+                                                style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEliminarCategoria">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    }
                                 </td>
                             </tr>
                         }
@@ -166,7 +180,10 @@
 </div>
 
 <partial name="_ModalDetallesCategoria" />
-<partial name="_ModalEliminarCategoria" />
+@if (puedeEliminar)
+{
+    <partial name="_ModalEliminarCategoria" />
+}
 
 @section Scripts {
     <script>

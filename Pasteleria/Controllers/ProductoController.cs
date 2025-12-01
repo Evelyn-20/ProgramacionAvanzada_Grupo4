@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Pasteleria.Abstracciones.Logica.Producto;
 using Pasteleria.Abstracciones.ModeloUI;
 using Pasteleria.LogicaDeNegocio.Productos;
@@ -12,6 +13,7 @@ using System.Globalization;
 
 namespace Pasteleria.Controllers
 {
+    [Authorize] // Requiere autenticación para todo el controller
     public class ProductoController : BaseController
     {
         private IListarProductos _listarProducto;
@@ -39,11 +41,14 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Producto/ListadoProductos
+        [HttpGet]
         public IActionResult ListadoProductos(string buscar, int? categoria)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            // Validar permisos
+            if (!PuedeGestionarInventario())
+            {
+                return RedirectSinPermiso("No tienes permisos para ver el inventario");
+            }
 
             try
             {
@@ -51,27 +56,14 @@ namespace Pasteleria.Controllers
 
                 if (!string.IsNullOrWhiteSpace(buscar))
                 {
-                    // Búsqueda inteligente en todos los campos
                     var terminoBusqueda = buscar.Trim();
-
-                    // Obtener todos los productos
                     var todosProductos = _listarProducto.Obtener();
 
-                    // Buscar en múltiples campos simultáneamente
                     productos = todosProductos.Where(p =>
-                        // Buscar en nombre
                         p.NombreProducto.Contains(terminoBusqueda, StringComparison.OrdinalIgnoreCase) ||
-
-                        // Buscar en descripción
                         p.DescripcionProducto.Contains(terminoBusqueda, StringComparison.OrdinalIgnoreCase) ||
-
-                        // Buscar en ID (convertir a string)
                         p.IdProducto.ToString().Contains(terminoBusqueda) ||
-
-                        // Buscar en cantidad (convertir a string)
                         p.Cantidad.ToString().Contains(terminoBusqueda) ||
-
-                        // Buscar en precio (convertir a string y permitir búsqueda con o sin decimales)
                         p.Precio.ToString().Contains(terminoBusqueda) ||
                         p.Precio.ToString("N2").Contains(terminoBusqueda) ||
                         p.Precio.ToString("F0").Contains(terminoBusqueda)
@@ -101,25 +93,27 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Producto/CrearProducto
         [HttpGet]
         public IActionResult CrearProducto()
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!EsAdministrador())
+            {
+                return RedirectSinPermiso("Solo los administradores pueden crear productos");
+            }
 
             var categorias = _listarCategorias.ObtenerActivas();
             ViewBag.Categorias = categorias;
             return View();
         }
 
-        // POST: Producto/CrearProducto
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CrearProducto(Producto producto, IFormFile archivo)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!EsAdministrador())
+            {
+                return RedirectSinPermiso("Solo los administradores pueden crear productos");
+            }
 
             try
             {
@@ -173,6 +167,7 @@ namespace Pasteleria.Controllers
 
                 if (resultado > 0)
                 {
+                    TempData["Success"] = "Producto creado exitosamente";
                     return RedirectToAction(nameof(ListadoProductos));
                 }
                 else
@@ -196,8 +191,10 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult EditarProducto(int id)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarInventario())
+            {
+                return RedirectSinPermiso("No tienes permisos para editar productos");
+            }
 
             try
             {
@@ -209,8 +206,15 @@ namespace Pasteleria.Controllers
                     return RedirectToAction(nameof(ListadoProductos));
                 }
 
-                var categorias = _listarCategorias.ObtenerActivas();
-                ViewBag.Categorias = categorias;
+                // Cargar categorías solo si no es Operaciones
+                var tipoUsuario = ObtenerTipoUsuario();
+                var soloStock = tipoUsuario == "Operaciones" || tipoUsuario == "Operador";
+
+                if (!soloStock)
+                {
+                    var categorias = _listarCategorias.ObtenerActivas();
+                    ViewBag.Categorias = categorias;
+                }
 
                 return View(producto);
             }
@@ -221,17 +225,57 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // POST: Producto/EditarProducto
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditarProducto(Producto producto, IFormFile archivo, string PrecioStr, string PorcentajeImpuestoStr)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarInventario())
+            {
+                return RedirectSinPermiso("No tienes permisos para editar productos");
+            }
 
             try
             {
-                // Remover validación de campos que no vienen del formulario
+                var tipoUsuario = ObtenerTipoUsuario();
+                var soloStock = tipoUsuario == "Operaciones" || tipoUsuario == "Operador";
+
+                // Obtener producto existente
+                var productoExistente = _obtenerProductoPorId.Obtener(producto.IdProducto);
+                if (productoExistente == null)
+                {
+                    TempData["Error"] = "Producto no encontrado";
+                    return RedirectToAction(nameof(ListadoProductos));
+                }
+
+                // Si es Operaciones, solo puede modificar el stock
+                if (soloStock)
+                {
+                    // Validar solo la cantidad
+                    if (producto.Cantidad < 0)
+                    {
+                        ModelState.AddModelError("Cantidad", "La cantidad no puede ser negativa");
+                        return View(producto);
+                    }
+
+                    // Mantener todos los campos originales excepto la cantidad
+                    productoExistente.Cantidad = producto.Cantidad;
+                    productoExistente.FechaActualizacion = DateTime.Now;
+
+                    int resultadoStock = _actualizarProducto.Actualizar(productoExistente);
+
+                    if (resultadoStock > 0)
+                    {
+                        TempData["Success"] = "Stock actualizado exitosamente";
+                    }
+                    else
+                    {
+                        TempData["Error"] = "No se pudo actualizar el stock";
+                    }
+
+                    return RedirectToAction(nameof(ListadoProductos));
+                }
+
+                // Procesamiento completo para Admin y Supervisor
                 ModelState.Remove("Imagen");
                 ModelState.Remove("FechaCreacion");
                 ModelState.Remove("FechaActualizacion");
@@ -239,7 +283,6 @@ namespace Pasteleria.Controllers
                 ModelState.Remove("Precio");
                 ModelState.Remove("PorcentajeImpuesto");
 
-                // Parsear Precio desde el string
                 if (!string.IsNullOrEmpty(PrecioStr))
                 {
                     if (decimal.TryParse(PrecioStr, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal precioParseado))
@@ -252,7 +295,6 @@ namespace Pasteleria.Controllers
                     }
                 }
 
-                // Parsear PorcentajeImpuesto desde el string
                 if (!string.IsNullOrEmpty(PorcentajeImpuestoStr))
                 {
                     if (decimal.TryParse(PorcentajeImpuestoStr, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal impuestoParseado))
@@ -265,7 +307,6 @@ namespace Pasteleria.Controllers
                     }
                 }
 
-                // Validar valores
                 if (producto.Precio <= 0)
                 {
                     ModelState.AddModelError("Precio", "El precio debe ser mayor a 0");
@@ -278,29 +319,18 @@ namespace Pasteleria.Controllers
 
                 if (!ModelState.IsValid)
                 {
-                    var productoParaVista = _obtenerProductoPorId.Obtener(producto.IdProducto);
-                    if (productoParaVista != null)
-                    {
-                        producto.Imagen = productoParaVista.Imagen;
-                        producto.FechaCreacion = productoParaVista.FechaCreacion;
-                    }
+                    producto.Imagen = productoExistente.Imagen;
+                    producto.FechaCreacion = productoExistente.FechaCreacion;
 
-                    // Recargar las categorías
                     var categorias = _listarCategorias.ObtenerActivas();
                     ViewBag.Categorias = categorias;
 
                     return View(producto);
                 }
 
-                var productoExistente = _obtenerProductoPorId.Obtener(producto.IdProducto);
-                if (productoExistente == null)
-                {
-                    TempData["Error"] = "Producto no encontrado";
-                    return RedirectToAction(nameof(ListadoProductos));
-                }
-
                 producto.FechaCreacion = productoExistente.FechaCreacion;
 
+                // Procesar imagen si se subió una nueva
                 if (archivo != null && archivo.Length > 0)
                 {
                     var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
@@ -339,6 +369,7 @@ namespace Pasteleria.Controllers
 
                 if (resultado > 0)
                 {
+                    TempData["Success"] = "Producto actualizado exitosamente";
                     return RedirectToAction(nameof(ListadoProductos));
                 }
                 else
@@ -365,8 +396,14 @@ namespace Pasteleria.Controllers
                 }
                 catch { }
 
-                var categoriasError = _listarCategorias.ObtenerActivas();
-                ViewBag.Categorias = categoriasError;
+                var tipoUsuario = ObtenerTipoUsuario();
+                var soloStock = tipoUsuario == "Operaciones" || tipoUsuario == "Operador";
+
+                if (!soloStock)
+                {
+                    var categoriasError = _listarCategorias.ObtenerActivas();
+                    ViewBag.Categorias = categoriasError;
+                }
 
                 return View(producto);
             }
@@ -375,8 +412,10 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult DetalleProducto(int id)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarInventario())
+            {
+                return RedirectSinPermiso("No tienes permisos para ver detalles de productos");
+            }
 
             try
             {
@@ -384,6 +423,7 @@ namespace Pasteleria.Controllers
 
                 if (producto == null)
                 {
+                    TempData["Error"] = "Producto no encontrado";
                     return RedirectToAction(nameof(ListadoProductos));
                 }
 
@@ -400,14 +440,22 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult EliminarProducto(int IdProducto)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            // Solo Admin puede eliminar
+            if (!EsAdministrador())
+            {
+                TempData["Error"] = "Solo los administradores pueden eliminar productos";
+                return RedirectToAction(nameof(ListadoProductos));
+            }
 
             try
             {
                 int resultado = _eliminarProducto.Eliminar(IdProducto);
 
-                if (resultado < 0)
+                if (resultado > 0)
+                {
+                    TempData["Success"] = "Producto eliminado exitosamente";
+                }
+                else
                 {
                     TempData["Error"] = "No se pudo eliminar el producto";
                 }
@@ -422,6 +470,7 @@ namespace Pasteleria.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous] // Permitir acceso público para mostrar imágenes
         public IActionResult ObtenerImagenProducto(int id)
         {
             try

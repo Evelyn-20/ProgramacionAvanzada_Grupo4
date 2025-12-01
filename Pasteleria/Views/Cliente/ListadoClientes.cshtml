@@ -2,6 +2,11 @@
 
 @{
     ViewBag.Title = "Listado de Clientes";
+    
+    // Permisos
+    var tipoUsuario = User.FindFirst("TipoUsuario")?.Value;
+    var puedeGestionarClientes = tipoUsuario == "Administrador" || tipoUsuario == "Ventas" || tipoUsuario == "Supervisor" || tipoUsuario == "Vendedor";
+    var puedeEliminar = tipoUsuario == "Administrador";
 }
 
 <!-- Banner Hero -->
@@ -30,6 +35,13 @@
         </div>
     }
 
+    @if (!puedeGestionarClientes)
+    {
+        <div class="alert alert-warning" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
+            <i class="fas fa-exclamation-circle"></i> No tienes permisos para gestionar clientes. Solo puedes visualizar la información.
+        </div>
+    }
+
     <!-- Barra de búsqueda y botón agregar -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap;">
         <form method="get" action="@Url.Action("ListadoClientes")" style="position: relative; flex: 1; min-width: 300px; display: flex; gap: 0.5rem;">
@@ -46,9 +58,12 @@
                 <i class="fas fa-search"></i> Buscar
             </button>
         </form>
-        <a href="@Url.Action("CrearCliente")" class="btn btn-primary" style="white-space: nowrap;">
-            <i class="fas fa-user-plus"></i> Agregar Cliente
-        </a>
+        @if (puedeGestionarClientes)
+        {
+            <a href="@Url.Action("CrearCliente")" class="btn btn-primary" style="white-space: nowrap;">
+                <i class="fas fa-user-plus"></i> Agregar Cliente
+            </a>
+        }
     </div>
 
     <!-- Tabla con estilo mejorado -->
@@ -103,12 +118,15 @@
                                     @(string.IsNullOrEmpty(cliente.Direccion) ? "Sin dirección" : cliente.Direccion)
                                 </td>
                                 <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
-                                    <button type="button"
-                                            class="btn btn-sm btn-editar"
-                                            data-id="@cliente.IdCliente"
-                                            style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
+                                    @if (puedeGestionarClientes)
+                                    {
+                                        <button type="button"
+                                                class="btn btn-sm btn-editar"
+                                                data-id="@cliente.IdCliente"
+                                                style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    }
                                     <button type="button"
                                             class="btn btn-sm btn-ver-detalles"
                                             style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
@@ -116,13 +134,16 @@
                                             data-bs-target="#modalDetallesCliente">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button type="button"
-                                            class="btn btn-sm btn-eliminar"
-                                            style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalEliminarCliente">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    @if (puedeEliminar)
+                                    {
+                                        <button type="button"
+                                                class="btn btn-sm btn-eliminar"
+                                                style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEliminarCliente">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    }
                                 </td>
                             </tr>
                             contador++;
@@ -174,7 +195,10 @@
 </div>
 
 <partial name="_ModalDetallesCliente" />
-<partial name="_ModalEliminarCliente" />
+@if (puedeEliminar)
+{
+    <partial name="_ModalEliminarCliente" />
+}
 
 @section Scripts {
     <script src="~/js/cliente.js"></script>

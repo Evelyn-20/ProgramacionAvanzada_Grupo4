@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Pasteleria.Abstracciones.Logica.Categoria;
 using Pasteleria.Abstracciones.ModeloUI;
 using Pasteleria.LogicaDeNegocio.Categorias;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Pasteleria.Controllers
 {
+    [Authorize] // Requiere autenticación
     public class CategoriaController : BaseController
     {
         private IListarCategorias _listarCategoria;
@@ -34,11 +36,13 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Categoria/ListadoCategorias
+        [HttpGet]
         public IActionResult ListadoCategorias(string buscar)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarCategorias())
+            {
+                return RedirectSinPermiso();
+            }
 
             try
             {
@@ -63,37 +67,42 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Categoria/CrearCategoria
         [HttpGet]
         public IActionResult CrearCategoria()
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarCategorias())
+            {
+                return RedirectSinPermiso();
+            }
 
             return View();
         }
 
-        // POST: Categoria/CrearCategoria
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CrearCategoria(Categoria categoria, IFormFile archivo)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarCategorias())
+            {
+                return RedirectSinPermiso();
+            }
+
+            // Solo Admin puede crear productos
+            if (!EsAdministrador())
+            {
+                return RedirectSinPermiso("Solo los administradores pueden crear categorías");
+            }
 
             try
             {
-                // Remover validación automática de la imagen
                 ModelState.Remove("Imagen");
 
-                // Validar que se haya subido un archivo
                 if (archivo == null || archivo.Length == 0)
                 {
                     ModelState.AddModelError("archivo", "La imagen de la categoría es obligatoria");
                     return View(categoria);
                 }
 
-                // Validar tipo de archivo
                 var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
                 var extension = Path.GetExtension(archivo.FileName).ToLowerInvariant();
 
@@ -103,35 +112,23 @@ namespace Pasteleria.Controllers
                     return View(categoria);
                 }
 
-                // Validar tamaño (máximo 5MB)
                 if (archivo.Length > 5 * 1024 * 1024)
                 {
                     ModelState.AddModelError("archivo", "La imagen no puede superar los 5MB");
                     return View(categoria);
                 }
 
-                // Validar el resto del modelo
                 if (!ModelState.IsValid)
                 {
-                    foreach (var key in ModelState.Keys)
-                    {
-                        var errors = ModelState[key].Errors;
-                        foreach (var error in errors)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"  {key}: {error.ErrorMessage}");
-                        }
-                    }
                     return View(categoria);
                 }
 
-                // Procesar el archivo
                 using (var memoryStream = new MemoryStream())
                 {
                     await archivo.CopyToAsync(memoryStream);
                     categoria.Imagen = memoryStream.ToArray();
                 }
 
-                // Establecer estado como activo
                 categoria.Estado = true;
 
                 int resultado = await _crearCategoria.Guardar(categoria);
@@ -155,12 +152,18 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Categoria/EditarCategoria/5
         [HttpGet]
         public IActionResult EditarCategoria(int id)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarCategorias())
+            {
+                return RedirectSinPermiso();
+            }
+
+            if (!EsAdministrador())
+            {
+                return RedirectSinPermiso("Solo los administradores pueden editar categorías");
+            }
 
             try
             {
@@ -181,32 +184,27 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // POST: Categoria/EditarCategoria
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditarCategoria(Categoria categoria, IFormFile archivo)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarCategorias())
+            {
+                return RedirectSinPermiso();
+            }
+
+            if (!EsAdministrador())
+            {
+                return RedirectSinPermiso("Solo los administradores pueden editar categorías");
+            }
 
             try
             {
-                // Remover validación de la imagen
                 ModelState.Remove("Imagen");
                 ModelState.Remove("archivo");
 
                 if (!ModelState.IsValid)
                 {
-                    foreach (var key in ModelState.Keys)
-                    {
-                        var errors = ModelState[key].Errors;
-                        foreach (var error in errors)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"  {key}: {error.ErrorMessage}");
-                        }
-                    }
-
-                    // Recargar la categoría para mostrar la imagen actual
                     var categoriaParaVista = _obtenerCategoriaPorId.Obtener(categoria.IdCategoria);
                     if (categoriaParaVista != null)
                     {
@@ -216,7 +214,6 @@ namespace Pasteleria.Controllers
                     return View(categoria);
                 }
 
-                // Obtener categoría existente
                 var categoriaExistente = _obtenerCategoriaPorId.Obtener(categoria.IdCategoria);
                 if (categoriaExistente == null)
                 {
@@ -224,7 +221,6 @@ namespace Pasteleria.Controllers
                     return RedirectToAction(nameof(ListadoCategorias));
                 }
 
-                // Procesar imagen nueva si se proporcionó
                 if (archivo != null && archivo.Length > 0)
                 {
                     var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
@@ -274,7 +270,6 @@ namespace Pasteleria.Controllers
             {
                 ModelState.AddModelError("", $"Error al actualizar la categoría: {ex.Message}");
 
-                // Intentar recargar la imagen
                 try
                 {
                     var categoriaTemp = _obtenerCategoriaPorId.Obtener(categoria.IdCategoria);
@@ -289,12 +284,13 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Categoria/DetalleCategoria/5
         [HttpGet]
         public IActionResult DetalleCategoria(int id)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarCategorias())
+            {
+                return RedirectSinPermiso();
+            }
 
             try
             {
@@ -315,13 +311,15 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // POST: Categoria/EliminarCategoria
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult EliminarCategoria(int IdCategoria)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!EsAdministrador())
+            {
+                TempData["Error"] = "Solo administradores pueden eliminar categorías";
+                return RedirectToAction(nameof(ListadoCategorias));
+            }
 
             try
             {
@@ -345,8 +343,8 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Categoria/ObtenerImagenCategoria/5
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult ObtenerImagenCategoria(int id)
         {
             try
@@ -378,7 +376,6 @@ namespace Pasteleria.Controllers
                 return File(bytes, "image/png");
             }
 
-            // Imagen base64 de 1x1 pixel transparente
             byte[] emptyImage = Convert.FromBase64String("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=");
             return File(emptyImage, "image/png");
         }
@@ -388,19 +385,15 @@ namespace Pasteleria.Controllers
             if (imageBytes == null || imageBytes.Length < 4)
                 return "image/png";
 
-            // JPEG
             if (imageBytes[0] == 0xFF && imageBytes[1] == 0xD8)
                 return "image/jpeg";
 
-            // PNG
             if (imageBytes[0] == 0x89 && imageBytes[1] == 0x50 && imageBytes[2] == 0x4E && imageBytes[3] == 0x47)
                 return "image/png";
 
-            // GIF
             if (imageBytes[0] == 0x47 && imageBytes[1] == 0x49 && imageBytes[2] == 0x46)
                 return "image/gif";
 
-            // BMP
             if (imageBytes[0] == 0x42 && imageBytes[1] == 0x4D)
                 return "image/bmp";
 

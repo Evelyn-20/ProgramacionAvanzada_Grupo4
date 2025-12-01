@@ -11,15 +11,16 @@ namespace Pasteleria.Controllers.Api
 {
     [Authorize] // Solo usuarios autenticados
     [ApiController]
+    [Route("api/pedidosapi")]
     public class PedidoApiController : ControllerBase
     {
         private readonly IBuscarProductosParaPedido _buscarProductos;
         private readonly ICalcularTotales _calcularTotales;
 
-        public PedidoApiController()
+        public PedidoApiController(IBuscarProductosParaPedido buscarProductos, ICalcularTotales calcularTotales)
         {
-            _buscarProductos = new BuscarProductosParaPedido();
-            _calcularTotales = new CalcularTotales();
+            _buscarProductos = buscarProductos;
+            _calcularTotales = calcularTotales;
         }
 
         // GET /api/pedidosapi/buscar-productos?q=chocolate
@@ -54,7 +55,6 @@ namespace Pasteleria.Controllers.Api
         }
 
         // POST /api/pedidosapi/calcular-totales
-
         [HttpPost("calcular-totales")]
         public IActionResult CalcularTotales([FromBody] List<ItemCalculoRequest> items)
         {
@@ -124,7 +124,6 @@ namespace Pasteleria.Controllers.Api
         }
 
         // GET /api/pedidosapi/validar-stock/{productoId}
-
         [HttpGet("validar-stock/{productoId}")]
         public IActionResult ValidarStock(int productoId, [FromQuery] int cantidad = 1)
         {

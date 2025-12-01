@@ -45,7 +45,7 @@ namespace Pasteleria.Controllers
                     return View();
                 }
 
-                // Primero intentar como Usuario (administrador con rol)
+                // Primero intentar como Usuario (empleados con roles)
                 var (usuario, nombreRol) = _autenticarUsuario.Autenticar(email, password);
 
                 if (usuario != null)
@@ -54,16 +54,16 @@ namespace Pasteleria.Controllers
                     var sessionId = Guid.NewGuid().ToString();
                     HttpContext.Session.SetString("SessionId", sessionId);
 
-                    // Crear Claims Para Usuario
+                    // ✅ CORRECCIÓN: Usar el nombreRol que viene de la BD
                     var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
-                new Claim(ClaimTypes.Name, usuario.NombreUsuario),
-                new Claim(ClaimTypes.Email, usuario.Email),
-                new Claim(ClaimTypes.Role, nombreRol),
-                new Claim("TipoUsuario", "Administrador"),
-                new Claim("SessionId", sessionId) // Vincula con Session
-            };
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
+                        new Claim(ClaimTypes.Name, usuario.NombreUsuario),
+                        new Claim(ClaimTypes.Email, usuario.Email),
+                        new Claim(ClaimTypes.Role, nombreRol),
+                        new Claim("TipoUsuario", nombreRol), // ✅ Usar el rol real de la BD
+                        new Claim("SessionId", sessionId)
+                    };
 
                     var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
                     var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
@@ -83,20 +83,18 @@ namespace Pasteleria.Controllers
 
                 if (cliente != null)
                 {
-                    // Generar SessionId para Cliente también
                     var sessionId = Guid.NewGuid().ToString();
                     HttpContext.Session.SetString("SessionId", sessionId);
 
-                    // Crear Claims Para Cliente
                     var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, cliente.IdCliente.ToString()),
-                new Claim(ClaimTypes.Name, cliente.NombreCliente),
-                new Claim(ClaimTypes.Email, cliente.Correo),
-                new Claim(ClaimTypes.Role, "Cliente"),
-                new Claim("TipoUsuario", "Cliente"),
-                new Claim("SessionId", sessionId)
-            };
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, cliente.IdCliente.ToString()),
+                        new Claim(ClaimTypes.Name, cliente.NombreCliente),
+                        new Claim(ClaimTypes.Email, cliente.Correo),
+                        new Claim(ClaimTypes.Role, "Cliente"),
+                        new Claim("TipoUsuario", "Cliente"),
+                        new Claim("SessionId", sessionId)
+                    };
 
                     var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
                     var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
@@ -137,7 +135,6 @@ namespace Pasteleria.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    // Verificar si el correo ya existe
                     var clienteExistente = _listarClientes.BuscarPorCorreo(cliente.Correo);
                     if (clienteExistente != null && clienteExistente.Count > 0)
                     {
@@ -145,7 +142,6 @@ namespace Pasteleria.Controllers
                         return View(cliente);
                     }
 
-                    // Verificar si la cédula ya existe
                     var clientePorCedula = _listarClientes.BuscarPorCedula(cliente.Cedula);
                     if (clientePorCedula != null && clientePorCedula.Count > 0)
                     {
@@ -153,7 +149,6 @@ namespace Pasteleria.Controllers
                         return View(cliente);
                     }
 
-                    // Establecer estado como activo
                     cliente.Estado = true;
 
                     int resultado = await _crearCliente.Guardar(cliente);
@@ -187,10 +182,7 @@ namespace Pasteleria.Controllers
         // GET: Account/Logout
         public async Task<IActionResult> Logout()
         {
-            // CERRAR SESIÓN DE AUTENTICACIÓN
             await HttpContext.SignOutAsync("CookieAuth");
-
-            // LIMPIAR SESIÓN (carrito)
             HttpContext.Session.Clear();
 
             TempData["Success"] = "Has cerrado sesión exitosamente";

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Pasteleria.Abstracciones.Logica.Cliente;
 using Pasteleria.Abstracciones.ModeloUI;
 using Pasteleria.LogicaDeNegocio.Clientes;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Pasteleria.Controllers
 {
+    [Authorize] // Requiere autenticación
     public class ClienteController : BaseController
     {
         private IListarClientes _listarCliente;
@@ -34,11 +36,13 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Cliente/ListadoClientes
+        [HttpGet]
         public IActionResult ListadoClientes(string buscar)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarClientes())
+            {
+                return RedirectSinPermiso();
+            }
 
             try
             {
@@ -46,12 +50,10 @@ namespace Pasteleria.Controllers
 
                 if (!string.IsNullOrWhiteSpace(buscar))
                 {
-                    // Buscar por nombre, cédula o correo
                     var clientesPorNombre = _listarCliente.BuscarPorNombre(buscar);
                     var clientesPorCedula = _listarCliente.BuscarPorCedula(buscar);
                     var clientesPorCorreo = _listarCliente.BuscarPorCorreo(buscar);
 
-                    // Combinar resultados y eliminar duplicados
                     clientes = clientesPorNombre
                         .Union(clientesPorCedula)
                         .Union(clientesPorCorreo)
@@ -73,29 +75,40 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Cliente/CrearCliente
         [HttpGet]
         public IActionResult CrearCliente()
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarClientes())
+            {
+                return RedirectSinPermiso();
+            }
+
+            if (!EsAdministrador())
+            {
+                return RedirectSinPermiso("Solo los administradores pueden crear clientes");
+            }
 
             return View();
         }
 
-        // POST: Cliente/CrearCliente
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CrearCliente(Cliente cliente)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarClientes())
+            {
+                return RedirectSinPermiso();
+            }
+
+            if (!EsAdministrador())
+            {
+                return RedirectSinPermiso("Solo los administradores pueden crear clientes");
+            }
 
             try
             {
                 if (ModelState.IsValid)
                 {
-                    // Verificar si el correo ya existe
                     var clienteExistentePorCorreo = _listarCliente.BuscarPorCorreo(cliente.Correo);
                     if (clienteExistentePorCorreo != null && clienteExistentePorCorreo.Count > 0)
                     {
@@ -103,7 +116,6 @@ namespace Pasteleria.Controllers
                         return View(cliente);
                     }
 
-                    // Verificar si la cédula ya existe
                     var clienteExistentePorCedula = _listarCliente.BuscarPorCedula(cliente.Cedula);
                     if (clienteExistentePorCedula != null && clienteExistentePorCedula.Count > 0)
                     {
@@ -111,7 +123,6 @@ namespace Pasteleria.Controllers
                         return View(cliente);
                     }
 
-                    // Establecer estado como activo
                     cliente.Estado = true;
 
                     int resultado = await _crearCliente.Guardar(cliente);
@@ -126,7 +137,7 @@ namespace Pasteleria.Controllers
                         ModelState.AddModelError("", "No se pudo crear el cliente en la base de datos");
                     }
                 }
-                
+
                 return View(cliente);
             }
             catch (Exception ex)
@@ -136,12 +147,18 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Cliente/EditarCliente/5
         [HttpGet]
         public IActionResult EditarCliente(int id)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarClientes())
+            {
+                return RedirectSinPermiso();
+            }
+
+            if (!EsAdministrador())
+            {
+                return RedirectSinPermiso("Solo los administradores puede editar clientes");
+            }
 
             try
             {
@@ -162,19 +179,24 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // POST: Cliente/EditarCliente
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult EditarCliente(Cliente cliente)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarClientes())
+            {
+                return RedirectSinPermiso();
+            }
+
+            if (!EsAdministrador())
+            {
+                return RedirectSinPermiso("Solo los administradores pueden editar clientes");
+            }
 
             try
             {
                 if (ModelState.IsValid)
                 {
-                    // Verificar si el correo ya existe en otro cliente
                     var clienteExistentePorCorreo = _listarCliente.BuscarPorCorreo(cliente.Correo);
                     if (clienteExistentePorCorreo != null &&
                         clienteExistentePorCorreo.Any(c => c.IdCliente != cliente.IdCliente))
@@ -183,7 +205,6 @@ namespace Pasteleria.Controllers
                         return View(cliente);
                     }
 
-                    // Verificar si la cédula ya existe en otro cliente
                     var clienteExistentePorCedula = _listarCliente.BuscarPorCedula(cliente.Cedula);
                     if (clienteExistentePorCedula != null &&
                         clienteExistentePorCedula.Any(c => c.IdCliente != cliente.IdCliente))
@@ -214,13 +235,15 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // POST: Cliente/EliminarCliente
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult EliminarCliente(int IdCliente)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!EsAdministrador())
+            {
+                TempData["Error"] = "Solo administradores pueden eliminar clientes";
+                return RedirectToAction(nameof(ListadoClientes));
+            }
 
             try
             {

@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Pasteleria.Abstracciones.Logica.Usuario;
 using Pasteleria.Abstracciones.Logica.Rol;
@@ -12,6 +15,7 @@ using System.Threading.Tasks;
 
 namespace Pasteleria.Controllers
 {
+    [Authorize] // Requiere autenticación
     public class UsuarioController : BaseController
     {
         private IListarUsuarios _listarUsuarios;
@@ -38,11 +42,13 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Usuario/ListadoUsuarios
+        [HttpGet]
         public IActionResult ListadoUsuarios(string buscar)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarUsuarios())
+            {
+                return RedirectSinPermiso();
+            }
 
             try
             {
@@ -50,11 +56,9 @@ namespace Pasteleria.Controllers
 
                 if (!string.IsNullOrWhiteSpace(buscar))
                 {
-                    // Buscar por nombre o email
                     var usuariosPorNombre = _listarUsuarios.BuscarPorNombre(buscar);
                     var usuariosPorEmail = _listarUsuarios.BuscarPorEmail(buscar);
 
-                    // Combinar resultados y eliminar duplicados
                     usuarios = usuariosPorNombre.Union(usuariosPorEmail).ToList();
                     ViewBag.Buscar = buscar;
                 }
@@ -63,7 +67,6 @@ namespace Pasteleria.Controllers
                     usuarios = _listarUsuarios.Obtener();
                 }
 
-                // Crear diccionario de roles para mostrar en la vista
                 var roles = _listarRoles.Obtener();
                 var rolesDict = roles.ToDictionary(r => r.IdRol, r => r.NombreRol);
                 ViewBag.RolesDict = rolesDict;
@@ -77,53 +80,53 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Usuario/CrearUsuario
         [HttpGet]
         public IActionResult CrearUsuario()
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarUsuarios())
+            {
+                return RedirectSinPermiso();
+            }
+
+            if (!EsAdministrador())
+            {
+                return RedirectSinPermiso("Solo los administradores pueden crear usuarios");
+            }
 
             CargarRoles();
             return View();
         }
 
-        // POST: Usuario/CrearUsuario
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CrearUsuario(Usuario usuario)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarUsuarios())
+            {
+                return RedirectSinPermiso();
+            }
+
+            if (!EsAdministrador())
+            {
+                return RedirectSinPermiso("Solo los administradores pueden crear usuarios");
+            }
 
             try
             {
                 if (ModelState.IsValid)
                 {
-                    // Establecer estado como activo
                     usuario.Estado = true;
 
                     int resultado = await _crearUsuario.Guardar(usuario);
 
                     if (resultado > 0)
                     {
-                        TempData["Exito"] = "Usuario creado exitosamente";
+                        TempData["Success"] = "Usuario creado exitosamente";
                         return RedirectToAction(nameof(ListadoUsuarios));
                     }
                     else
                     {
                         ModelState.AddModelError("", "No se pudo crear el usuario en la base de datos");
-                    }
-                }
-                else
-                {
-                    foreach (var key in ModelState.Keys)
-                    {
-                        var errors = ModelState[key].Errors;
-                        foreach (var error in errors)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"  {key}: {error.ErrorMessage}");
-                        }
                     }
                 }
 
@@ -138,12 +141,18 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Usuario/EditarUsuario/5
         [HttpGet]
         public IActionResult EditarUsuario(int id)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarUsuarios())
+            {
+                return RedirectSinPermiso();
+            }
+
+            if (!EsAdministrador())
+            {
+                return RedirectSinPermiso("Solo los administradores pueden editar usuarios");
+            }
 
             try
             {
@@ -156,7 +165,6 @@ namespace Pasteleria.Controllers
                 }
 
                 CargarRoles();
-                // Limpiar la contraseña para que no se muestre en el formulario
                 usuario.Contrasenna = string.Empty;
                 return View(usuario);
             }
@@ -167,25 +175,29 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // POST: Usuario/EditarUsuario
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult EditarUsuario(Usuario usuario)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarUsuarios())
+            {
+                return RedirectSinPermiso();
+            }
+
+            if (!EsAdministrador())
+            {
+                return RedirectSinPermiso("Solo los administradores pueden editar usuarios");
+            }
 
             try
             {
-                System.Diagnostics.Debug.WriteLine($"ID: {usuario?.IdUsuario}");
-
                 if (ModelState.IsValid)
                 {
                     int resultado = _actualizarUsuario.Actualizar(usuario);
 
                     if (resultado > 0)
                     {
-                        TempData["Exito"] = "Usuario actualizado exitosamente";
+                        TempData["Success"] = "Usuario actualizado exitosamente";
                         return RedirectToAction(nameof(ListadoUsuarios));
                     }
                     else
@@ -205,12 +217,13 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Usuario/DetallesUsuario/5
         [HttpGet]
         public IActionResult DetallesUsuario(int id)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarUsuarios())
+            {
+                return RedirectSinPermiso();
+            }
 
             try
             {
@@ -222,7 +235,6 @@ namespace Pasteleria.Controllers
                     return RedirectToAction(nameof(ListadoUsuarios));
                 }
 
-                // Obtener el nombre del rol
                 var roles = _listarRoles.Obtener();
                 var rol = roles.FirstOrDefault(r => r.IdRol == usuario.IdRol);
                 ViewBag.NombreRol = rol?.NombreRol ?? "Sin rol";
@@ -236,13 +248,14 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // POST: Usuario/EliminarUsuario
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult EliminarUsuario(int IdUsuario)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeGestionarUsuarios())
+            {
+                return RedirectSinPermiso();
+            }
 
             try
             {
@@ -250,7 +263,7 @@ namespace Pasteleria.Controllers
 
                 if (resultado > 0)
                 {
-                    TempData["Exito"] = "Usuario eliminado exitosamente";
+                    TempData["Success"] = "Usuario eliminado exitosamente";
                 }
                 else
                 {
@@ -266,11 +279,10 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // Método auxiliar para cargar los roles en el ViewBag
         private void CargarRoles()
         {
             var roles = _listarRoles.Obtener()
-                .Where(r => r.Estado) // Solo roles activos
+                .Where(r => r.Estado)
                 .Select(r => new SelectListItem
                 {
                     Value = r.IdRol.ToString(),

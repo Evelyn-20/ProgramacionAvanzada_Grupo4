@@ -1,0 +1,353 @@
+﻿@{
+    ViewData["Title"] = "Crear Pedido para Cliente";
+    var clientes = ViewBag.Clientes as List<dynamic>;
+}
+
+<!-- Banner Hero -->
+<section class="hero" style="padding: 3rem 0;">
+    <div class="hero-content">
+        <h1 class="hero-title">Crear Pedido para Cliente</h1>
+        <p class="hero-subtitle">Administración de pedidos</p>
+    </div>
+</section>
+
+<div class="container" style="padding: 3rem 20px; max-width: 1400px;">
+    <div style="display: grid; grid-template-columns: 1fr 400px; gap: 2rem; align-items: start;">
+        <!-- Columna izquierda -->
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+            <!-- Selección de Cliente -->
+            <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); padding: 2rem;">
+                <h3 style="color: var(--dark-color); margin-bottom: 1.5rem; font-family: 'Playfair Display', serif; font-size: 1.5rem;">
+                    <i class="fas fa-user"></i> Seleccionar Cliente
+                </h3>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; color: var(--dark-color); font-weight: 600; margin-bottom: 0.5rem;">
+                        Buscar Cliente <span style="color: #e74c3c;">*</span>
+                    </label>
+                    <input type="text"
+                           id="buscarCliente"
+                           placeholder="Buscar por nombre, cédula o correo..."
+                           style="width: 100%; padding: 0.9rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem;">
+                    <div id="resultadosCliente" style="margin-top: 0.5rem; max-height: 200px; overflow-y: auto;"></div>
+                </div>
+
+                <div id="clienteSeleccionado" style="display: none; padding: 1rem; background: var(--light-color); border-radius: 10px; border-left: 4px solid var(--primary-color);">
+                    <h5 style="color: var(--dark-color); margin-bottom: 0.5rem;">Cliente Seleccionado:</h5>
+                    <p id="infoCliente" style="margin: 0; color: var(--text-color);"></p>
+                    <input type="hidden" id="idClienteSeleccionado" value="">
+                </div>
+            </div>
+
+            <!-- Búsqueda de Productos -->
+            <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); padding: 2rem;">
+                <h3 style="color: var(--dark-color); margin-bottom: 1.5rem; font-family: 'Playfair Display', serif; font-size: 1.5rem;">
+                    <i class="fas fa-shopping-basket"></i> Agregar Productos
+                </h3>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; color: var(--dark-color); font-weight: 600; margin-bottom: 0.5rem;">
+                        Buscar Producto
+                    </label>
+                    <input type="text"
+                           id="buscarProducto"
+                           placeholder="Buscar productos..."
+                           style="width: 100%; padding: 0.9rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem;">
+                    <div id="resultadosProducto" style="margin-top: 0.5rem; max-height: 300px; overflow-y: auto;"></div>
+                </div>
+
+                <div id="productosAgregados">
+                    <h4 style="color: var(--dark-color); margin-bottom: 1rem;">Productos en el Pedido:</h4>
+                    <div id="listaProductos" style="min-height: 100px;">
+                        <p style="text-align: center; color: var(--text-color); padding: 2rem;">
+                            No hay productos agregados
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna derecha: Resumen -->
+        <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); padding: 2rem; position: sticky; top: 100px;">
+            <h3 style="color: var(--dark-color); margin-bottom: 1.5rem; font-family: 'Playfair Display', serif; font-size: 1.5rem;">
+                Resumen del Pedido
+            </h3>
+
+            <div style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--secondary-color);">
+                    <span style="color: var(--text-color);">Subtotal:</span>
+                    <span id="resumenSubtotal" style="color: var(--dark-color); font-weight: 600;">₡0.00</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--secondary-color);">
+                    <span style="color: var(--text-color);">Descuento:</span>
+                    <span id="resumenDescuento" style="color: #27ae60; font-weight: 600;">₡0.00</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid var(--secondary-color);">
+                    <span style="color: var(--text-color);">Impuesto (13%):</span>
+                    <span id="resumenImpuesto" style="color: var(--dark-color); font-weight: 600;">₡0.00</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
+                    <span style="color: var(--dark-color); font-weight: 700; font-size: 1.2rem;">Total:</span>
+                    <span id="resumenTotal" style="color: var(--primary-color); font-weight: 700; font-size: 1.5rem;">₡0.00</span>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <button id="btnGuardarPedido" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+                    <i class="fas fa-save"></i> Crear Pedido
+                </button>
+                <a href="@Url.Action("ListadoPedidos", "Pedido")" class="btn btn-secondary" style="width: 100%; padding: 1rem; font-size: 1.1rem; text-align: center; text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> Cancelar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let productosEnPedido = [];
+        let clienteSeleccionado = null;
+
+        // Buscar cliente
+        $('#buscarCliente').on('input', function() {
+            const termino = $(this).val();
+
+            if (termino.length < 2) {
+                $('#resultadosCliente').html('');
+                return;
+            }
+
+            $.get('/Pedido/BuscarCliente', { termino: termino }, function(data) {
+                let html = '';
+                data.forEach(cliente => {
+                    html += `
+                        <div class="cliente-item" data-id="${cliente.id}" style="padding: 0.8rem; border-bottom: 1px solid var(--secondary-color); cursor: pointer; transition: background 0.3s;">
+                            <strong>${cliente.nombre}</strong><br>
+                            <small>Cédula: ${cliente.cedula} | ${cliente.correo}</small>
+                        </div>
+                    `;
+                });
+                $('#resultadosCliente').html(html || '<p style="padding: 0.5rem; color: var(--text-color);">No se encontraron clientes</p>');
+
+                $('.cliente-item').hover(
+                    function() { $(this).css('background', 'var(--light-color)'); },
+                    function() { $(this).css('background', 'transparent'); }
+                );
+
+                $('.cliente-item').click(function() {
+                    const id = $(this).data('id');
+                    const cliente = data.find(c => c.id === id);
+                    seleccionarCliente(cliente);
+                });
+            });
+        });
+
+        function seleccionarCliente(cliente) {
+            clienteSeleccionado = cliente;
+            $('#idClienteSeleccionado').val(cliente.id);
+            $('#infoCliente').html(`
+                <strong>${cliente.nombre}</strong><br>
+                Cédula: ${cliente.cedula}<br>
+                Correo: ${cliente.correo}
+            `);
+            $('#clienteSeleccionado').show();
+            $('#buscarCliente').val('');
+            $('#resultadosCliente').html('');
+        }
+
+        // Buscar producto
+        $('#buscarProducto').on('input', function() {
+            const termino = $(this).val();
+
+            if (termino.length < 2) {
+                $('#resultadosProducto').html('');
+                return;
+            }
+
+            $.get('/api/pedidosapi/buscar-productos', { q: termino }, function(data) {
+                let html = '';
+                data.forEach(producto => {
+                    html += `
+                        <div class="producto-item" data-producto='${JSON.stringify(producto)}' style="padding: 0.8rem; border-bottom: 1px solid var(--secondary-color); cursor: pointer; transition: background 0.3s; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>${producto.nombre}</strong><br>
+                                <small>Precio: ₡${producto.precio.toFixed(2)} | Stock: ${producto.stock}</small>
+                            </div>
+                            <button class="btn btn-sm btn-primary" style="padding: 0.4rem 0.8rem;">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                $('#resultadosProducto').html(html || '<p style="padding: 0.5rem; color: var(--text-color);">No se encontraron productos</p>');
+
+                $('.producto-item').hover(
+                    function() { $(this).css('background', 'var(--light-color)'); },
+                    function() { $(this).css('background', 'transparent'); }
+                );
+
+                $('.producto-item').click(function() {
+                    const producto = $(this).data('producto');
+                    agregarProducto(producto);
+                });
+            });
+        });
+
+        function agregarProducto(producto) {
+            const existe = productosEnPedido.find(p => p.id === producto.id);
+            if (existe) {
+                if (existe.cantidad < producto.stock) {
+                    existe.cantidad++;
+                } else {
+                    Swal.fire('Stock máximo', `Solo hay ${producto.stock} unidades disponibles`, 'warning');
+                    return;
+                }
+            } else {
+                productosEnPedido.push({
+                    id: producto.id,
+                    nombre: producto.nombre,
+                    precio: producto.precio,
+                    cantidad: 1,
+                    descuento: 0,
+                    impuesto: producto.impuesto,
+                    stock: producto.stock
+                });
+            }
+
+            $('#buscarProducto').val('');
+            $('#resultadosProducto').html('');
+            actualizarListaProductos();
+            calcularTotales();
+        }
+
+        function actualizarListaProductos() {
+            if (productosEnPedido.length === 0) {
+                $('#listaProductos').html('<p style="text-align: center; color: var(--text-color); padding: 2rem;">No hay productos agregados</p>');
+                return;
+            }
+
+            let html = '';
+            productosEnPedido.forEach((producto, index) => {
+                html += `
+                    <div style="display: flex; gap: 1rem; padding: 1rem; border-bottom: 1px solid var(--secondary-color); align-items: center;">
+                        <div style="flex: 1;">
+                            <strong>${producto.nombre}</strong><br>
+                            <small>₡${producto.precio.toFixed(2)}</small>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <button onclick="cambiarCantidad(${index}, -1)" class="btn btn-sm" style="width: 30px; height: 30px; padding: 0; background: var(--secondary-color);">-</button>
+                            <span style="font-weight: 600; min-width: 30px; text-align: center;">${producto.cantidad}</span>
+                            <button onclick="cambiarCantidad(${index}, 1)" class="btn btn-sm" style="width: 30px; height: 30px; padding: 0; background: var(--secondary-color);">+</button>
+                        </div>
+                        <div style="text-align: right; min-width: 80px;">
+                            <strong style="color: var(--primary-color);">₡${(producto.precio * producto.cantidad).toFixed(2)}</strong>
+                        </div>
+                        <button onclick="eliminarProducto(${index})" class="btn btn-sm" style="width: 35px; height: 35px; padding: 0; background: #e74c3c; color: white;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            $('#listaProductos').html(html);
+        }
+
+        function cambiarCantidad(index, cambio) {
+            const producto = productosEnPedido[index];
+            const nuevaCantidad = producto.cantidad + cambio;
+
+            if (nuevaCantidad < 1) {
+                eliminarProducto(index);
+                return;
+            }
+
+            if (nuevaCantidad > producto.stock) {
+                Swal.fire('Stock máximo', `Solo hay ${producto.stock} unidades disponibles`, 'warning');
+                return;
+            }
+
+            producto.cantidad = nuevaCantidad;
+            actualizarListaProductos();
+            calcularTotales();
+        }
+
+        function eliminarProducto(index) {
+            productosEnPedido.splice(index, 1);
+            actualizarListaProductos();
+            calcularTotales();
+        }
+
+        function calcularTotales() {
+            let subtotal = 0;
+            let descuentoTotal = 0;
+            let impuestoTotal = 0;
+
+            productosEnPedido.forEach(producto => {
+                const subtotalProducto = producto.precio * producto.cantidad;
+                subtotal += subtotalProducto;
+                descuentoTotal += producto.descuento;
+
+                const subtotalConDescuento = subtotalProducto - producto.descuento;
+                impuestoTotal += subtotalConDescuento * (producto.impuesto / 100);
+            });
+
+            const total = subtotal - descuentoTotal + impuestoTotal;
+
+            $('#resumenSubtotal').text('₡' + subtotal.toFixed(2));
+            $('#resumenDescuento').text('₡' + descuentoTotal.toFixed(2));
+            $('#resumenImpuesto').text('₡' + impuestoTotal.toFixed(2));
+            $('#resumenTotal').text('₡' + total.toFixed(2));
+        }
+
+        // Guardar pedido
+        $('#btnGuardarPedido').click(function() {
+            const idCliente = $('#idClienteSeleccionado').val();
+
+            if (!idCliente) {
+                Swal.fire('Error', 'Debe seleccionar un cliente', 'error');
+                return;
+            }
+
+            if (productosEnPedido.length === 0) {
+                Swal.fire('Error', 'Debe agregar al menos un producto', 'error');
+                return;
+            }
+
+            const productos = productosEnPedido.map(p => ({
+                IdProducto: p.id,
+                Cantidad: p.cantidad,
+                Descuento: p.descuento
+            }));
+
+            $.ajax({
+                url: '/Pedido/GuardarPedido',
+                type: 'POST',
+                data: {
+                    idCliente: idCliente,
+                    productosJson: JSON.stringify(productos),
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Pedido creado!',
+                            text: response.mensaje,
+                            confirmButtonText: 'Ver Pedidos'
+                        }).then(() => {
+                            window.location.href = '/Pedido/ListadoPedidos';
+                        });
+                    } else {
+                        Swal.fire('Error', response.mensaje, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error', 'Error al procesar la solicitud', 'error');
+                }
+            });
+        });
+    </script>
+    <form id="tokenForm" style="display: none;">
+        @Html.AntiForgeryToken()
+    </form>
+}

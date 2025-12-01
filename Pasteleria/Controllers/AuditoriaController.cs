@@ -1,12 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Pasteleria.Abstracciones.Logica.Auditoria;
 using Pasteleria.Abstracciones.ModeloUI;
-using Pasteleria.LogicaDeNegocio.Auditoria;
+using Pasteleria.AccesoADatos.Auditoria;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Pasteleria.Controllers
 {
+    [Authorize]
     public class AuditoriaController : BaseController
     {
         private IListarAuditorias _listarAuditorias;
@@ -23,11 +27,13 @@ namespace Pasteleria.Controllers
             }
         }
 
-        // GET: Auditoria/ListadoAuditorias
+        [HttpGet]
         public IActionResult ListadoAuditorias(string buscar, string filtro)
         {
-            if (!VerificarPermisosAdministrador())
-                return RedirectToAction("Index", "Home");
+            if (!PuedeVerAuditorias())
+            {
+                return RedirectSinPermiso();
+            }
 
             try
             {
