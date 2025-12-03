@@ -76,7 +76,7 @@ namespace Pasteleria.AccesoADatos.Categorias
                 IdCategoria = categoriaAD.IdCategoria,
                 NombreCategoria = categoriaAD.NombreCategoria,
                 Imagen = categoriaAD.Imagen,
-                ImagenThumbnail = categoriaAD.ImagenThumbnail, // ⭐ AGREGADO
+                ImagenThumbnail = categoriaAD.ImagenThumbnail,
                 Estado = categoriaAD.Estado
             };
         }

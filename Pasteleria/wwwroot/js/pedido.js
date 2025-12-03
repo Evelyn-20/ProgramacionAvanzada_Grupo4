@@ -78,6 +78,82 @@
     botonesDetalles.forEach(function (btn) {
         btn.addEventListener('click', function () {
             var pedidoId = this.getAttribute('data-id');
+            var cliente = this.getAttribute('data-cliente');
+            var usuario = this.getAttribute('data-usuario');
+            var fecha = this.getAttribute('data-fecha');
+            var subtotal = this.getAttribute('data-subtotal');
+            var descuento = this.getAttribute('data-descuento');
+            var impuesto = this.getAttribute('data-impuesto');
+            var total = this.getAttribute('data-total');
+            var estado = this.getAttribute('data-estado');
+
+            // Actualizar información básica primero
+            var detallesPedidoId = document.getElementById('detalles-pedido-id');
+            var detallesPedidoCliente = document.getElementById('detalles-pedido-cliente');
+            var detallesPedidoUsuario = document.getElementById('detalles-pedido-usuario');
+            var detallesPedidoUsuarioContainer = document.getElementById('detalles-pedido-usuario-container');
+            var detallesPedidoFecha = document.getElementById('detalles-pedido-fecha');
+            var detallesPedidoSubtotal = document.getElementById('detalles-pedido-subtotal');
+            var detallesPedidoDescuento = document.getElementById('detalles-pedido-descuento');
+            var detallesPedidoDescuentoRow = document.getElementById('detalles-pedido-descuento-row');
+            var detallesPedidoImpuesto = document.getElementById('detalles-pedido-impuesto');
+            var detallesPedidoTotal = document.getElementById('detalles-pedido-total');
+            var estadoBadge = document.getElementById('detalles-pedido-estado-badge');
+
+            if (detallesPedidoId) detallesPedidoId.textContent = pedidoId;
+            if (detallesPedidoCliente) detallesPedidoCliente.textContent = cliente;
+            if (detallesPedidoFecha) detallesPedidoFecha.textContent = fecha;
+
+            // Mostrar usuario si existe
+            if (usuario && usuario.trim() !== '') {
+                if (detallesPedidoUsuario) detallesPedidoUsuario.textContent = usuario;
+                if (detallesPedidoUsuarioContainer) detallesPedidoUsuarioContainer.style.display = 'block';
+            } else {
+                if (detallesPedidoUsuarioContainer) detallesPedidoUsuarioContainer.style.display = 'none';
+            }
+
+            // Formatear y mostrar totales
+            if (detallesPedidoSubtotal) {
+                detallesPedidoSubtotal.textContent = '₡' + formatearNumero(parseFloat(subtotal));
+            }
+
+            if (detallesPedidoImpuesto) {
+                detallesPedidoImpuesto.textContent = '₡' + formatearNumero(parseFloat(impuesto));
+            }
+
+            if (detallesPedidoTotal) {
+                detallesPedidoTotal.textContent = '₡' + formatearNumero(parseFloat(total));
+            }
+
+            // Mostrar/ocultar descuento
+            var descuentoNum = parseFloat(descuento);
+            if (descuentoNum > 0) {
+                if (detallesPedidoDescuento) {
+                    detallesPedidoDescuento.textContent = '-₡' + formatearNumero(descuentoNum);
+                }
+                if (detallesPedidoDescuentoRow) {
+                    detallesPedidoDescuentoRow.style.display = 'flex';
+                }
+            } else {
+                if (detallesPedidoDescuentoRow) {
+                    detallesPedidoDescuentoRow.style.display = 'none';
+                }
+            }
+
+            // Actualizar badge de estado
+            if (estadoBadge) {
+                var icono = obtenerIconoEstado(estado);
+                estadoBadge.innerHTML = '<i class="fas ' + icono + '"></i> ' + estado;
+                var estadoColor = obtenerColorEstado(estado);
+                estadoBadge.style.background = estadoColor;
+                estadoBadge.style.color = 'white';
+                estadoBadge.style.padding = '0.5rem 1rem';
+                estadoBadge.style.borderRadius = '20px';
+                estadoBadge.style.display = 'inline-block';
+                estadoBadge.style.fontWeight = '600';
+            }
+
+            // Cargar productos via AJAX
             cargarDetallesPedido(pedidoId);
         });
     });
@@ -253,61 +329,6 @@
         var pedido = data.pedido;
         var productos = data.productos;
 
-        // Actualizar información básica
-        var detallesPedidoId = document.getElementById('detalles-pedido-id');
-        var detallesPedidoCliente = document.getElementById('detalles-pedido-cliente');
-        var detallesPedidoFecha = document.getElementById('detalles-pedido-fecha');
-        var detallesPedidoSubtotal = document.getElementById('detalles-pedido-subtotal');
-        var detallesPedidoDescuento = document.getElementById('detalles-pedido-descuento');
-        var detallesPedidoDescuentoRow = document.getElementById('detalles-pedido-descuento-row');
-        var detallesPedidoImpuesto = document.getElementById('detalles-pedido-impuesto');
-        var detallesPedidoTotal = document.getElementById('detalles-pedido-total');
-        var estadoBadge = document.getElementById('detalles-pedido-estado-badge');
-
-        if (detallesPedidoId) detallesPedidoId.textContent = pedido.id;
-        if (detallesPedidoCliente) detallesPedidoCliente.textContent = pedido.cliente;
-        if (detallesPedidoFecha) detallesPedidoFecha.textContent = pedido.fecha;
-
-        // Formatear y mostrar totales
-        if (detallesPedidoSubtotal) {
-            detallesPedidoSubtotal.textContent = '₡' + formatearNumero(pedido.subtotal);
-        }
-
-        if (detallesPedidoImpuesto) {
-            detallesPedidoImpuesto.textContent = '₡' + formatearNumero(pedido.impuesto);
-        }
-
-        if (detallesPedidoTotal) {
-            detallesPedidoTotal.textContent = '₡' + formatearNumero(pedido.total);
-        }
-
-        // Mostrar/ocultar descuento
-        if (pedido.descuento && pedido.descuento > 0) {
-            if (detallesPedidoDescuento) {
-                detallesPedidoDescuento.textContent = '-₡' + formatearNumero(pedido.descuento);
-            }
-            if (detallesPedidoDescuentoRow) {
-                detallesPedidoDescuentoRow.style.display = 'flex';
-            }
-        } else {
-            if (detallesPedidoDescuentoRow) {
-                detallesPedidoDescuentoRow.style.display = 'none';
-            }
-        }
-
-        // Actualizar badge de estado
-        if (estadoBadge) {
-            var icono = obtenerIconoEstado(pedido.estado);
-            estadoBadge.innerHTML = '<i class="fas ' + icono + '"></i> ' + pedido.estado;
-            var estadoColor = obtenerColorEstado(pedido.estado);
-            estadoBadge.style.background = estadoColor;
-            estadoBadge.style.color = 'white';
-            estadoBadge.style.padding = '0.5rem 1rem';
-            estadoBadge.style.borderRadius = '20px';
-            estadoBadge.style.display = 'inline-block';
-            estadoBadge.style.fontWeight = '600';
-        }
-
         // Actualizar lista de productos
         var productosContainer = document.getElementById('detalles-pedido-productos');
         if (productosContainer) {
@@ -410,6 +431,8 @@ function obtenerColorEstado(estado) {
             return '#27ae60';
         case 'Cancelado':
             return '#e74c3c';
+        case 'Entregado':
+            return '#16a085';
         default:
             return '#95a5a6';
     }
@@ -426,6 +449,8 @@ function obtenerIconoEstado(estado) {
             return 'fa-check-circle';
         case 'Cancelado':
             return 'fa-times-circle';
+        case 'Entregado':
+            return 'fa-truck';
         default:
             return 'fa-question-circle';
     }

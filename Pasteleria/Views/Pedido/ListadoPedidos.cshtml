@@ -99,6 +99,7 @@
                     <tr>
                         <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">#</th>
                         <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Cliente</th>
+                        <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Usuario</th>
                         <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Fecha</th>
                         <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Productos</th>
                         <th style="padding: 1.2rem; color: var(--dark-color); font-weight: 600; border: none;">Total</th>
@@ -118,6 +119,19 @@
                                 <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">
                                     <i class="fas fa-user" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
                                     @pedido.NombreCliente
+                                </td>
+                                <td style="padding: 1.2rem; color: var(--text-color);">
+                                    @if (!string.IsNullOrWhiteSpace(pedido.NombreUsuario))
+                                    {
+                                        <span>
+                                            <i class="fas fa-user-tie" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
+                                            @pedido.NombreUsuario
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span style="color: var(--text-color); opacity: 0.6; font-style: italic;">-</span>
+                                    }
                                 </td>
                                 <td style="padding: 1.2rem; color: var(--text-color);">
                                     <i class="fas fa-calendar" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
@@ -164,6 +178,7 @@
                                             class="btn btn-sm btn-detalles"
                                             data-id="@pedido.IdPedido"
                                             data-cliente="@pedido.NombreCliente"
+                                            data-usuario="@(pedido.NombreUsuario ?? "")"
                                             data-fecha="@pedido.FechaPedidoFormateada"
                                             data-subtotal="@pedido.Subtotal"
                                             data-descuento="@((pedido.Descuento ?? 0).ToString("F2"))"
@@ -194,7 +209,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="7" style="padding: 3rem; text-align: center; color: var(--text-color);">
+                            <td colspan="8" style="padding: 3rem; text-align: center; color: var(--text-color);">
                                 <i class="fas fa-inbox" style="font-size: 3rem; color: var(--secondary-color); opacity: 0.5; display: block; margin-bottom: 1rem;"></i>
                                 <p style="font-size: 1.2rem; margin: 0;">No se encontraron pedidos</p>
                                 @if (!string.IsNullOrWhiteSpace(ViewBag.Buscar as string) || ViewBag.EstadoFiltro != null)

@@ -50,6 +50,17 @@ namespace Pasteleria.AccesoADatos.Pedidos
                         .AsNoTracking()
                         .FirstOrDefault(e => e.IdEstadoPedido == p.IdEstadoPedido);
 
+                    // Obtener nombre del usuario si existe
+                    string nombreUsuario = null;
+                    if (p.IdUsuario.HasValue && p.IdUsuario.Value > 0)
+                    {
+                        var usuario = _contexto.Usuario
+                            .AsNoTracking()
+                            .FirstOrDefault(u => u.IdUsuario == p.IdUsuario.Value);
+
+                        nombreUsuario = usuario?.NombreUsuario;
+                    }
+
                     var cantidadProductos = _contexto.DetallePedido
                         .AsNoTracking()
                         .Where(d => d.IdPedido == p.IdPedido)
@@ -67,6 +78,7 @@ namespace Pasteleria.AccesoADatos.Pedidos
                         Total = p.Total,
                         IdEstadoPedido = p.IdEstadoPedido,
                         NombreCliente = cliente?.NombreCliente ?? "Cliente no encontrado",
+                        NombreUsuario = nombreUsuario,
                         Estado = estado?.NombreEstado ?? "Estado desconocido",
                         CantidadProductos = cantidadProductos
                     });
@@ -113,6 +125,17 @@ namespace Pasteleria.AccesoADatos.Pedidos
                         .AsNoTracking()
                         .FirstOrDefault(e => e.IdEstadoPedido == p.IdEstadoPedido);
 
+                    // Obtener nombre del usuario si existe
+                    string nombreUsuario = null;
+                    if (p.IdUsuario.HasValue && p.IdUsuario.Value > 0)
+                    {
+                        var usuario = _contexto.Usuario
+                            .AsNoTracking()
+                            .FirstOrDefault(u => u.IdUsuario == p.IdUsuario.Value);
+
+                        nombreUsuario = usuario?.NombreUsuario;
+                    }
+
                     var cantidadProductos = _contexto.DetallePedido
                         .AsNoTracking()
                         .Where(d => d.IdPedido == p.IdPedido)
@@ -130,6 +153,7 @@ namespace Pasteleria.AccesoADatos.Pedidos
                         Total = p.Total,
                         IdEstadoPedido = p.IdEstadoPedido,
                         NombreCliente = cliente?.NombreCliente ?? "Cliente no encontrado",
+                        NombreUsuario = nombreUsuario,
                         Estado = estado?.NombreEstado ?? "Estado desconocido",
                         CantidadProductos = cantidadProductos
                     });
@@ -145,13 +169,11 @@ namespace Pasteleria.AccesoADatos.Pedidos
 
         public List<PedidoUI> ObtenerPorEstado(int idEstado)
         {
-            // Similar implementation
             return Obtener().Where(p => p.IdEstadoPedido == idEstado).ToList();
         }
 
         public List<PedidoUI> ObtenerPorFecha(DateTime fechaInicio, DateTime fechaFin)
         {
-            // Similar implementation
             return Obtener().Where(p => p.Fecha >= fechaInicio && p.Fecha <= fechaFin).ToList();
         }
     }

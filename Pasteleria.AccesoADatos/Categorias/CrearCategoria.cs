@@ -47,7 +47,7 @@ namespace Pasteleria.AccesoADatos.Categorias
             {
                 NombreCategoria = categoria.NombreCategoria,
                 Imagen = categoria.Imagen ?? new byte[0],
-                ImagenThumbnail = categoria.ImagenThumbnail ?? new byte[0], // ⭐ AGREGADO
+                ImagenThumbnail = categoria.ImagenThumbnail ?? new byte[0],
                 Estado = categoria.Estado
             };
         }

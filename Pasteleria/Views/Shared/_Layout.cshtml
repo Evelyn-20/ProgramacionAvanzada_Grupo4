@@ -152,20 +152,10 @@
                             <ul class="dropdown-menu-custom">
                                 <li><a href="/Pedido/ListadoPedidos">Pedidos</a></li>
                                 <li><a href="/Pedido/CrearPedido">Crear Pedido</a></li>
+                                <li><a class="nav-link" href="@Url.Action("GenerarReporte", "ReportePedido")">Reportes</a></li>
                             </ul>
                         </li>
                     }
-
-                    <!-- BOTON REPORTES PDF: Admin -->
-                    @if (esAdmin || esVentas)
-                    {
-                        <li>
-                            <a href="/Venta/GenerarPDF">
-                                <i class="fas fa-file-pdf"></i> Ventas PDF
-                            </a>
-                        </li>
-                    }
-
 
                     <!-- MENÚ CLIENTES: Admin y Ventas -->
                     @if (puedeGestionarClientes)

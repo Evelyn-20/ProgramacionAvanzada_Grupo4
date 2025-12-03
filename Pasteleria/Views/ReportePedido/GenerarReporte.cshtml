@@ -1,0 +1,162 @@
+﻿@{
+    ViewData["Title"] = "Reporte de Pedidos";
+}
+
+<!-- Banner Hero -->
+<section class="hero" style="padding: 3rem 0;">
+    <div class="hero-content">
+        <h1 class="hero-title">Reporte de Pedidos</h1>
+        <p class="hero-subtitle">Genera reportes detallados de pedidos con filtros personalizados</p>
+    </div>
+</section>
+
+<div class="container" style="padding: 3rem 20px; max-width: 1200px;">
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); padding: 2.5rem; max-width: 900px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <i class="fas fa-file-alt" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+            <h3 style="color: var(--dark-color); font-family: 'Playfair Display', serif; margin-bottom: 0.5rem;">
+                Configurar Reporte
+            </h3>
+            <p style="color: var(--text-color);">Selecciona los filtros para generar tu reporte personalizado</p>
+        </div>
+
+        <form method="post" action="@Url.Action("GenerarReporteResult", "ReportePedido")">
+            @Html.AntiForgeryToken()
+
+            <!-- Rango de Fechas -->
+            <div style="background: var(--light-color); padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem; border-left: 4px solid var(--primary-color);">
+                <h5 style="color: var(--dark-color); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem;">
+                    <i class="fas fa-calendar-alt" style="color: var(--primary-color);"></i>
+                    Rango de Fechas <span style="color: #e74c3c; font-size: 0.9rem;">*</span>
+                </h5>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label style="display: block; color: var(--dark-color); font-weight: 600; margin-bottom: 0.5rem;">
+                            Fecha Inicio
+                        </label>
+                        <input type="date"
+                               name="FechaInicio"
+                               class="form-control"
+                               required
+                               value="@ViewBag.FechaInicio"
+                               max="@DateTime.Now.ToString("yyyy-MM-dd")"
+                               style="width: 100%; padding: 0.9rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem;" />
+                    </div>
+                    <div>
+                        <label style="display: block; color: var(--dark-color); font-weight: 600; margin-bottom: 0.5rem;">
+                            Fecha Fin
+                        </label>
+                        <input type="date"
+                               name="FechaFin"
+                               class="form-control"
+                               required
+                               value="@ViewBag.FechaFin"
+                               max="@DateTime.Now.ToString("yyyy-MM-dd")"
+                               style="width: 100%; padding: 0.9rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem;" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros Opcionales -->
+            <div style="background: var(--light-color); padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem; border-left: 4px solid var(--primary-color);">
+                <h5 style="color: var(--dark-color); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem;">
+                    <i class="fas fa-filter" style="color: var(--primary-color);"></i>
+                    Filtros Adicionales <span style="color: var(--text-color); font-size: 0.85rem; font-weight: normal;">(Opcional)</span>
+                </h5>
+
+                <div style="display: grid; gap: 1.2rem;">
+                    <!-- Estado -->
+                    <div>
+                        <label style="display: block; color: var(--dark-color); font-weight: 600; margin-bottom: 0.5rem;">
+                            <i class="fas fa-toggle-on" style="color: var(--primary-color); margin-right: 0.3rem;"></i> Estado del Pedido
+                        </label>
+                        <select name="Estado"
+                                class="form-control"
+                                style="width: 100%; padding: 0.9rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem;">
+                            <option value="Todos" @@(ViewBag.Estado == "Todos" || string.IsNullOrEmpty(ViewBag.Estado as string) ? "selected" : "")>-- Todos los Estados --</option>
+                            @foreach (Pasteleria.Abstracciones.ModeloUI.EstadoPedido e in (IEnumerable<Pasteleria.Abstracciones.ModeloUI.EstadoPedido>)ViewBag.Estados)
+                            {
+                                <option value="@e.NombreEstado" @@(ViewBag.Estado == e.NombreEstado ? "selected" : "")>@e.NombreEstado</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Cliente -->
+                    <div>
+                        <label style="display: block; color: var(--dark-color); font-weight: 600; margin-bottom: 0.5rem;">
+                            <i class="fas fa-user" style="color: var(--primary-color); margin-right: 0.3rem;"></i> Cliente
+                        </label>
+                        <select name="IdCliente"
+                                class="form-control"
+                                style="width: 100%; padding: 0.9rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem;">
+                            <option value="">-- Todos los Clientes --</option>
+                            @foreach (Pasteleria.Abstracciones.ModeloUI.Cliente c in (IEnumerable<Pasteleria.Abstracciones.ModeloUI.Cliente>)ViewBag.Clientes)
+                            {
+                                <option value="@c.IdCliente" @@(ViewBag.IdCliente != null && ViewBag.IdCliente == c.IdCliente ? "selected" : "")>@c.NombreCliente (@c.Cedula)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Usuario -->
+                    <div>
+                        <label style="display: block; color: var(--dark-color); font-weight: 600; margin-bottom: 0.5rem;">
+                            <i class="fas fa-user-tie" style="color: var(--primary-color); margin-right: 0.3rem;"></i> Usuario que Procesó
+                        </label>
+                        <select name="IdUsuario"
+                                class="form-control"
+                                style="width: 100%; padding: 0.9rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem;">
+                            <option value="">-- Todos los Usuarios --</option>
+                            @foreach (Pasteleria.Abstracciones.ModeloUI.Usuario u in (IEnumerable<Pasteleria.Abstracciones.ModeloUI.Usuario>)ViewBag.Usuarios)
+                            {
+                                <option value="@u.IdUsuario" @@(ViewBag.IdUsuario != null && ViewBag.IdUsuario == u.IdUsuario ? "selected" : "")>@u.NombreUsuario</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap;">
+                <button type="submit"
+                        class="btn btn-primary"
+                        style="padding: 1rem 3rem; font-size: 1.1rem; border-radius: 50px; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-chart-bar"></i> Ver Reporte
+                </button>
+                <a href="@Url.Action("ListadoPedidos", "Pedido")"
+                   class="btn btn-secondary"
+                   style="padding: 1rem 3rem; font-size: 1.1rem; border-radius: 50px; text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Establecer fecha de fin como hoy por defecto
+        document.addEventListener('DOMContentLoaded', function() {
+            const fechaFin = document.querySelector('input[name="FechaFin"]');
+            if (fechaFin && !fechaFin.value) {
+                fechaFin.value = new Date().toISOString().split('T')[0];
+            }
+        });
+    </script>
+}

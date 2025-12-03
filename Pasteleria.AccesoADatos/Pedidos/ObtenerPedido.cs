@@ -52,6 +52,17 @@ namespace Pasteleria.AccesoADatos.Pedidos
                     .AsNoTracking()
                     .FirstOrDefault(e => e.IdEstadoPedido == pedidoData.IdEstadoPedido);
 
+                // Obtener nombre del usuario si existe
+                string nombreUsuario = null;
+                if (pedidoData.IdUsuario.HasValue && pedidoData.IdUsuario.Value > 0)
+                {
+                    var usuario = _contexto.Usuario
+                        .AsNoTracking()
+                        .FirstOrDefault(u => u.IdUsuario == pedidoData.IdUsuario.Value);
+
+                    nombreUsuario = usuario?.NombreUsuario;
+                }
+
                 var cantidadProductos = _contexto.DetallePedido
                     .AsNoTracking()
                     .Where(d => d.IdPedido == pedidoData.IdPedido)
@@ -69,6 +80,7 @@ namespace Pasteleria.AccesoADatos.Pedidos
                     Total = pedidoData.Total,
                     IdEstadoPedido = pedidoData.IdEstadoPedido,
                     NombreCliente = cliente?.NombreCliente ?? "Cliente no encontrado",
+                    NombreUsuario = nombreUsuario,
                     Estado = estado?.NombreEstado ?? "Estado desconocido",
                     CantidadProductos = cantidadProductos
                 };

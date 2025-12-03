@@ -1,0 +1,206 @@
+﻿@model List<Pasteleria.Controllers.ReportePedidoDetalle>
+
+@{
+    ViewData["Title"] = "Resultados del Reporte";
+}
+
+<!-- Banner Hero -->
+<section class="hero" style="padding: 3rem 0;">
+    <div class="hero-content">
+        <h1 class="hero-title">Resultados del Reporte</h1>
+        <p class="hero-subtitle">Reporte de pedidos del @ViewBag.FechaInicio al @ViewBag.FechaFin</p>
+    </div>
+</section>
+
+<div class="container" style="padding: 3rem 20px; max-width: 1400px;">
+
+    @if (Model == null || Model.Count == 0)
+    {
+        <div style="text-align: center; padding: 5rem 2rem; background: var(--white); border-radius: 15px; box-shadow: var(--shadow);">
+            <i class="fas fa-inbox" style="font-size: 5rem; color: var(--secondary-color); opacity: 0.5; display: block; margin-bottom: 2rem;"></i>
+            <h2 style="color: var(--dark-color); margin-bottom: 1rem; font-family: 'Playfair Display', serif;">No se encontraron pedidos</h2>
+            <p style="color: var(--text-color); margin-bottom: 2rem; font-size: 1.1rem;">No hay pedidos que coincidan con los filtros seleccionados.</p>
+            <a href="@Url.Action("GenerarReporte", "ReportePedido")" class="btn btn-primary" style="padding: 1rem 3rem; font-size: 1.1rem; text-decoration: none; border-radius: 50px;">
+                <i class="fas fa-filter"></i> Cambiar Filtros
+            </a>
+        </div>
+    }
+    else
+    {
+        <!-- Resumen Estadístico -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <div style="background: linear-gradient(135deg, var(--primary-color) 0%, #c37049 100%); color: var(--white); padding: 2rem; border-radius: 15px; box-shadow: var(--shadow); text-align: center;">
+                <i class="fas fa-shopping-cart" style="font-size: 3rem; opacity: 0.9; margin-bottom: 1rem;"></i>
+                <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;">@ViewBag.TotalPedidos</div>
+                <div style="font-size: 1rem; opacity: 0.95; text-transform: uppercase; letter-spacing: 1px;">Total Pedidos</div>
+            </div>
+
+            <div style="background: linear-gradient(135deg, var(--dark-color) 0%, #3d271a 100%); color: var(--white); padding: 2rem; border-radius: 15px; box-shadow: var(--shadow); text-align: center;">
+                <i class="fas fa-dollar-sign" style="font-size: 3rem; opacity: 0.9; margin-bottom: 1rem;"></i>
+                <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;">₡@ViewBag.TotalGeneral.ToString("N2")</div>
+                <div style="font-size: 1rem; opacity: 0.95; text-transform: uppercase; letter-spacing: 1px;">Total Facturado</div>
+            </div>
+
+            <div style="background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%); color: var(--dark-color); padding: 2rem; border-radius: 15px; box-shadow: var(--shadow); text-align: center;">
+                <i class="fas fa-box" style="font-size: 3rem; opacity: 0.7; margin-bottom: 1rem;"></i>
+                <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;">@ViewBag.TotalProductos</div>
+                <div style="font-size: 1rem; opacity: 0.85; text-transform: uppercase; letter-spacing: 1px;">Productos Vendidos</div>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap;">
+            <div>
+                <a href="@Url.Action("GenerarReporte", "ReportePedido")" 
+                   class="btn btn-secondary" 
+                   style="padding: 0.8rem 2rem; font-size: 1rem; border-radius: 50px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-filter"></i> Nuevos Filtros
+                </a>
+            </div>
+            <div>
+                @{
+                    var fechaInicioParam = ViewBag.FechaInicio?.ToString() ?? "";
+                    var fechaFinParam = ViewBag.FechaFin?.ToString() ?? "";
+                }
+                <a href="@Url.Action("ExportarPDF", "ReportePedido", new { 
+                       FechaInicio = fechaInicioParam, 
+                       FechaFin = fechaFinParam, 
+                       IdCliente = ViewBag.IdCliente, 
+                       IdUsuario = ViewBag.IdUsuario,
+                       Estado = ViewBag.Estado 
+                   })" 
+                   class="btn btn-primary" 
+                   style="padding: 0.8rem 2rem; font-size: 1rem; border-radius: 50px; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+                    <i class="fas fa-file-pdf"></i> Descargar PDF
+                </a>
+            </div>
+        </div>
+
+        <!-- Listado de Pedidos -->
+        @foreach (var reporte in Model)
+        {
+            <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); margin-bottom: 2rem; overflow: hidden; transition: transform 0.3s;"
+                 onmouseover="this.style.transform='translateY(-5px)'"
+                 onmouseout="this.style.transform='translateY(0)'">
+                <!-- Encabezado del Pedido -->
+                <div style="background: linear-gradient(135deg, var(--secondary-color) 0%, #e8d4bc 100%); padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h4 style="color: var(--dark-color); margin: 0 0 0.5rem 0; font-weight: 700;">
+                            <i class="fas fa-receipt"></i> Pedido #@reporte.Pedido.IdPedido
+                        </h4>
+                        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.9rem; color: var(--text-color);">
+                            <span>
+                                <i class="fas fa-user" style="color: var(--primary-color);"></i> 
+                                <strong>@reporte.Pedido.NombreCliente</strong>
+                            </span>
+                            <span>
+                                <i class="fas fa-calendar" style="color: var(--primary-color);"></i> 
+                                @reporte.Pedido.FechaPedidoFormateada
+                            </span>
+                            @if (!string.IsNullOrWhiteSpace(reporte.Pedido.NombreUsuario))
+                            {
+                                <span>
+                                    <i class="fas fa-user-tie" style="color: var(--primary-color);"></i> 
+                                    Procesado por: <strong>@reporte.Pedido.NombreUsuario</strong>
+                                </span>
+                            }
+                            @{
+                                var estadoColor = "";
+                                switch (reporte.Pedido.Estado)
+                                {
+                                    case "Pendiente": estadoColor = "#f39c12"; break;
+                                    case "En Proceso": estadoColor = "#3498db"; break;
+                                    case "Completado": estadoColor = "#27ae60"; break;
+                                    case "Cancelado": estadoColor = "#e74c3c"; break;
+                                    default: estadoColor = "#95a5a6"; break;
+                                }
+                            }
+                            <span style="background: @estadoColor; color: var(--white); padding: 0.3rem 0.8rem; border-radius: 15px; font-weight: 600;">
+                                @reporte.Pedido.Estado
+                            </span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: var(--text-color); font-size: 0.85rem; margin-bottom: 0.25rem;">Total</div>
+                        <div style="color: var(--primary-color); font-size: 1.8rem; font-weight: 700;">₡@reporte.Pedido.Total.ToString("N2")</div>
+                    </div>
+                </div>
+
+                <!-- Detalles de Productos -->
+                <div style="padding: 1.5rem 2rem;">
+                    <h6 style="color: var(--dark-color); font-weight: 600; margin-bottom: 1rem;">
+                        <i class="fas fa-box-open"></i> Productos del Pedido
+                    </h6>
+                    <div class="table-responsive">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: var(--light-color); border-bottom: 2px solid var(--secondary-color);">
+                                    <th style="padding: 0.8rem; text-align: left; color: var(--dark-color); font-weight: 600;">Producto</th>
+                                    <th style="padding: 0.8rem; text-align: center; color: var(--dark-color); font-weight: 600;">Cantidad</th>
+                                    <th style="padding: 0.8rem; text-align: right; color: var(--dark-color); font-weight: 600;">Precio Unit.</th>
+                                    <th style="padding: 0.8rem; text-align: right; color: var(--dark-color); font-weight: 600;">Descuento</th>
+                                    <th style="padding: 0.8rem; text-align: right; color: var(--dark-color); font-weight: 600;">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var detalle in reporte.Detalles)
+                                {
+                                    <tr style="border-bottom: 1px solid var(--secondary-color);">
+                                        <td style="padding: 0.8rem; color: var(--dark-color);">
+                                            <strong>@detalle.NombreProducto</strong>
+                                        </td>
+                                        <td style="padding: 0.8rem; text-align: center; color: var(--text-color);">
+                                            @detalle.Cantidad
+                                        </td>
+                                        <td style="padding: 0.8rem; text-align: right; color: var(--text-color);">
+                                            ₡@detalle.Precio.ToString("N2")
+                                        </td>
+                                        <td style="padding: 0.8rem; text-align: right; color: #27ae60;">
+                                            @if (detalle.Descuento > 0)
+                                            {
+                                                <span>-₡@detalle.Descuento.ToString("N2")</span>
+                                            }
+                                            else
+                                            {
+                                                <span>-</span>
+                                            }
+                                        </td>
+                                        <td style="padding: 0.8rem; text-align: right; color: var(--dark-color); font-weight: 600;">
+                                            ₡@detalle.Subtotal.ToString("N2")
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Resumen del Pedido -->
+                    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid var(--secondary-color); display: grid; gap: 0.5rem; max-width: 400px; margin-left: auto;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--text-color);">Subtotal:</span>
+                            <span style="color: var(--dark-color); font-weight: 600;">₡@reporte.Pedido.Subtotal.ToString("N2")</span>
+                        </div>
+                        @if (reporte.Pedido.Descuento.HasValue && reporte.Pedido.Descuento > 0)
+                        {
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-color);">Descuento:</span>
+                                <span style="color: #27ae60; font-weight: 600;">-₡@reporte.Pedido.Descuento.Value.ToString("N2")</span>
+                            </div>
+                        }
+                        @if (reporte.Pedido.Impuesto.HasValue && reporte.Pedido.Impuesto > 0)
+                        {
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-color);">Impuesto (13%):</span>
+                                <span style="color: var(--dark-color); font-weight: 600;">₡@reporte.Pedido.Impuesto.Value.ToString("N2")</span>
+                            </div>
+                        }
+                        <div style="display: flex; justify-content: space-between; padding-top: 0.5rem; border-top: 2px solid var(--primary-color);">
+                            <span style="color: var(--dark-color); font-weight: 700; font-size: 1.1rem;">Total:</span>
+                            <span style="color: var(--primary-color); font-weight: 700; font-size: 1.2rem;">₡@reporte.Pedido.Total.ToString("N2")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

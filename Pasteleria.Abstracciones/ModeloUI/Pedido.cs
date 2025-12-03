@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pasteleria.Abstracciones.ModeloUI
 {
@@ -12,36 +7,51 @@ namespace Pasteleria.Abstracciones.ModeloUI
     {
         public int IdPedido { get; set; }
 
-        [DisplayName("Cliente")]
+        [Required(ErrorMessage = "El cliente es obligatorio")]
         public int IdCliente { get; set; }
 
-        [DisplayName("Usuario")]
         public int? IdUsuario { get; set; }
 
-        [DisplayName("Fecha")]
+        [Required(ErrorMessage = "La fecha es obligatoria")]
         public DateTime Fecha { get; set; }
 
-        [DisplayName("Subtotal")]
+        [Required(ErrorMessage = "El subtotal es obligatorio")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "El subtotal debe ser mayor a 0")]
         public decimal Subtotal { get; set; }
 
-        [DisplayName("Total")]
-        public decimal Total { get; set; }
-
-        [DisplayName("Estado")]
-        public int IdEstadoPedido { get; set; }
-
-        [DisplayName("Descuento")]
         public decimal? Descuento { get; set; }
 
-        [DisplayName("Impuesto")]
         public decimal? Impuesto { get; set; }
 
-        // Propiedades calculadas/adicionales para la vista
+        [Required(ErrorMessage = "El total es obligatorio")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "El total debe ser mayor a 0")]
+        public decimal Total { get; set; }
+
+        [Required(ErrorMessage = "El estado es obligatorio")]
+        public int IdEstadoPedido { get; set; }
+
+        // Propiedades adicionales para la UI
         public string NombreCliente { get; set; }
+        public string NombreUsuario { get; set; }
         public string Estado { get; set; }
         public int CantidadProductos { get; set; }
-        public string MetodoPago { get; set; }
 
-        public string FechaPedidoFormateada => Fecha.ToString("dd/MM/yyyy HH:mm");
+        // Propiedad calculada para mostrar fecha formateada
+        public string FechaPedidoFormateada
+        {
+            get
+            {
+                return Fecha.ToString("dd/MM/yyyy HH:mm");
+            }
+        }
+
+        // Constructor
+        public Pedido()
+        {
+            Fecha = DateTime.Now;
+            Descuento = 0;
+            Impuesto = 0;
+            IdEstadoPedido = 1; // Pendiente por defecto
+        }
     }
 }
