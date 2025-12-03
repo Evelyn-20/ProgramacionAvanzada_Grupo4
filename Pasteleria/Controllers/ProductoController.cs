@@ -1,15 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Pasteleria.Abstracciones.Logica.Categoria;
 using Pasteleria.Abstracciones.Logica.Producto;
 using Pasteleria.Abstracciones.ModeloUI;
-using Pasteleria.LogicaDeNegocio.Productos;
-using Pasteleria.Abstracciones.Logica.Categoria;
+using Pasteleria.Helpers;
 using Pasteleria.LogicaDeNegocio.Categorias;
+using Pasteleria.LogicaDeNegocio.Productos;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
-using System.Globalization;
 
 namespace Pasteleria.Controllers
 {
@@ -118,31 +119,16 @@ namespace Pasteleria.Controllers
             try
             {
                 ModelState.Remove("Imagen");
+                ModelState.Remove("ImagenThumbnail");
                 ModelState.Remove("FechaCreacion");
                 ModelState.Remove("FechaActualizacion");
 
-                if (archivo == null || archivo.Length == 0)
-                {
-                    ModelState.AddModelError("archivo", "La imagen del producto es obligatoria");
-                    var categorias = _listarCategorias.ObtenerActivas();
-                    ViewBag.Categorias = categorias;
-                    return View(producto);
-                }
+                // Procesar y validar imagen
+                var (imagenOptimizada, thumbnail, error) = await ProcesarImagen(archivo);
 
-                var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
-                var extension = Path.GetExtension(archivo.FileName).ToLowerInvariant();
-
-                if (string.IsNullOrEmpty(extension) || !extensionesPermitidas.Contains(extension))
+                if (!string.IsNullOrEmpty(error))
                 {
-                    ModelState.AddModelError("archivo", "Solo se permiten archivos de imagen (JPG, JPEG, PNG, GIF, BMP)");
-                    var categorias = _listarCategorias.ObtenerActivas();
-                    ViewBag.Categorias = categorias;
-                    return View(producto);
-                }
-
-                if (archivo.Length > 5 * 1024 * 1024)
-                {
-                    ModelState.AddModelError("archivo", "La imagen no puede superar los 5MB");
+                    ModelState.AddModelError("archivo", error);
                     var categorias = _listarCategorias.ObtenerActivas();
                     ViewBag.Categorias = categorias;
                     return View(producto);
@@ -155,12 +141,9 @@ namespace Pasteleria.Controllers
                     return View(producto);
                 }
 
-                using (var memoryStream = new MemoryStream())
-                {
-                    await archivo.CopyToAsync(memoryStream);
-                    producto.Imagen = memoryStream.ToArray();
-                }
-
+                // Asignar imágenes procesadas
+                producto.Imagen = imagenOptimizada;
+                producto.ImagenThumbnail = thumbnail;
                 producto.Estado = true;
 
                 int resultado = await _crearProducto.Guardar(producto);
@@ -523,6 +506,386 @@ namespace Pasteleria.Controllers
                 return "image/bmp";
 
             return "image/png";
+        }
+
+        // Obtiene el thumbnail del producto
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ObtenerThumbnailProducto(int id)
+        {
+            try
+            {
+                var producto = _obtenerProductoPorId.Obtener(id);
+
+                if (producto == null)
+                {
+                    return ImagenPlaceholder();
+                }
+
+                // Si tiene thumbnail, devolverlo
+                if (producto.ImagenThumbnail != null && producto.ImagenThumbnail.Length > 0)
+                {
+                    return File(producto.ImagenThumbnail, "image/jpeg");
+                }
+
+                // Si no tiene thumbnail pero tiene imagen completa, generar thumbnail al vuelo
+                if (producto.Imagen != null && producto.Imagen.Length > 0)
+                {
+                    try
+                    {
+                        var thumbnail = ImageHelper.GenerarThumbnail(producto.Imagen);
+                        if (thumbnail != null && thumbnail.Length > 0)
+                        {
+                            return File(thumbnail, "image/jpeg");
+                        }
+                    }
+                    catch
+                    {
+                        // Si falla, devolver imagen completa
+                        string contentType = DeterminarTipoImagen(producto.Imagen);
+                        return File(producto.Imagen, contentType);
+                    }
+                }
+
+                return ImagenPlaceholder();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al obtener thumbnail: {ex.Message}");
+                return ImagenPlaceholder();
+            }
+        }
+
+        // Procesa y valida la imagen subida, generando tanto la versión optimizada como el thumbnail
+        private async Task<(byte[] imagenOptimizada, byte[] thumbnail, string error)> ProcesarImagen(IFormFile archivo)
+        {
+            try
+            {
+                // Validar que se subió un archivo
+                if (archivo == null || archivo.Length == 0)
+                {
+                    return (null, null, "Debe seleccionar una imagen");
+                }
+
+                // Validar extensión
+                var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+                var extension = Path.GetExtension(archivo.FileName).ToLowerInvariant();
+
+                if (string.IsNullOrEmpty(extension) || !extensionesPermitidas.Contains(extension))
+                {
+                    return (null, null, "Solo se permiten imágenes (JPG, JPEG, PNG, GIF, BMP)");
+                }
+
+                // Validar tamaño del archivo (máximo 5MB)
+                if (archivo.Length > 5 * 1024 * 1024)
+                {
+                    return (null, null, "La imagen no puede superar los 5MB");
+                }
+
+                // Leer bytes de la imagen
+                byte[] imagenOriginal;
+                using (var memoryStream = new MemoryStream())
+                {
+                    await archivo.CopyToAsync(memoryStream);
+                    imagenOriginal = memoryStream.ToArray();
+                }
+
+                // Validar que sea una imagen válida
+                if (!ImageHelper.EsImagenValida(imagenOriginal))
+                {
+                    return (null, null, "El archivo no es una imagen válida");
+                }
+
+                // Validar dimensiones mínimas
+                if (!ImageHelper.CumpleDimensionesMinimas(imagenOriginal, out string mensajeError))
+                {
+                    return (null, null, mensajeError);
+                }
+
+                // Optimizar imagen completa (para detalles)
+                byte[] imagenOptimizada = ImageHelper.OptimizarImagen(imagenOriginal);
+
+                // Generar thumbnail (para listados, carrito, home)
+                byte[] thumbnail = ImageHelper.GenerarThumbnail(imagenOriginal);
+
+                return (imagenOptimizada, thumbnail, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, null, $"Error al procesar la imagen: {ex.Message}");
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GenerarThumbnails()
+        {
+            if (!EsAdministrador())
+            {
+                TempData["Error"] = "Solo los administradores pueden acceder a esta función";
+                return RedirectToAction("ListadoProductos");
+            }
+
+            using (var contexto = new Contexto())
+            {
+                var productosSinThumbnail = contexto.Producto
+                    .Count(p => p.Imagen != null && p.Imagen.Length > 0
+                             && (p.ImagenThumbnail == null || p.ImagenThumbnail.Length == 0));
+
+                var categoriasSinThumbnail = contexto.Categoria
+                    .Count(c => c.Imagen != null && c.Imagen.Length > 0
+                             && (c.ImagenThumbnail == null || c.ImagenThumbnail.Length == 0));
+
+                ViewBag.ProductosSinThumbnail = productosSinThumbnail;
+                ViewBag.CategoriasSinThumbnail = categoriasSinThumbnail;
+            }
+
+            return View();
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ProcesarThumbnailsProductos()
+        {
+            if (!EsAdministrador())
+            {
+                return Json(new { success = false, mensaje = "No autorizado" });
+            }
+
+            try
+            {
+                using (var contexto = new Contexto())
+                {
+                    // Obtener TODOS los productos primero
+                    var todosProductos = contexto.Producto.ToList();
+                    System.Diagnostics.Debug.WriteLine($"Total productos en BD: {todosProductos.Count}");
+
+                    // Filtrar en memoria
+                    var productosSinThumbnail = todosProductos
+                        .Where(p => p.Imagen != null &&
+                                   p.Imagen.Length > 0 &&
+                                   (p.ImagenThumbnail == null || p.ImagenThumbnail.Length == 0))
+                        .ToList();
+
+                    System.Diagnostics.Debug.WriteLine($"Productos sin thumbnail: {productosSinThumbnail.Count}");
+
+                    if (productosSinThumbnail.Count == 0)
+                    {
+                        return Json(new
+                        {
+                            success = true,
+                            mensaje = "No hay productos que necesiten thumbnails",
+                            procesados = 0,
+                            errores = 0
+                        });
+                    }
+
+                    int procesados = 0;
+                    int errores = 0;
+                    var mensajesError = new List<string>();
+
+                    foreach (var producto in productosSinThumbnail)
+                    {
+                        try
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Procesando producto {producto.IdProducto}: {producto.NombreProducto}");
+
+                            // Generar thumbnail
+                            var thumbnail = ImageHelper.GenerarThumbnail(producto.Imagen);
+
+                            if (thumbnail != null && thumbnail.Length > 0)
+                            {
+                                producto.ImagenThumbnail = thumbnail;
+                                System.Diagnostics.Debug.WriteLine($"  - Thumbnail generado: {thumbnail.Length} bytes");
+
+                                // Opcional: optimizar imagen completa
+                                try
+                                {
+                                    var imagenOptimizada = ImageHelper.OptimizarImagen(producto.Imagen);
+                                    if (imagenOptimizada != null && imagenOptimizada.Length > 0)
+                                    {
+                                        var tamañoOriginal = producto.Imagen.Length;
+                                        producto.Imagen = imagenOptimizada;
+                                        System.Diagnostics.Debug.WriteLine($"  - Imagen optimizada: {tamañoOriginal} -> {imagenOptimizada.Length} bytes");
+                                    }
+                                }
+                                catch (Exception exOpt)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"  - Error optimizando: {exOpt.Message}");
+                                    // Continuar aunque falle la optimización
+                                }
+
+                                procesados++;
+                            }
+                            else
+                            {
+                                var error = $"No se pudo generar thumbnail para producto {producto.IdProducto}";
+                                System.Diagnostics.Debug.WriteLine($"  - {error}");
+                                mensajesError.Add(error);
+                                errores++;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            var error = $"Error en producto {producto.IdProducto}: {ex.Message}";
+                            System.Diagnostics.Debug.WriteLine($"  - {error}");
+                            mensajesError.Add(error);
+                            errores++;
+                        }
+                    }
+
+                    // Guardar cambios
+                    if (procesados > 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Guardando {procesados} cambios...");
+                        int guardados = contexto.SaveChanges();
+                        System.Diagnostics.Debug.WriteLine($"Guardados: {guardados}");
+                    }
+
+                    var mensaje = $"Procesados: {procesados}, Errores: {errores}";
+                    if (mensajesError.Any())
+                    {
+                        mensaje += $" | Detalles: {string.Join(", ", mensajesError.Take(3))}";
+                    }
+
+                    return Json(new
+                    {
+                        success = true,
+                        mensaje = mensaje,
+                        procesados,
+                        errores,
+                        detalles = mensajesError
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ERROR GENERAL: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
+                return Json(new { success = false, mensaje = $"Error: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ProcesarThumbnailsCategorias()
+        {
+            if (!EsAdministrador())
+            {
+                return Json(new { success = false, mensaje = "No autorizado" });
+            }
+
+            try
+            {
+                using (var contexto = new Contexto())
+                {
+                    // Obtener TODAS las categorías primero
+                    var todasCategorias = contexto.Categoria.ToList();
+                    System.Diagnostics.Debug.WriteLine($"Total categorías en BD: {todasCategorias.Count}");
+
+                    // Filtrar en memoria
+                    var categoriasSinThumbnail = todasCategorias
+                        .Where(c => c.Imagen != null &&
+                                   c.Imagen.Length > 0 &&
+                                   (c.ImagenThumbnail == null || c.ImagenThumbnail.Length == 0))
+                        .ToList();
+
+                    System.Diagnostics.Debug.WriteLine($"Categorías sin thumbnail: {categoriasSinThumbnail.Count}");
+
+                    if (categoriasSinThumbnail.Count == 0)
+                    {
+                        return Json(new
+                        {
+                            success = true,
+                            mensaje = "No hay categorías que necesiten thumbnails",
+                            procesados = 0,
+                            errores = 0
+                        });
+                    }
+
+                    int procesados = 0;
+                    int errores = 0;
+                    var mensajesError = new List<string>();
+
+                    foreach (var categoria in categoriasSinThumbnail)
+                    {
+                        try
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Procesando categoría {categoria.IdCategoria}: {categoria.NombreCategoria}");
+
+                            // Generar thumbnail
+                            var thumbnail = ImageHelper.GenerarThumbnail(categoria.Imagen);
+
+                            if (thumbnail != null && thumbnail.Length > 0)
+                            {
+                                categoria.ImagenThumbnail = thumbnail;
+                                System.Diagnostics.Debug.WriteLine($"  - Thumbnail generado: {thumbnail.Length} bytes");
+
+                                // Opcional: optimizar imagen completa
+                                try
+                                {
+                                    var imagenOptimizada = ImageHelper.OptimizarImagen(categoria.Imagen);
+                                    if (imagenOptimizada != null && imagenOptimizada.Length > 0)
+                                    {
+                                        var tamañoOriginal = categoria.Imagen.Length;
+                                        categoria.Imagen = imagenOptimizada;
+                                        System.Diagnostics.Debug.WriteLine($"  - Imagen optimizada: {tamañoOriginal} -> {imagenOptimizada.Length} bytes");
+                                    }
+                                }
+                                catch (Exception exOpt)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"  - Error optimizando: {exOpt.Message}");
+                                }
+
+                                procesados++;
+                            }
+                            else
+                            {
+                                var error = $"No se pudo generar thumbnail para categoría {categoria.IdCategoria}";
+                                System.Diagnostics.Debug.WriteLine($"  - {error}");
+                                mensajesError.Add(error);
+                                errores++;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            var error = $"Error en categoría {categoria.IdCategoria}: {ex.Message}";
+                            System.Diagnostics.Debug.WriteLine($"  - {error}");
+                            mensajesError.Add(error);
+                            errores++;
+                        }
+                    }
+
+                    // Guardar cambios
+                    if (procesados > 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Guardando {procesados} cambios...");
+                        int guardados = contexto.SaveChanges();
+                        System.Diagnostics.Debug.WriteLine($"Guardados: {guardados}");
+                    }
+
+                    var mensaje = $"Procesados: {procesados}, Errores: {errores}";
+                    if (mensajesError.Any())
+                    {
+                        mensaje += $" | Detalles: {string.Join(", ", mensajesError.Take(3))}";
+                    }
+
+                    return Json(new
+                    {
+                        success = true,
+                        mensaje = mensaje,
+                        procesados,
+                        errores,
+                        detalles = mensajesError
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ERROR GENERAL: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
+                return Json(new { success = false, mensaje = $"Error: {ex.Message}" });
+            }
         }
     }
 }

@@ -82,9 +82,8 @@
                                 onmouseout="this.style.background='transparent'">
                                 <td style="padding: 1.2rem; color: var(--text-color);">@categoria.IdCategoria</td>
                                 <td style="padding: 1.2rem;">
-                                    <img src="@Url.Action("ObtenerImagenCategoria", "Categoria", new { id = categoria.IdCategoria })"
-                                         alt="@categoria.NombreCategoria"
-                                         style="width: 60px; height: 60px; object-fit: cover; border-radius: 10px; box-shadow: var(--shadow);">
+                                    <img src="@Url.Action("ObtenerThumbnailCategoria", "Categoria", new { id = categoria.IdCategoria })" alt="@categoria.NombreCategoria"
+                                         onerror="this.src='/images/placeholder.png'" loading="lazy" style="width: 60px; height: 60px; object-fit: cover; border-radius: 10px; box-shadow: var(--shadow);">
                                 </td>
                                 <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">@categoria.NombreCategoria</td>
                                 <td style="padding: 1.2rem;">

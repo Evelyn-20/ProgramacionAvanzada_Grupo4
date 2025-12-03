@@ -21,7 +21,7 @@ namespace Pasteleria.AccesoADatos.Categorias
             try
             {
                 List<CategoriaAD> categoriasAD = _contexto.Categoria
-                    .AsNoTracking() // Mejora el rendimiento
+                    .AsNoTracking()
                     .ToList();
                 return categoriasAD.Select(c => ConvertirObjetoParaUI(c)).ToList();
             }
@@ -53,12 +53,10 @@ namespace Pasteleria.AccesoADatos.Categorias
         {
             try
             {
-                // Obtener todas primero y filtrar en memoria para evitar timeout
                 List<CategoriaAD> categoriasAD = _contexto.Categoria
                     .AsNoTracking()
                     .ToList();
 
-                // Filtrar las activas en memoria
                 return categoriasAD
                     .Where(c => c.Estado)
                     .Select(c => ConvertirObjetoParaUI(c))
@@ -78,6 +76,7 @@ namespace Pasteleria.AccesoADatos.Categorias
                 IdCategoria = categoriaAD.IdCategoria,
                 NombreCategoria = categoriaAD.NombreCategoria,
                 Imagen = categoriaAD.Imagen,
+                ImagenThumbnail = categoriaAD.ImagenThumbnail, // ⭐ AGREGADO
                 Estado = categoriaAD.Estado
             };
         }

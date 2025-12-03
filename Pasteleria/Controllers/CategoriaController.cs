@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Pasteleria.Abstracciones.Logica.Categoria;
 using Pasteleria.Abstracciones.ModeloUI;
 using Pasteleria.LogicaDeNegocio.Categorias;
+using Pasteleria.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -87,7 +88,6 @@ namespace Pasteleria.Controllers
                 return RedirectSinPermiso();
             }
 
-            // Solo Admin puede crear productos
             if (!EsAdministrador())
             {
                 return RedirectSinPermiso("Solo los administradores pueden crear categorías");
@@ -96,25 +96,14 @@ namespace Pasteleria.Controllers
             try
             {
                 ModelState.Remove("Imagen");
+                ModelState.Remove("ImagenThumbnail");
 
-                if (archivo == null || archivo.Length == 0)
+                // Procesar y validar imagen
+                var (imagenOptimizada, thumbnail, error) = await ProcesarImagenCategoria(archivo);
+
+                if (!string.IsNullOrEmpty(error))
                 {
-                    ModelState.AddModelError("archivo", "La imagen de la categoría es obligatoria");
-                    return View(categoria);
-                }
-
-                var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
-                var extension = Path.GetExtension(archivo.FileName).ToLowerInvariant();
-
-                if (string.IsNullOrEmpty(extension) || !extensionesPermitidas.Contains(extension))
-                {
-                    ModelState.AddModelError("archivo", "Solo se permiten archivos de imagen (JPG, JPEG, PNG, GIF, BMP)");
-                    return View(categoria);
-                }
-
-                if (archivo.Length > 5 * 1024 * 1024)
-                {
-                    ModelState.AddModelError("archivo", "La imagen no puede superar los 5MB");
+                    ModelState.AddModelError("archivo", error);
                     return View(categoria);
                 }
 
@@ -123,12 +112,9 @@ namespace Pasteleria.Controllers
                     return View(categoria);
                 }
 
-                using (var memoryStream = new MemoryStream())
-                {
-                    await archivo.CopyToAsync(memoryStream);
-                    categoria.Imagen = memoryStream.ToArray();
-                }
-
+                // Asignar imágenes procesadas
+                categoria.Imagen = imagenOptimizada;
+                categoria.ImagenThumbnail = thumbnail;
                 categoria.Estado = true;
 
                 int resultado = await _crearCategoria.Guardar(categoria);
@@ -201,6 +187,7 @@ namespace Pasteleria.Controllers
             try
             {
                 ModelState.Remove("Imagen");
+                ModelState.Remove("ImagenThumbnail");
                 ModelState.Remove("archivo");
 
                 if (!ModelState.IsValid)
@@ -209,6 +196,7 @@ namespace Pasteleria.Controllers
                     if (categoriaParaVista != null)
                     {
                         categoria.Imagen = categoriaParaVista.Imagen;
+                        categoria.ImagenThumbnail = categoriaParaVista.ImagenThumbnail;
                     }
 
                     return View(categoria);
@@ -221,34 +209,27 @@ namespace Pasteleria.Controllers
                     return RedirectToAction(nameof(ListadoCategorias));
                 }
 
+                // Procesar nueva imagen si se subió
                 if (archivo != null && archivo.Length > 0)
                 {
-                    var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
-                    var extension = Path.GetExtension(archivo.FileName).ToLowerInvariant();
+                    var (imagenOptimizada, thumbnail, error) = await ProcesarImagenCategoria(archivo);
 
-                    if (string.IsNullOrEmpty(extension) || !extensionesPermitidas.Contains(extension))
+                    if (!string.IsNullOrEmpty(error))
                     {
-                        ModelState.AddModelError("archivo", "Solo se permiten archivos de imagen");
+                        ModelState.AddModelError("archivo", error);
                         categoria.Imagen = categoriaExistente.Imagen;
+                        categoria.ImagenThumbnail = categoriaExistente.ImagenThumbnail;
                         return View(categoria);
                     }
 
-                    if (archivo.Length > 5 * 1024 * 1024)
-                    {
-                        ModelState.AddModelError("archivo", "La imagen no puede superar los 5MB");
-                        categoria.Imagen = categoriaExistente.Imagen;
-                        return View(categoria);
-                    }
-
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        await archivo.CopyToAsync(memoryStream);
-                        categoria.Imagen = memoryStream.ToArray();
-                    }
+                    categoria.Imagen = imagenOptimizada;
+                    categoria.ImagenThumbnail = thumbnail;
                 }
                 else
                 {
+                    // Mantener imágenes existentes
                     categoria.Imagen = categoriaExistente.Imagen;
+                    categoria.ImagenThumbnail = categoriaExistente.ImagenThumbnail;
                 }
 
                 int resultado = _actualizarCategoria.Actualizar(categoria);
@@ -262,6 +243,7 @@ namespace Pasteleria.Controllers
                 {
                     ModelState.AddModelError("", "No se pudo actualizar la categoría");
                     categoria.Imagen = categoriaExistente.Imagen;
+                    categoria.ImagenThumbnail = categoriaExistente.ImagenThumbnail;
                 }
 
                 return View(categoria);
@@ -276,6 +258,7 @@ namespace Pasteleria.Controllers
                     if (categoriaTemp != null)
                     {
                         categoria.Imagen = categoriaTemp.Imagen;
+                        categoria.ImagenThumbnail = categoriaTemp.ImagenThumbnail;
                     }
                 }
                 catch { }
@@ -399,5 +382,114 @@ namespace Pasteleria.Controllers
 
             return "image/png";
         }
+
+        // Obtiene el thumbnail de la categoría
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ObtenerThumbnailCategoria(int id)
+        {
+            try
+            {
+                var categoria = _obtenerCategoriaPorId.Obtener(id);
+
+                if (categoria == null)
+                {
+                    return ImagenPlaceholder();
+                }
+
+                // Si tiene thumbnail, devolverlo
+                if (categoria.ImagenThumbnail != null && categoria.ImagenThumbnail.Length > 0)
+                {
+                    return File(categoria.ImagenThumbnail, "image/jpeg");
+                }
+
+                // Si no tiene thumbnail pero tiene imagen completa, generar thumbnail al vuelo
+                if (categoria.Imagen != null && categoria.Imagen.Length > 0)
+                {
+                    try
+                    {
+                        var thumbnail = ImageHelper.GenerarThumbnail(categoria.Imagen);
+                        if (thumbnail != null && thumbnail.Length > 0)
+                        {
+                            return File(thumbnail, "image/jpeg");
+                        }
+                    }
+                    catch
+                    {
+                        // Si falla, devolver imagen completa
+                        string contentType = DeterminarTipoImagen(categoria.Imagen);
+                        return File(categoria.Imagen, contentType);
+                    }
+                }
+
+                return ImagenPlaceholder();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al obtener thumbnail: {ex.Message}");
+                return ImagenPlaceholder();
+            }
+        }
+
+        /// Procesa y valida la imagen subida, generando tanto la versión optimizada como el thumbnail
+        private async Task<(byte[] imagenOptimizada, byte[] thumbnail, string error)> ProcesarImagenCategoria(IFormFile archivo)
+        {
+            try
+            {
+                // Validar que se subió un archivo
+                if (archivo == null || archivo.Length == 0)
+                {
+                    return (null, null, "Debe seleccionar una imagen");
+                }
+
+                // Validar extensión
+                var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+                var extension = Path.GetExtension(archivo.FileName).ToLowerInvariant();
+
+                if (string.IsNullOrEmpty(extension) || !extensionesPermitidas.Contains(extension))
+                {
+                    return (null, null, "Solo se permiten imágenes (JPG, JPEG, PNG, GIF, BMP)");
+                }
+
+                // Validar tamaño del archivo (máximo 5MB)
+                if (archivo.Length > 5 * 1024 * 1024)
+                {
+                    return (null, null, "La imagen no puede superar los 5MB");
+                }
+
+                // Leer bytes de la imagen
+                byte[] imagenOriginal;
+                using (var memoryStream = new MemoryStream())
+                {
+                    await archivo.CopyToAsync(memoryStream);
+                    imagenOriginal = memoryStream.ToArray();
+                }
+
+                // Validar que sea una imagen válida
+                if (!ImageHelper.EsImagenValida(imagenOriginal))
+                {
+                    return (null, null, "El archivo no es una imagen válida");
+                }
+
+                // Validar dimensiones mínimas
+                if (!ImageHelper.CumpleDimensionesMinimas(imagenOriginal, out string mensajeError))
+                {
+                    return (null, null, mensajeError);
+                }
+
+                // Optimizar imagen completa (para detalles)
+                byte[] imagenOptimizada = ImageHelper.OptimizarImagen(imagenOriginal);
+
+                // Generar thumbnail (para listados, home, catálogo)
+                byte[] thumbnail = ImageHelper.GenerarThumbnail(imagenOriginal);
+
+                return (imagenOptimizada, thumbnail, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, null, $"Error al procesar la imagen: {ex.Message}");
+            }
+        }
+
     }
 }

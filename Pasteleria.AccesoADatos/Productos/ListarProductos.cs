@@ -46,7 +46,6 @@ namespace Pasteleria.AccesoADatos.Productos
 
         public List<Abstracciones.ModeloUI.Producto> BuscarPorPrecio(decimal precio)
         {
-            // Buscar productos con precio igual o cercano (±10% del precio buscado)
             decimal rangoMin = precio * 0.9m;
             decimal rangoMax = precio * 1.1m;
 
@@ -58,7 +57,6 @@ namespace Pasteleria.AccesoADatos.Productos
 
         public List<Abstracciones.ModeloUI.Producto> BuscarPorCantidad(int cantidad)
         {
-            // Buscar productos con cantidad igual o mayor
             List<ProductoAD> productosAD = _contexto.Producto
                 .Where(p => p.Cantidad >= cantidad)
                 .ToList();
@@ -77,6 +75,7 @@ namespace Pasteleria.AccesoADatos.Productos
                 Precio = productoAD.Precio,
                 PorcentajeImpuesto = productoAD.PorcentajeImpuesto,
                 Imagen = productoAD.Imagen,
+                ImagenThumbnail = productoAD.ImagenThumbnail,
                 Estado = productoAD.Estado,
                 FechaCreacion = productoAD.FechaCreacion,
                 FechaActualizacion = productoAD.FechaActualizacion
