@@ -74,6 +74,12 @@ builder.Services.AddScoped<IGestionarEstadosPedido, GestionarEstadosPedido>();
 
 var app = builder.Build();
 
+// CONFIGURACIÓN DE ROTATIVA PDF
+Rotativa.AspNetCore.RotativaConfiguration.Setup(
+    app.Environment.ContentRootPath,
+    "wwwroot/Rotativa"
+);
+
 // CONFIGURAR EL PIPELINE HTTP
 if (!app.Environment.IsDevelopment())
 {
@@ -100,3 +106,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+
+

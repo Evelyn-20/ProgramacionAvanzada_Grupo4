@@ -1,0 +1,57 @@
+﻿@model List<Pasteleria.Abstracciones.ModeloUI.Venta>
+@{
+    Layout = "_LayoutPDF";
+}
+
+
+
+
+@{
+    ViewData["Title"] = "Resultados del Reporte";
+}
+
+<h2>Resultados del Reporte</h2>
+
+@if (Model == null || Model.Count == 0)
+
+{
+    <div class="alert alert-warning">
+        No se encontraron ventas con los filtros seleccionados.
+    </div>
+}
+else
+{
+    <table class="table table-bordered table-striped mt-3">
+        <thead>
+            <tr>
+                <th>ID Venta</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Usuario</th>
+                <th>Subtotal</th>
+                <th>Impuesto</th>
+                <th>Total</th>
+                <th>Método Pago</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var v in Model)
+            {
+                <tr>
+                    <td>@v.IdVenta</td>
+                    <td>@v.FechaVenta.ToString("yyyy-MM-dd")</td>
+                    <td>@v.NombreCliente</td>
+                    <td>@v.NombreUsuario</td>
+                    <td>₡@v.Subtotal</td>
+                    <td>₡@v.Impuesto</td>
+                    <td><strong>₡@v.Total</strong></td>
+                    <td>@v.MetodoPago</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <a href="/Venta/ExportarPDF" class="btn btn-danger mt-3">
+        <i class="fas fa-file-pdf"></i> Descargar PDF
+    </a>
+}

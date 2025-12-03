@@ -21,13 +21,15 @@ public class Contexto : DbContext
     public DbSet<PedidoAD> Pedido { get; set; }
     public DbSet<DetallePedidoAD> DetallePedido { get; set; }
     public DbSet<EstadoPedidoAD> EstadoPedido { get; set; }
+    public DbSet<Venta> Venta { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
         {
             optionsBuilder.UseSqlServer(
-                "Data Source=EVELYN\\SQLEXPRESS;Initial Catalog=PASTELERIA;Integrated Security=True;MultipleActiveResultSets=true;TrustServerCertificate=True;Connection Timeout=60",
+                "Data Source=Walter\\SQLEXPRESS;Initial Catalog=PASTELERIA;Integrated Security=True;MultipleActiveResultSets=true;TrustServerCertificate=True;Connection Timeout=60",
                 sqlServerOptions =>
                 {
                     sqlServerOptions.CommandTimeout(160);
@@ -173,5 +175,42 @@ public class Contexto : DbContext
         });
 
         base.OnModelCreating(modelBuilder);
+
+        // Configurar la tabla Venta
+        modelBuilder.Entity<Venta>(entity =>
+        {
+            entity.ToTable("Venta", "dbo");
+            entity.HasKey(e => e.IdVenta);
+
+            entity.Property(e => e.IdVenta).ValueGeneratedOnAdd();
+            entity.Property(e => e.IdPedido).IsRequired();
+            entity.Property(e => e.IdCliente).IsRequired();
+            entity.Property(e => e.IdUsuario).IsRequired();
+            entity.Property(e => e.FechaVenta).IsRequired().HasColumnType("datetime");
+
+            entity.Property(e => e.Subtotal).IsRequired().HasColumnType("decimal(10,2)");
+            entity.Property(e => e.Impuesto).IsRequired().HasColumnType("decimal(10,2)");
+            entity.Property(e => e.Total).IsRequired().HasColumnType("decimal(10,2)");
+
+            entity.Property(e => e.MetodoPago).HasMaxLength(50);
+
+            // Relaciones (solo mapeo, FK ya existe en SQL)
+            entity.HasOne<PedidoAD>()
+                  .WithMany()
+                  .HasForeignKey(e => e.IdPedido);
+
+            entity.HasOne<ClienteAD>()
+                  .WithMany()
+                  .HasForeignKey(e => e.IdCliente);
+
+            entity.HasOne<UsuarioAD>()
+                  .WithMany()
+                  .HasForeignKey(e => e.IdUsuario);
+        });
+
+
+
     }
+
+
 }

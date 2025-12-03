@@ -156,6 +156,17 @@
                         </li>
                     }
 
+                    <!-- BOTON REPORTES PDF: Admin -->
+                    @if (esAdmin || esVentas)
+                    {
+                        <li>
+                            <a href="/Venta/GenerarPDF">
+                                <i class="fas fa-file-pdf"></i> Ventas PDF
+                            </a>
+                        </li>
+                    }
+
+
                     <!-- MENÚ CLIENTES: Admin y Ventas -->
                     @if (puedeGestionarClientes)
                     {
