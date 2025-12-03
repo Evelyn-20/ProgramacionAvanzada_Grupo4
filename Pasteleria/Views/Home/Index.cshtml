@@ -85,8 +85,8 @@
 
                     <div class="product-card">
                         <div class="product-image">
-                            <img src="@Url.Action("ObtenerImagenProducto", "Producto", new { id = producto.IdProducto })"
-                                 alt="@producto.NombreProducto" />
+                            <img src="@Url.Action("ObtenerThumbnailProducto", "Producto", new { id = producto.IdProducto })" alt="@producto.NombreProducto" 
+                                class="card-img-top" onerror="this.src='/images/placeholder.png'" loading="lazy">
                             @if (!string.IsNullOrEmpty(badge))
                             {
                                 <span class="@badgeClass">@badge</span>
@@ -141,8 +141,8 @@
                 {
                     <div class="category-card">
                         <div class="category-image">
-                            <img src="@Url.Action("ObtenerImagenCategoria", "Categoria", new { id = categoria.IdCategoria })"
-                                 alt="@categoria.NombreCategoria" />
+                            <img src="@Url.Action("ObtenerThumbnailCategoria", "Categoria", new { id = categoria.IdCategoria })" alt="@categoria.NombreCategoria"
+                                 class="category-image" onerror="this.src='/images/placeholder.png'" loading="lazy">
                         </div>
                         <h3>@categoria.NombreCategoria</h3>
                         <a href="@Url.Action("Productos", "Catalogo", new { id = categoria.IdCategoria })"

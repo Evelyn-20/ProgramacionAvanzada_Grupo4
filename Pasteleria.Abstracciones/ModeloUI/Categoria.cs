@@ -15,6 +15,8 @@ namespace Pasteleria.Abstracciones.ModeloUI
         [DisplayName("Imagen de la categoría")]
         public byte[] Imagen { get; set; }
 
+        public byte[]? ImagenThumbnail { get; set; }
+
         [DisplayName("Estado")]
         public bool Estado { get; set; }
 

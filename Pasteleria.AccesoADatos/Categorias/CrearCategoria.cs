@@ -32,7 +32,9 @@ namespace Pasteleria.AccesoADatos.Categorias
                 {
                     laCategoriaAGuardar.IdCategoria,
                     laCategoriaAGuardar.NombreCategoria,
-                    laCategoriaAGuardar.Estado
+                    laCategoriaAGuardar.Estado,
+                    TieneImagen = laCategoriaAGuardar.Imagen != null && laCategoriaAGuardar.Imagen.Length > 0,
+                    TieneThumbnail = laCategoriaAGuardar.ImagenThumbnail != null && laCategoriaAGuardar.ImagenThumbnail.Length > 0
                 });
             }
 
@@ -45,6 +47,7 @@ namespace Pasteleria.AccesoADatos.Categorias
             {
                 NombreCategoria = categoria.NombreCategoria,
                 Imagen = categoria.Imagen ?? new byte[0],
+                ImagenThumbnail = categoria.ImagenThumbnail ?? new byte[0], // ⭐ AGREGADO
                 Estado = categoria.Estado
             };
         }

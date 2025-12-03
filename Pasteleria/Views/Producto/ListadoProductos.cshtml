@@ -107,8 +107,8 @@
                             <tr style="border-bottom: 1px solid var(--secondary-color); transition: background 0.3s;">
                                 <td style="padding: 1.2rem; color: var(--text-color);">@producto.IdProducto</td>
                                 <td style="padding: 1.2rem;">
-                                    <img src="@Url.Action("ObtenerImagenProducto", "Producto", new { id = producto.IdProducto })"
-                                         alt="@producto.NombreProducto"
+                                    <img src="@Url.Action("ObtenerThumbnailProducto", "Producto", new { id = producto.IdProducto })"
+                                         alt="@producto.NombreProducto" loading="lazy"
                                          style="width: 60px; height: 60px; object-fit: cover; border-radius: 10px; box-shadow: var(--shadow);">
                                 </td>
                                 <td style="padding: 1.2rem; color: var(--dark-color); font-weight: 500;">@producto.NombreProducto</td>

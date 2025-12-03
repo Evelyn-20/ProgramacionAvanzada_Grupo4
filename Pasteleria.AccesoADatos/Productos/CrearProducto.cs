@@ -20,7 +20,6 @@ namespace Pasteleria.AccesoADatos.Productos
 
         public async Task<int> Guardar(Abstracciones.ModeloUI.Producto elProducto)
         {
-            // Establecer fechas de creación y actualización
             var fechaActual = DateTime.Now;
             elProducto.FechaCreacion = fechaActual;
             elProducto.FechaActualizacion = fechaActual;
@@ -31,7 +30,6 @@ namespace Pasteleria.AccesoADatos.Productos
 
             int cantidadDeDatosAgregados = await _contexto.SaveChangesAsync();
 
-            // Registrar en auditoría
             if (cantidadDeDatosAgregados > 0)
             {
                 _auditoria.RegistrarCreacion("Producto", elProductoAGuardar.IdProducto, new
@@ -41,7 +39,9 @@ namespace Pasteleria.AccesoADatos.Productos
                     elProductoAGuardar.IdCategoria,
                     elProductoAGuardar.Precio,
                     elProductoAGuardar.Cantidad,
-                    elProductoAGuardar.Estado
+                    elProductoAGuardar.Estado,
+                    TieneImagen = elProductoAGuardar.Imagen != null && elProductoAGuardar.Imagen.Length > 0,
+                    TieneThumbnail = elProductoAGuardar.ImagenThumbnail != null && elProductoAGuardar.ImagenThumbnail.Length > 0
                 });
             }
 
@@ -59,6 +59,7 @@ namespace Pasteleria.AccesoADatos.Productos
                 Precio = producto.Precio,
                 PorcentajeImpuesto = producto.PorcentajeImpuesto,
                 Imagen = producto.Imagen ?? new byte[0],
+                ImagenThumbnail = producto.ImagenThumbnail ?? new byte[0],
                 Estado = producto.Estado,
                 FechaCreacion = producto.FechaCreacion,
                 FechaActualizacion = producto.FechaActualizacion

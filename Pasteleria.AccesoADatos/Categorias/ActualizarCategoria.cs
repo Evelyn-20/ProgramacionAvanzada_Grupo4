@@ -41,10 +41,15 @@ namespace Pasteleria.AccesoADatos.Categorias
                 categoriaExistente.NombreCategoria = laCategoria.NombreCategoria;
                 categoriaExistente.Estado = laCategoria.Estado;
 
-                // Solo actualizar imagen si se proporcionó una nueva
+                // Actualizar imágenes solo si se proporcionaron nuevas
                 if (laCategoria.Imagen != null && laCategoria.Imagen.Length > 0)
                 {
                     categoriaExistente.Imagen = laCategoria.Imagen;
+                }
+
+                if (laCategoria.ImagenThumbnail != null && laCategoria.ImagenThumbnail.Length > 0)
+                {
+                    categoriaExistente.ImagenThumbnail = laCategoria.ImagenThumbnail;
                 }
 
                 int cantidadDeDatosActualizados = _contexto.SaveChanges();

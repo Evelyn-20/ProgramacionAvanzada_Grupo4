@@ -31,6 +31,8 @@ namespace Pasteleria.AccesoADatos.Modelos
 
         public byte[] Imagen { get; set; }
 
+        public byte[]? ImagenThumbnail { get; set; }
+
         [Required]
         public bool Estado { get; set; }
 

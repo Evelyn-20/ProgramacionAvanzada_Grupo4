@@ -22,7 +22,6 @@ namespace Pasteleria.AccesoADatos.Productos
         {
             try
             {
-                // Obtener el producto existente
                 var productoExistente = _contexto.Producto
                     .FirstOrDefault(p => p.IdProducto == elProducto.IdProducto);
 
@@ -42,7 +41,7 @@ namespace Pasteleria.AccesoADatos.Productos
                     productoExistente.IdCategoria
                 };
 
-                // Actualizar SOLO los campos modificables
+                // Actualizar campos
                 productoExistente.NombreProducto = elProducto.NombreProducto;
                 productoExistente.IdCategoria = elProducto.IdCategoria;
                 productoExistente.DescripcionProducto = elProducto.DescripcionProducto;
@@ -52,15 +51,19 @@ namespace Pasteleria.AccesoADatos.Productos
                 productoExistente.Estado = elProducto.Estado;
                 productoExistente.FechaActualizacion = DateTime.Now;
 
-                // Solo actualizar imagen si se proporcionó una nueva
+                // Actualizar imágenes solo si se proporcionaron nuevas
                 if (elProducto.Imagen != null && elProducto.Imagen.Length > 0)
                 {
                     productoExistente.Imagen = elProducto.Imagen;
                 }
 
+                if (elProducto.ImagenThumbnail != null && elProducto.ImagenThumbnail.Length > 0)
+                {
+                    productoExistente.ImagenThumbnail = elProducto.ImagenThumbnail;
+                }
+
                 int cantidadDeDatosActualizados = _contexto.SaveChanges();
 
-                // Registrar en auditoría
                 if (cantidadDeDatosActualizados > 0)
                 {
                     _auditoria.RegistrarActualizacion("Producto", elProducto.IdProducto,
