@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Pasteleria.Abstracciones.Logica.Pedido;
 using Rotativa.AspNetCore;
 using Pasteleria.Abstracciones.ModeloUI;
@@ -9,7 +10,8 @@ using System.Collections.Generic;
 
 namespace Pasteleria.Controllers
 {
-    public class ReportePedidoController : Controller
+    [Authorize] // Requiere autenticación
+    public class ReportePedidoController : BaseController
     {
         private readonly IListarPedidos _listarPedidos;
         private readonly IObtenerPedido _obtenerPedido;
@@ -38,6 +40,12 @@ namespace Pasteleria.Controllers
         // GET: /ReportePedido/GenerarReporte
         public IActionResult GenerarReporte()
         {
+            // Solo Admin, Ventas, Operaciones y Contador pueden ver reportes
+            if (!PuedeVerReportes())
+            {
+                return RedirectSinPermiso("No tiene permisos para ver reportes");
+            }
+
             CargarCombos();
 
             // Si hay TempData con los filtros anteriores, mantenerlos
@@ -57,6 +65,12 @@ namespace Pasteleria.Controllers
         [HttpPost]
         public IActionResult GenerarReporteResult(DateTime FechaInicio, DateTime FechaFin, int? IdCliente, int? IdUsuario, string Estado)
         {
+            // Validar permisos
+            if (!PuedeVerReportes())
+            {
+                return RedirectSinPermiso("No tiene permisos para ver reportes");
+            }
+
             try
             {
                 // Validar fechas
@@ -75,7 +89,7 @@ namespace Pasteleria.Controllers
                 }
 
                 // Obtener todos los pedidos en el rango de fechas
-                var pedidos = _listarPedidos.ObtenerPorFecha(FechaInicio, FechaFin);
+                var pedidos = _listarPedidos.ObtenerPorFecha(FechaInicio, FechaFin.AddDays(1));
 
                 // Filtrar por estado si se especifica
                 if (!string.IsNullOrWhiteSpace(Estado) && Estado != "Todos")
@@ -136,6 +150,12 @@ namespace Pasteleria.Controllers
         // GET: /ReportePedido/ExportarPDF
         public IActionResult ExportarPDF(string FechaInicio, string FechaFin, int? IdCliente, int? IdUsuario, string Estado)
         {
+            // Validar permisos
+            if (!PuedeVerReportes())
+            {
+                return RedirectSinPermiso("No tiene permisos para exportar reportes");
+            }
+
             try
             {
                 // Validar que se proporcionen fechas
@@ -177,7 +197,7 @@ namespace Pasteleria.Controllers
                 }
 
                 // Obtener todos los pedidos en el rango de fechas
-                var pedidos = _listarPedidos.ObtenerPorFecha(fechaInicioDate, fechaFinDate);
+                var pedidos = _listarPedidos.ObtenerPorFecha(fechaInicioDate, fechaFinDate.AddDays(1));
 
                 // Aplicar filtros
                 if (!string.IsNullOrWhiteSpace(Estado) && Estado != "Todos")

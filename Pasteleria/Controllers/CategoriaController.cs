@@ -71,6 +71,7 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult CrearCategoria()
         {
+            // Admin y Operaciones pueden gestionar categorías
             if (!PuedeGestionarCategorias())
             {
                 return RedirectSinPermiso();
@@ -83,14 +84,10 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CrearCategoria(Categoria categoria, IFormFile archivo)
         {
+            // Admin y Operaciones pueden crear categorías
             if (!PuedeGestionarCategorias())
             {
                 return RedirectSinPermiso();
-            }
-
-            if (!EsAdministrador())
-            {
-                return RedirectSinPermiso("Solo los administradores pueden crear categorías");
             }
 
             try
@@ -141,14 +138,10 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult EditarCategoria(int id)
         {
+            // Admin y Operaciones pueden editar categorías
             if (!PuedeGestionarCategorias())
             {
                 return RedirectSinPermiso();
-            }
-
-            if (!EsAdministrador())
-            {
-                return RedirectSinPermiso("Solo los administradores pueden editar categorías");
             }
 
             try
@@ -174,14 +167,10 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditarCategoria(Categoria categoria, IFormFile archivo)
         {
+            // Admin y Operaciones pueden editar categorías
             if (!PuedeGestionarCategorias())
             {
                 return RedirectSinPermiso();
-            }
-
-            if (!EsAdministrador())
-            {
-                return RedirectSinPermiso("Solo los administradores pueden editar categorías");
             }
 
             try
@@ -298,6 +287,7 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult EliminarCategoria(int IdCategoria)
         {
+            // Solo Admin puede eliminar categorías
             if (!EsAdministrador())
             {
                 TempData["Error"] = "Solo administradores pueden eliminar categorías";

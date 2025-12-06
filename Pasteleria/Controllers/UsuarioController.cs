@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Pasteleria.Abstracciones.Logica.Usuario;
 using Pasteleria.Abstracciones.Logica.Rol;
 using Pasteleria.Abstracciones.ModeloUI;
@@ -45,6 +43,7 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult ListadoUsuarios(string buscar)
         {
+            // Solo Admin puede gestionar usuarios
             if (!PuedeGestionarUsuarios())
             {
                 return RedirectSinPermiso();
@@ -83,14 +82,10 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult CrearUsuario()
         {
+            // Solo Admin puede crear usuarios
             if (!PuedeGestionarUsuarios())
             {
                 return RedirectSinPermiso();
-            }
-
-            if (!EsAdministrador())
-            {
-                return RedirectSinPermiso("Solo los administradores pueden crear usuarios");
             }
 
             CargarRoles();
@@ -101,14 +96,10 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CrearUsuario(Usuario usuario)
         {
+            // Solo Admin puede crear usuarios
             if (!PuedeGestionarUsuarios())
             {
                 return RedirectSinPermiso();
-            }
-
-            if (!EsAdministrador())
-            {
-                return RedirectSinPermiso("Solo los administradores pueden crear usuarios");
             }
 
             try
@@ -144,14 +135,10 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult EditarUsuario(int id)
         {
+            // Solo Admin puede editar usuarios
             if (!PuedeGestionarUsuarios())
             {
                 return RedirectSinPermiso();
-            }
-
-            if (!EsAdministrador())
-            {
-                return RedirectSinPermiso("Solo los administradores pueden editar usuarios");
             }
 
             try
@@ -179,14 +166,10 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult EditarUsuario(Usuario usuario)
         {
+            // Solo Admin puede editar usuarios
             if (!PuedeGestionarUsuarios())
             {
                 return RedirectSinPermiso();
-            }
-
-            if (!EsAdministrador())
-            {
-                return RedirectSinPermiso("Solo los administradores pueden editar usuarios");
             }
 
             try
@@ -220,6 +203,7 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult DetallesUsuario(int id)
         {
+            // Solo Admin puede ver detalles de usuarios
             if (!PuedeGestionarUsuarios())
             {
                 return RedirectSinPermiso();
@@ -252,6 +236,7 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult EliminarUsuario(int IdUsuario)
         {
+            // Solo Admin puede eliminar usuarios
             if (!PuedeGestionarUsuarios())
             {
                 return RedirectSinPermiso();

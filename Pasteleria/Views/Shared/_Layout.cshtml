@@ -150,9 +150,19 @@
                         <li>
                             <a href="#" class="has-dropdown">Pedidos</a>
                             <ul class="dropdown-menu-custom">
-                                <li><a href="/Pedido/ListadoPedidos">Pedidos</a></li>
-                                <li><a href="/Pedido/CrearPedido">Crear Pedido</a></li>
-                                <li><a class="nav-link" href="@Url.Action("GenerarReporte", "ReportePedido")">Reportes</a></li>
+                                <li><a href="/Pedido/ListadoPedidos">Ver Pedidos</a></li>
+
+                                @* Solo Admin y Ventas pueden crear pedidos  *@
+                                @if (puedeCrearPedidos)
+                                {
+                                    <li><a href="/Pedido/CrearPedido">Crear Pedido</a></li>
+                                }
+
+                                @* Admin, Ventas, Operaciones y Contador pueden ver reportes *@
+                                @if (esAdmin || esVentas || esOperaciones || tipoUsuario == "Contador")
+                                {
+                                    <li><a href="@Url.Action("GenerarReporte", "ReportePedido")">Reportes</a></li>
+                                }
                             </ul>
                         </li>
                     }

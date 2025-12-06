@@ -3,9 +3,9 @@
 @{
     ViewBag.Title = "Listado de Usuarios";
 
-    // Permisos
+    // Permisos basados en la tabla: Solo Admin
     var tipoUsuario = User.FindFirst("TipoUsuario")?.Value;
-    var puedeGestionarUsuarios = tipoUsuario == "Administrador";
+    var puedeGestionar = tipoUsuario == "Administrador";
 }
 
 <!-- Banner Hero -->
@@ -34,11 +34,12 @@
         </div>
     }
 
-    @if (!puedeGestionarUsuarios)
+    @if (!puedeGestionar)
     {
         <div class="alert alert-warning" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
-            <i class="fas fa-exclamation-circle"></i> No tienes permisos para gestionar usuarios. Solo puedes visualizar la información.
+            <i class="fas fa-exclamation-circle"></i> Solo los administradores pueden gestionar usuarios.
         </div>
+        return;
     }
 
     <!-- Barra de búsqueda y botón agregar -->
@@ -57,12 +58,10 @@
                 <i class="fas fa-search"></i> Buscar
             </button>
         </form>
-        @if (puedeGestionarUsuarios)
-        {
-            <a href="@Url.Action("CrearUsuario")" class="btn btn-primary" style="white-space: nowrap;">
-                <i class="fas fa-user-plus"></i> Agregar Usuario
-            </a>
-        }
+
+        <a href="@Url.Action("CrearUsuario")" class="btn btn-primary" style="white-space: nowrap;">
+            <i class="fas fa-user-plus"></i> Agregar Usuario
+        </a>
     </div>
 
     <!-- Tabla con estilo mejorado -->
@@ -117,32 +116,29 @@
                                     }
                                 </td>
                                 <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
-                                    @if (puedeGestionarUsuarios)
-                                    {
-                                        <button type="button"
-                                                class="btn btn-sm btn-editar"
-                                                data-id="@usuario.IdUsuario"
-                                                style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                    }
+                                    <button type="button"
+                                            class="btn btn-sm btn-editar"
+                                            data-id="@usuario.IdUsuario"
+                                            style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                            title="Editar usuario">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
                                     <button type="button"
                                             class="btn btn-sm btn-ver-detalles"
                                             style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
                                             data-bs-toggle="modal"
-                                            data-bs-target="#modalDetallesUsuario">
+                                            data-bs-target="#modalDetallesUsuario"
+                                            title="Ver detalles">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    @if (puedeGestionarUsuarios)
-                                    {
-                                        <button type="button"
-                                                class="btn btn-sm btn-eliminar"
-                                                style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#modalEliminarUsuario">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    }
+                                    <button type="button"
+                                            class="btn btn-sm btn-eliminar"
+                                            style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalEliminarUsuario"
+                                            title="Eliminar usuario">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
                             contador++;
@@ -194,10 +190,7 @@
 </div>
 
 <partial name="_ModalDetallesUsuario" />
-@if (puedeGestionarUsuarios)
-{
-    <partial name="_ModalEliminarUsuario" />
-}
+<partial name="_ModalEliminarUsuario" />
 
 @section Scripts {
     <script src="~/js/usuario.js"></script>

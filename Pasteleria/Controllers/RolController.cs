@@ -38,6 +38,7 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult ListadoRoles(string buscar)
         {
+            // Solo Admin puede gestionar roles
             if (!PuedeGestionarUsuarios())
             {
                 return RedirectSinPermiso();
@@ -69,14 +70,10 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult CrearRol()
         {
+            // Solo Admin puede crear roles
             if (!PuedeGestionarUsuarios())
             {
                 return RedirectSinPermiso();
-            }
-
-            if (!EsAdministrador())
-            {
-                return RedirectSinPermiso("Solo los administradores pueden crear roles");
             }
 
             return View();
@@ -86,14 +83,10 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CrearRol(Rol rol)
         {
+            // Solo Admin puede crear roles
             if (!PuedeGestionarUsuarios())
             {
                 return RedirectSinPermiso();
-            }
-
-            if (!EsAdministrador())
-            {
-                return RedirectSinPermiso("Solo los administradores pueden crear roles");
             }
 
             try
@@ -127,14 +120,10 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult EditarRol(int id)
         {
+            // Solo Admin puede editar roles
             if (!PuedeGestionarUsuarios())
             {
                 return RedirectSinPermiso();
-            }
-
-            if (!EsAdministrador())
-            {
-                return RedirectSinPermiso("Solo los administradores pueden editar roles");
             }
 
             try
@@ -160,14 +149,10 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult EditarRol(Rol rol)
         {
+            // Solo Admin puede editar roles
             if (!PuedeGestionarUsuarios())
             {
                 return RedirectSinPermiso();
-            }
-
-            if (!EsAdministrador())
-            {
-                return RedirectSinPermiso("Solo los administradores pueden editar roles");
             }
 
             try
@@ -200,6 +185,7 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult EliminarRol(int IdRol)
         {
+            // Solo Admin puede eliminar roles
             if (!PuedeGestionarUsuarios())
             {
                 return RedirectSinPermiso();

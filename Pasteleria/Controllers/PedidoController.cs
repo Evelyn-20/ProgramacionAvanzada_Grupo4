@@ -422,7 +422,7 @@ namespace Pasteleria.Controllers
             try
             {
                 // Solo Admin puede cambiar estados
-                if (!EsAdministrador())
+                if (!PuedeCambiarEstadoPedidos())
                 {
                     TempData["Error"] = "Solo administradores pueden cambiar estados de pedidos";
                     return RedirectToAction("ListadoPedidos");

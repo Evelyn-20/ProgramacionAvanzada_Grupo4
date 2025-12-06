@@ -78,14 +78,10 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult CrearCliente()
         {
+            // Admin y Ventas pueden crear clientes
             if (!PuedeGestionarClientes())
             {
                 return RedirectSinPermiso();
-            }
-
-            if (!EsAdministrador())
-            {
-                return RedirectSinPermiso("Solo los administradores pueden crear clientes");
             }
 
             return View();
@@ -95,14 +91,10 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CrearCliente(Cliente cliente)
         {
+            // Admin y Ventas pueden crear clientes
             if (!PuedeGestionarClientes())
             {
                 return RedirectSinPermiso();
-            }
-
-            if (!EsAdministrador())
-            {
-                return RedirectSinPermiso("Solo los administradores pueden crear clientes");
             }
 
             try
@@ -150,14 +142,10 @@ namespace Pasteleria.Controllers
         [HttpGet]
         public IActionResult EditarCliente(int id)
         {
+            // Admin y Ventas pueden editar clientes
             if (!PuedeGestionarClientes())
             {
                 return RedirectSinPermiso();
-            }
-
-            if (!EsAdministrador())
-            {
-                return RedirectSinPermiso("Solo los administradores puede editar clientes");
             }
 
             try
@@ -183,14 +171,10 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult EditarCliente(Cliente cliente)
         {
+            // Admin y Ventas pueden editar clientes
             if (!PuedeGestionarClientes())
             {
                 return RedirectSinPermiso();
-            }
-
-            if (!EsAdministrador())
-            {
-                return RedirectSinPermiso("Solo los administradores pueden editar clientes");
             }
 
             try
@@ -239,6 +223,7 @@ namespace Pasteleria.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult EliminarCliente(int IdCliente)
         {
+            // Solo Admin puede eliminar clientes
             if (!EsAdministrador())
             {
                 TempData["Error"] = "Solo administradores pueden eliminar clientes";

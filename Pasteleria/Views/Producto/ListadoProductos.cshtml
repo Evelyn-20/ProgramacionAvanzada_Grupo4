@@ -3,9 +3,28 @@
 @{
     ViewBag.Title = "Inventario";
 
-    // Permisos
+    // Permisos basados en la tabla
     var tipoUsuario = User.FindFirst("TipoUsuario")?.Value;
-    var puedeGestionarInventario = tipoUsuario == "Administrador" || tipoUsuario == "Operaciones" || tipoUsuario == "Supervisor" || tipoUsuario == "Operador";
+
+    // Ver Inventario: Admin, Operaciones, Supervisor, Operador
+    var puedeVerInventario = tipoUsuario == "Administrador" ||
+                             tipoUsuario == "Operaciones" ||
+                             tipoUsuario == "Supervisor" ||
+                             tipoUsuario == "Operador";
+
+    // Crear: Solo Admin
+    var puedeCrear = tipoUsuario == "Administrador";
+
+    // Editar Stock: Admin, Operaciones, Supervisor, Operador
+    var puedeEditarStock = tipoUsuario == "Administrador" ||
+                           tipoUsuario == "Operaciones" ||
+                           tipoUsuario == "Supervisor" ||
+                           tipoUsuario == "Operador";
+
+    // Editar Todo: Solo Admin
+    var puedeEditarTodo = tipoUsuario == "Administrador";
+
+    // Eliminar: Solo Admin
     var puedeEliminar = tipoUsuario == "Administrador";
 }
 
@@ -18,6 +37,14 @@
 </section>
 
 <div class="container" style="padding: 3rem 20px; max-width: 1400px;">
+
+    @if (!puedeVerInventario)
+    {
+        <div class="alert alert-warning" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
+            <i class="fas fa-exclamation-circle"></i> No tienes permisos para ver el inventario.
+        </div>
+        return;
+    }
 
     <!-- Barra de búsqueda y botón agregar -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap;">
@@ -35,7 +62,8 @@
             </button>
         </form>
 
-        @if (puedeGestionarInventario)
+        @* Botón Crear: Solo Admin *@
+        @if (puedeCrear)
         {
             <a href="@Url.Action("CrearProducto", "Producto")" class="btn btn-primary" style="white-space: nowrap;">
                 <i class="fas fa-plus"></i> Agregar Producto
@@ -148,15 +176,19 @@
                                     }
                                 </td>
                                 <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
-                                    @if (puedeGestionarInventario)
+                                    @* Botón Editar: Admin (todo) u Operaciones (solo stock) *@
+                                    @if (puedeEditarStock)
                                     {
                                         <button type="button"
                                                 class="btn btn-sm btn-editar"
                                                 data-id="@producto.IdProducto"
-                                                style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
+                                                style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                                title="@(puedeEditarTodo ? "Editar producto" : "Editar stock")">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                     }
+
+                                    @* Botón Ver Detalles: Todos los que pueden ver inventario *@
                                     <button type="button"
                                             class="btn btn-sm btn-detalles"
                                             data-id="@producto.IdProducto"
@@ -171,9 +203,12 @@
                                             data-fecha-actualizacion="@producto.FechaActualizacionFormateada"
                                             style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
                                             data-bs-toggle="modal"
-                                            data-bs-target="#modalDetallesProducto">
+                                            data-bs-target="#modalDetallesProducto"
+                                            title="Ver detalles">
                                         <i class="fas fa-eye"></i>
                                     </button>
+
+                                    @* Botón Eliminar: Solo Admin *@
                                     @if (puedeEliminar)
                                     {
                                         <button type="button"
@@ -187,7 +222,8 @@
                                                 data-estado="@(producto.Estado ? "Activo" : "Inactivo")"
                                                 style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
                                                 data-bs-toggle="modal"
-                                                data-bs-target="#modalEliminarProducto">
+                                                data-bs-target="#modalEliminarProducto"
+                                                title="Eliminar producto">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     }
@@ -295,12 +331,12 @@
             // Verificar mensajes de TempData
             @if (TempData["Success"] != null)
             {
-                        <text>mostrarNotificacion('@TempData["Success"]', 'success');</text>
+                            <text>mostrarNotificacion('@TempData["Success"]', 'success');</text>
             }
 
             @if (TempData["Error"] != null)
             {
-                        <text>mostrarNotificacion('@TempData["Error"]', 'error');</text>
+                            <text>mostrarNotificacion('@TempData["Error"]', 'error');</text>
             }
         });
     </script>

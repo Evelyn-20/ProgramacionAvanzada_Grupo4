@@ -124,16 +124,14 @@
 
                             @if (pedido.Estado == "Pendiente")
                             {
-                                <form method="post" action="@Url.Action("CancelarPedido", "Pedido")" style="margin: 0;">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="idPedido" value="@pedido.IdPedido" />
-                                    <button type="submit"
-                                            class="btn"
-                                            onclick="return confirm('¿Está seguro de cancelar este pedido?')"
-                                            style="width: 100%; padding: 0.75rem; background: transparent; color: #e74c3c; border: 2px solid #e74c3c; border-radius: 50px; cursor: pointer; transition: all 0.3s;">
-                                        <i class="fas fa-ban"></i> Cancelar
-                                    </button>
-                                </form>
+                                <button type="button"
+                                        class="btn btn-cancelar-pedido"
+                                        data-id="@pedido.IdPedido"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalCancelarPedido"
+                                        style="width: 100%; padding: 0.75rem; background: transparent; color: #e74c3c; border: 2px solid #e74c3c; border-radius: 50px; cursor: pointer; transition: all 0.3s;">
+                                    <i class="fas fa-ban"></i> Cancelar
+                                </button>
                             }
                         </div>
                     </div>
@@ -156,7 +154,37 @@
 </div>
 
 <partial name="_ModalDetallesPedidoCliente" />
+<partial name="_ModalCancelarPedido" />
 
 @section Scripts {
     <script src="~/js/pedido.js"></script>
+    <script>
+        // Script para manejar el modal de cancelación
+        document.addEventListener('DOMContentLoaded', function() {
+            var botonesCancelar = document.querySelectorAll('.btn-cancelar-pedido');
+
+            botonesCancelar.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var pedidoId = this.getAttribute('data-id');
+
+                    // Actualizar el modal de cancelación
+                    var formCancelar = document.getElementById('formCancelarPedido');
+                    var inputId = document.getElementById('cancelar-pedido-id');
+                    var spanNumero = document.getElementById('cancelar-pedido-numero');
+
+                    if (formCancelar) {
+                        formCancelar.action = '@Url.Action("CancelarPedido", "Pedido")';
+                    }
+
+                    if (inputId) {
+                        inputId.value = pedidoId;
+                    }
+
+                    if (spanNumero) {
+                        spanNumero.textContent = pedidoId;
+                    }
+                });
+            });
+        });
+    </script>
 }

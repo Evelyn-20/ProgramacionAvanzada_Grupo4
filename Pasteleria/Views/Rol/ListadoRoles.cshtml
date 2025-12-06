@@ -3,9 +3,9 @@
 @{
     ViewBag.Title = "Listado de Roles";
 
-    // Permisos
+    // Permisos basados en la tabla: Solo Admin
     var tipoUsuario = User.FindFirst("TipoUsuario")?.Value;
-    var puedeGestionarRoles = tipoUsuario == "Administrador";
+    var puedeGestionar = tipoUsuario == "Administrador";
 }
 
 <!-- Banner Hero -->
@@ -17,7 +17,6 @@
 </section>
 
 <div class="container" style="padding: 3rem 20px; max-width: 1400px;">
-    <!-- Mensajes de éxito/error -->
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
@@ -34,11 +33,12 @@
         </div>
     }
 
-    @if (!puedeGestionarRoles)
+    @if (!puedeGestionar)
     {
         <div class="alert alert-warning" role="alert" style="border-radius: 10px; margin-bottom: 2rem;">
-            <i class="fas fa-exclamation-circle"></i> No tienes permisos para gestionar roles. Solo puedes visualizar la información.
+            <i class="fas fa-exclamation-circle"></i> Solo los administradores pueden gestionar roles.
         </div>
+        return;
     }
 
     <!-- Barra de búsqueda y botón agregar -->
@@ -57,12 +57,10 @@
                 <i class="fas fa-search"></i> Buscar
             </button>
         </form>
-        @if (puedeGestionarRoles)
-        {
-            <a href="@Url.Action("CrearRol")" class="btn btn-primary" style="white-space: nowrap;">
-                <i class="fas fa-plus-circle"></i> Agregar Rol
-            </a>
-        }
+
+        <a href="@Url.Action("CrearRol")" class="btn btn-primary" style="white-space: nowrap;">
+            <i class="fas fa-plus-circle"></i> Agregar Rol
+        </a>
     </div>
 
     <!-- Tabla con estilo mejorado -->
@@ -108,32 +106,29 @@
                                     }
                                 </td>
                                 <td style="padding: 1.2rem; text-align: center; white-space: nowrap;">
-                                    @if (puedeGestionarRoles)
-                                    {
-                                        <button type="button"
-                                                class="btn btn-sm btn-editar"
-                                                data-id="@rol.IdRol"
-                                                style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                    }
+                                    <button type="button"
+                                            class="btn btn-sm btn-editar"
+                                            data-id="@rol.IdRol"
+                                            style="background: var(--primary-color); color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                            title="Editar rol">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
                                     <button type="button"
                                             class="btn btn-sm btn-ver-detalles"
                                             style="background: #3498db; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
                                             data-bs-toggle="modal"
-                                            data-bs-target="#modalDetallesRol">
+                                            data-bs-target="#modalDetallesRol"
+                                            title="Ver detalles">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    @if (puedeGestionarRoles)
-                                    {
-                                        <button type="button"
-                                                class="btn btn-sm btn-eliminar"
-                                                style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#modalEliminarRol">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    }
+                                    <button type="button"
+                                            class="btn btn-sm btn-eliminar"
+                                            style="background: #e74c3c; color: var(--white); border: none; margin: 0 0.25rem; cursor: pointer;"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalEliminarRol"
+                                            title="Eliminar rol">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
                             contador++;
@@ -160,21 +155,16 @@
 
         @if (Model != null && Model.Count > 0)
         {
-            <!-- Footer de paginación -->
             <div style="padding: 1.5rem; background: var(--light-color); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--secondary-color); flex-wrap: wrap; gap: 1rem;">
                 <div style="color: var(--text-color); font-size: 0.95rem;">
                     Mostrando <strong><span id="startRecord">1</span>-<span id="endRecord">@Math.Min(10, Model.Count)</span></strong> de <strong id="totalRecords">@Model.Count</strong> roles
                 </div>
                 <div style="display: flex; gap: 0.5rem;">
-                    <button id="btnAnterior"
-                            class="btn"
-                            onclick="paginaAnterior()"
+                    <button id="btnAnterior" class="btn" onclick="paginaAnterior()"
                             style="border-radius: 50px; background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color); padding: 0.8rem 2rem;">
                         &lt; Anterior
                     </button>
-                    <button id="btnSiguiente"
-                            class="btn"
-                            onclick="paginaSiguiente()"
+                    <button id="btnSiguiente" class="btn" onclick="paginaSiguiente()"
                             style="border-radius: 50px; background: var(--primary-color); color: var(--white); border: none; padding: 0.8rem 2rem;">
                         Siguiente &gt;
                     </button>
@@ -185,10 +175,7 @@
 </div>
 
 <partial name="_ModalDetallesRol" />
-@if (puedeGestionarRoles)
-{
-    <partial name="_ModalEliminarRol" />
-}
+<partial name="_ModalEliminarRol" />
 
 @section Scripts {
     <script src="~/js/rol.js"></script>

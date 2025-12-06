@@ -17,7 +17,7 @@ namespace Pasteleria.Controllers
             ViewBag.UsuarioId = ObtenerUsuarioId();
         }
 
-        // Verificación General
+        // ========== VERIFICACIÓN GENERAL ==========
 
         protected bool VerificarSesionActiva()
         {
@@ -52,59 +52,115 @@ namespace Pasteleria.Controllers
             return false;
         }
 
-        // Permisos por funcionalidad
+        // ========== PERMISOS POR FUNCIONALIDAD (SEGÚN DOCUMENTO) ==========
+
+        /// <summary>
+        /// Todos los usuarios autenticados pueden ver el catálogo
+        /// </summary>
         protected bool PuedeVerCatalogo()
         {
             return TieneRol("Administrador", "Ventas", "Operaciones", "Supervisor",
                            "Vendedor", "Operador", "Contador", "Cliente");
         }
 
+        /// <summary>
+        /// Gestionar Inventario: Admin y Operaciones
+        /// Operaciones solo puede ajustar stock, no eliminar productos
+        /// </summary>
         protected bool PuedeGestionarInventario()
         {
             return TieneRol("Administrador", "Operaciones", "Supervisor", "Operador");
         }
 
+        /// <summary>
+        /// Solo Admin puede eliminar productos
+        /// Según documento: "Ventas no elimina productos"
+        /// </summary>
         protected bool PuedeEliminarProductos()
         {
             return TieneRol("Administrador");
         }
 
+        /// <summary>
+        /// Gestionar pedidos (ver listado): Admin, Ventas y Operaciones
+        /// Todos pueden acceder al listado, pero con diferentes permisos
+        /// </summary>
         protected bool PuedeGestionarPedidos()
         {
             return TieneRol("Administrador", "Ventas", "Operaciones", "Supervisor", "Vendedor", "Operador");
         }
 
+        /// <summary>
+        /// Ver/Consultar pedidos: Admin, Ventas y Operaciones
+        /// Según documento: Operaciones "ve pedidos"
+        /// </summary>
+        protected bool PuedeVerPedidos()
+        {
+            return TieneRol("Administrador", "Ventas", "Operaciones", "Supervisor", "Vendedor", "Operador");
+        }
+
+        /// <summary>
+        /// Crear/Editar pedidos: Admin y Ventas
+        /// Según documento: "Ventas crea/consulta pedidos"
+        /// Operaciones NO crea pedidos, solo los ve
+        /// </summary>
         protected bool PuedeCrearPedidos()
         {
             return TieneRol("Administrador", "Ventas", "Supervisor", "Vendedor");
         }
 
+        /// <summary>
+        /// Cambiar estados de pedidos: Solo Admin y Ventas
+        /// Operaciones solo VE los pedidos, no los modifica
+        /// </summary>
+        protected bool PuedeCambiarEstadoPedidos()
+        {
+            return TieneRol("Administrador", "Ventas", "Supervisor", "Vendedor");
+        }
+
+        /// <summary>
+        /// Gestionar clientes: Admin y Ventas
+        /// </summary>
         protected bool PuedeGestionarClientes()
         {
             return TieneRol("Administrador", "Ventas", "Supervisor", "Vendedor");
         }
 
+        /// <summary>
+        /// Solo Admin gestiona usuarios y roles
+        /// </summary>
         protected bool PuedeGestionarUsuarios()
         {
             return TieneRol("Administrador");
         }
 
+        // Ver reportes: Admin, Ventas, Operaciones, Contador
         protected bool PuedeVerReportes()
         {
-            return TieneRol("Administrador", "Ventas", "Operaciones", "Supervisor", "Contador");
+            return TieneRol("Administrador", "Ventas", "Operaciones", "Supervisor", "Contador", "Operador", "Vendedor");
         }
 
+        // Gestionar categorías: Admin y Operaciones
         protected bool PuedeGestionarCategorias()
         {
             return TieneRol("Administrador", "Operaciones", "Supervisor", "Operador");
         }
 
+        // Solo Admin ve auditorías
         protected bool PuedeVerAuditorias()
         {
             return TieneRol("Administrador");
         }
 
-        // Verificar Rol
+        // Solo Operaciones puede ajustar stock
+        protected bool SoloPuedeEditarStock()
+        {
+            var tipoUsuario = User.FindFirst("TipoUsuario")?.Value;
+            return tipoUsuario == "Operaciones" || tipoUsuario == "Operador";
+        }
+
+        // ========== VERIFICACIONES DE ROL ESPECÍFICO ==========
+
         protected bool EsAdministrador()
         {
             var tipoUsuario = User.FindFirst("TipoUsuario")?.Value;
@@ -153,7 +209,8 @@ namespace Pasteleria.Controllers
             return tipoUsuario == "Cliente";
         }
 
-        // Obtener información del Usuario
+        // ========== OBTENER INFORMACIÓN DEL USUARIO ==========
+
         protected int? ObtenerUsuarioId()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
