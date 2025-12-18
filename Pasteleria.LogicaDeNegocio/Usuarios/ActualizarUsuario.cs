@@ -53,7 +53,7 @@ namespace Pasteleria.LogicaDeNegocio.Usuarios
             }
 
             int resultado = _actualizarUsuario.Actualizar(usuario);
-            return resultado; 
+            return resultado;
         }
     }
 }
