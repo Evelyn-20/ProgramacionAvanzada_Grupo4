@@ -38,7 +38,6 @@ namespace Pasteleria.Abstracciones.ModeloUI
         [Display(Name = "Dirección")]
         public string Direccion { get; set; }
 
-        [Required(ErrorMessage = "La contraseña es obligatoria")]
         [StringLength(255, MinimumLength = 6, ErrorMessage = "La contraseña debe tener entre 6 y 255 caracteres")]
         [DataType(DataType.Password)]
         [Display(Name = "Contraseña")]

@@ -99,6 +99,12 @@ namespace Pasteleria.Controllers
 
             try
             {
+                // Validación manual para creación
+                if (string.IsNullOrWhiteSpace(cliente.Contrasenna))
+                {
+                    ModelState.AddModelError("Contrasenna", "La contraseña es obligatoria");
+                }
+
                 if (ModelState.IsValid)
                 {
                     var clienteExistentePorCorreo = _listarCliente.BuscarPorCorreo(cliente.Correo);

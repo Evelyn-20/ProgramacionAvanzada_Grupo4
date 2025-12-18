@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Pasteleria.Abstracciones.Logica.Usuario;
 using Pasteleria.Abstracciones.Logica.Rol;
+using Pasteleria.Abstracciones.Logica.Usuario;
 using Pasteleria.Abstracciones.ModeloUI;
-using Pasteleria.LogicaDeNegocio.Usuarios;
+using Pasteleria.AccesoADatos.Modelos;
 using Pasteleria.LogicaDeNegocio.Roles;
+using Pasteleria.LogicaDeNegocio.Usuarios;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -104,6 +105,12 @@ namespace Pasteleria.Controllers
 
             try
             {
+                // Validación manual para creación
+                if (string.IsNullOrWhiteSpace(usuario.Contrasenna))
+                {
+                    ModelState.AddModelError("Contrasenna", "La contraseña es obligatoria");
+                }
+
                 if (ModelState.IsValid)
                 {
                     usuario.Estado = true;
