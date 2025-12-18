@@ -41,7 +41,7 @@ namespace Pasteleria.Abstracciones.ModeloUI
         [StringLength(255, MinimumLength = 6, ErrorMessage = "La contraseña debe tener entre 6 y 255 caracteres")]
         [DataType(DataType.Password)]
         [Display(Name = "Contraseña")]
-        public string Contrasenna { get; set; }
+        public string Contrasenna { get; set; } 
 
         [Display(Name = "Estado")]
         public bool Estado { get; set; }

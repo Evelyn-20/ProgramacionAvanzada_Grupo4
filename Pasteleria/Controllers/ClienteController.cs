@@ -103,7 +103,7 @@ namespace Pasteleria.Controllers
                 if (string.IsNullOrWhiteSpace(cliente.Contrasenna))
                 {
                     ModelState.AddModelError("Contrasenna", "La contraseña es obligatoria");
-                }
+                } 
 
                 if (ModelState.IsValid)
                 {
