@@ -210,7 +210,7 @@ namespace Pasteleria.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditarProducto(Producto producto, IFormFile archivo, string PrecioStr, string PorcentajeImpuestoStr)
+        public async Task<IActionResult> EditarProducto(Producto producto, IFormFile archivo, string PrecioStr, string PorcentajeImpuestoStr, string PorcentajeDescuentoStr)
         {
             if (!PuedeGestionarInventario())
             {
@@ -233,14 +233,12 @@ namespace Pasteleria.Controllers
                 // Si es Operaciones, solo puede modificar el stock
                 if (soloStock)
                 {
-                    // Validar solo la cantidad
                     if (producto.Cantidad < 0)
                     {
                         ModelState.AddModelError("Cantidad", "La cantidad no puede ser negativa");
                         return View(producto);
                     }
 
-                    // Mantener todos los campos originales excepto la cantidad
                     productoExistente.Cantidad = producto.Cantidad;
                     productoExistente.FechaActualizacion = DateTime.Now;
 
@@ -265,7 +263,9 @@ namespace Pasteleria.Controllers
                 ModelState.Remove("archivo");
                 ModelState.Remove("Precio");
                 ModelState.Remove("PorcentajeImpuesto");
+                ModelState.Remove("PorcentajeDescuento");
 
+                // Parsear Precio
                 if (!string.IsNullOrEmpty(PrecioStr))
                 {
                     if (decimal.TryParse(PrecioStr, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal precioParseado))
@@ -278,6 +278,7 @@ namespace Pasteleria.Controllers
                     }
                 }
 
+                // Parsear Impuesto
                 if (!string.IsNullOrEmpty(PorcentajeImpuestoStr))
                 {
                     if (decimal.TryParse(PorcentajeImpuestoStr, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal impuestoParseado))
@@ -290,6 +291,26 @@ namespace Pasteleria.Controllers
                     }
                 }
 
+                // Parsear Descuento
+                if (!string.IsNullOrEmpty(PorcentajeDescuentoStr))
+                {
+                    if (decimal.TryParse(PorcentajeDescuentoStr, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal descuentoParseado))
+                    {
+                        // Si el descuento es 0, guardarlo como NULL
+                        producto.PorcentajeDescuento = descuentoParseado > 0 ? descuentoParseado : (decimal?)null;
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("PorcentajeDescuento", "El porcentaje de descuento no tiene un formato válido");
+                    }
+                }
+                else
+                {
+                    // Si está vacío, es NULL
+                    producto.PorcentajeDescuento = null;
+                }
+
+                // Validaciones
                 if (producto.Precio <= 0)
                 {
                     ModelState.AddModelError("Precio", "El precio debe ser mayor a 0");
@@ -298,6 +319,11 @@ namespace Pasteleria.Controllers
                 if (producto.PorcentajeImpuesto < 0 || producto.PorcentajeImpuesto > 100)
                 {
                     ModelState.AddModelError("PorcentajeImpuesto", "El porcentaje de impuesto debe estar entre 0 y 100");
+                }
+
+                if (producto.PorcentajeDescuento.HasValue && (producto.PorcentajeDescuento.Value < 0 || producto.PorcentajeDescuento.Value > 100))
+                {
+                    ModelState.AddModelError("PorcentajeDescuento", "El porcentaje de descuento debe estar entre 0 y 100");
                 }
 
                 if (!ModelState.IsValid)
@@ -316,36 +342,24 @@ namespace Pasteleria.Controllers
                 // Procesar imagen si se subió una nueva
                 if (archivo != null && archivo.Length > 0)
                 {
-                    var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
-                    var extension = Path.GetExtension(archivo.FileName).ToLowerInvariant();
+                    var (imagenOptimizada, thumbnail, error) = await ProcesarImagen(archivo);
 
-                    if (string.IsNullOrEmpty(extension) || !extensionesPermitidas.Contains(extension))
+                    if (!string.IsNullOrEmpty(error))
                     {
-                        ModelState.AddModelError("archivo", "Solo se permiten archivos de imagen");
+                        ModelState.AddModelError("archivo", error);
                         producto.Imagen = productoExistente.Imagen;
                         var categorias = _listarCategorias.ObtenerActivas();
                         ViewBag.Categorias = categorias;
                         return View(producto);
                     }
 
-                    if (archivo.Length > 5 * 1024 * 1024)
-                    {
-                        ModelState.AddModelError("archivo", "La imagen no puede superar los 5MB");
-                        producto.Imagen = productoExistente.Imagen;
-                        var categorias2 = _listarCategorias.ObtenerActivas();
-                        ViewBag.Categorias = categorias2;
-                        return View(producto);
-                    }
-
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        await archivo.CopyToAsync(memoryStream);
-                        producto.Imagen = memoryStream.ToArray();
-                    }
+                    producto.Imagen = imagenOptimizada;
+                    producto.ImagenThumbnail = thumbnail;
                 }
                 else
                 {
                     producto.Imagen = productoExistente.Imagen;
+                    producto.ImagenThumbnail = productoExistente.ImagenThumbnail;
                 }
 
                 int resultado = _actualizarProducto.Actualizar(producto);
@@ -438,9 +452,30 @@ namespace Pasteleria.Controllers
                 {
                     TempData["Success"] = "Producto eliminado exitosamente";
                 }
+                else if (resultado == -500)
+                {
+                    // Código especial: el producto fue inactivado en lugar de eliminado
+                    TempData["Success"] = "El producto fue desactivado exitosamente. No se puede eliminar físicamente porque está incluido en el historial de pedidos completados, pero ya no estará disponible para nuevas ventas.";
+                }
+                else if (resultado == -998)
+                {
+                    // Código especial: error de base de datos
+                    TempData["Error"] = "Error al eliminar el producto. Es posible que tenga restricciones en la base de datos.";
+                }
+                else if (resultado < 0 && resultado > -500)
+                {
+                    // Código negativo indica cuántos pedidos Pendientes o En Proceso tienen el producto
+                    int cantidadPedidos = Math.Abs(resultado);
+                    string pedidosTexto = cantidadPedidos == 1 ? "pedido" : "pedidos";
+                    string estaEstos = cantidadPedidos == 1 ? "está" : "están";
+                    string esteEstos = cantidadPedidos == 1 ? "este pedido" : "estos pedidos";
+
+                    TempData["Error"] = $"No se puede eliminar este producto porque actualmente está incluido en {cantidadPedidos} {pedidosTexto} que {estaEstos} Pendiente o En Proceso. " +
+                                       $"Por favor, espere a que {esteEstos} sea completado, entregado o cancelado antes de intentar eliminarlo.";
+                }
                 else
                 {
-                    TempData["Error"] = "No se pudo eliminar el producto";
+                    TempData["Error"] = "No se pudo eliminar el producto. Puede que no exista o ya haya sido eliminado.";
                 }
 
                 return RedirectToAction(nameof(ListadoProductos));

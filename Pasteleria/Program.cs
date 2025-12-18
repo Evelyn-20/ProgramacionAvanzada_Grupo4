@@ -4,6 +4,10 @@ using Pasteleria.LogicaDeNegocio.Productos;
 using Pasteleria.LogicaDeNegocio.Pedidos;
 using Microsoft.AspNetCore.Authentication;
 using Pasteleria.AccesoADatos.Modelos;
+using QuestPDF.Fluent;
+using QuestPDF.Infrastructure;
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -26,6 +26,9 @@ namespace Pasteleria.AccesoADatos.Modelos
         [Required]
         public decimal Precio { get; set; }
 
+        // Descuento opcional
+        public decimal? PorcentajeDescuento { get; set; }
+
         [Required]
         public decimal PorcentajeImpuesto { get; set; }
 

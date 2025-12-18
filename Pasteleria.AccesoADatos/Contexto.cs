@@ -27,11 +27,18 @@ public class Contexto : DbContext
     {
         if (!optionsBuilder.IsConfigured)
         {
+            // Leer la cadena de conexión de Azure o usar la local
+            string connectionString = Environment.GetEnvironmentVariable("SQLAZURECONNSTR_Contexto")
+                ?? Environment.GetEnvironmentVariable("SQLCONNSTR_Contexto")
+                ?? "Data Source=EVELYN\\SQLEXPRESS;Initial Catalog=PASTELERIA;Integrated Security=True;TrustServerCertificate=True";
+
             optionsBuilder.UseSqlServer(
-                "Data Source=EVELYN\\SQLEXPRESS;Initial Catalog=PASTELERIA;Integrated Security=True;MultipleActiveResultSets=true;TrustServerCertificate=True;Connection Timeout=60",
+                connectionString,
                 sqlServerOptions =>
                 {
+                    // Aumentar el timeout de comandos a 160 segundos
                     sqlServerOptions.CommandTimeout(160);
+                    // Habilitar retry logic para conexiones inestables
                     sqlServerOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: System.TimeSpan.FromSeconds(10),
@@ -51,8 +58,16 @@ public class Contexto : DbContext
             entity.Property(e => e.NombreProducto).IsRequired().HasMaxLength(200);
             entity.Property(e => e.DescripcionProducto).IsRequired().HasColumnType("TEXT");
             entity.Property(e => e.Precio).IsRequired().HasColumnType("decimal(10,2)");
+
+            // Configuración del descuento (NULLABLE - OPCIONAL)
+            entity.Property(e => e.PorcentajeDescuento)
+                .IsRequired(false)  // Explícitamente opcional
+                .HasColumnType("decimal(5,2)")
+                .HasDefaultValue(null);  // Valor por defecto NULL
+
             entity.Property(e => e.PorcentajeImpuesto).IsRequired().HasColumnType("decimal(5,2)");
             entity.Property(e => e.Imagen).HasColumnType("VARBINARY(MAX)");
+            entity.Property(e => e.ImagenThumbnail).HasColumnType("VARBINARY(MAX)");
             entity.Property(e => e.Estado).IsRequired();
             entity.Property(e => e.IdCategoria).IsRequired();
             entity.Property(e => e.Cantidad).IsRequired();
@@ -68,6 +83,7 @@ public class Contexto : DbContext
             entity.Property(e => e.IdCategoria).ValueGeneratedOnAdd();
             entity.Property(e => e.NombreCategoria).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Imagen).HasColumnType("VARBINARY(MAX)");
+            entity.Property(e => e.ImagenThumbnail).HasColumnType("VARBINARY(MAX)");
             entity.Property(e => e.Estado).IsRequired();
         });
 
@@ -154,7 +170,6 @@ public class Contexto : DbContext
             entity.Property(e => e.Subtotal).IsRequired().HasColumnType("decimal(10,2)");
             entity.Property(e => e.Descuento).IsRequired(false).HasColumnType("decimal(10,2)");
             entity.Property(e => e.Impuesto).IsRequired(false).HasColumnType("decimal(10,2)");
-
             entity.Property(e => e.Total).IsRequired().HasColumnType("decimal(10,2)");
             entity.Property(e => e.IdEstadoPedido).IsRequired();
         });

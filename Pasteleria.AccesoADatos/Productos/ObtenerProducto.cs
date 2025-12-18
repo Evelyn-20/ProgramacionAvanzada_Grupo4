@@ -36,6 +36,7 @@ namespace Pasteleria.AccesoADatos.Productos
                 DescripcionProducto = productoAD.DescripcionProducto,
                 Cantidad = productoAD.Cantidad,
                 Precio = productoAD.Precio,
+                PorcentajeDescuento = productoAD.PorcentajeDescuento,
                 PorcentajeImpuesto = productoAD.PorcentajeImpuesto,
                 Imagen = productoAD.Imagen,
                 ImagenThumbnail = productoAD.ImagenThumbnail,

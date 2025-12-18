@@ -1,9 +1,10 @@
-﻿@{
-    ViewData["Title"] = "Crear Pedido para Cliente";
-    var clientes = ViewBag.Clientes as List<dynamic>;
+﻿﻿@{
+ViewData["Title"] = "Crear Pedido para Cliente";
+
+// Solo estos roles pueden aplicar descuento global
+var puedeAplicarDescuento = User.IsInRole("Administrador") || User.IsInRole("Vendedor");
 }
 
-<!-- Banner Hero -->
 <section class="hero" style="padding: 3rem 0;">
     <div class="hero-content">
         <h1 class="hero-title">Crear Pedido para Cliente</h1>
@@ -13,9 +14,11 @@
 
 <div class="container" style="padding: 3rem 20px; max-width: 1400px;">
     <div style="display: grid; grid-template-columns: 1fr 400px; gap: 2rem; align-items: start;">
-        <!-- Columna izquierda -->
+
+        <!-- Izquierda -->
         <div style="display: flex; flex-direction: column; gap: 2rem;">
-            <!-- Selección de Cliente -->
+
+            <!-- Cliente -->
             <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); padding: 2rem;">
                 <h3 style="color: var(--dark-color); margin-bottom: 1.5rem; font-family: 'Playfair Display', serif; font-size: 1.5rem;">
                     <i class="fas fa-user"></i> Seleccionar Cliente
@@ -25,117 +28,152 @@
                     <label style="display: block; color: var(--dark-color); font-weight: 600; margin-bottom: 0.5rem;">
                         Buscar Cliente <span style="color: #e74c3c;">*</span>
                     </label>
-                    <input type="text"
-                           id="buscarCliente"
-                           placeholder="Buscar por nombre, cédula o correo..."
+                    <input type="text" id="buscarCliente" placeholder="Buscar por nombre, cédula o correo..."
                            style="width: 100%; padding: 0.9rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem;">
                     <div id="resultadosCliente" style="margin-top: 0.5rem; max-height: 200px; overflow-y: auto;"></div>
                 </div>
 
-                <div id="clienteSeleccionado" style="display: none; padding: 1rem; background: var(--light-color); border-radius: 10px; border-left: 4px solid var(--primary-color);">
+                <div id="clienteSeleccionado" style="display:none; padding:1rem; background: var(--light-color); border-radius:10px; border-left:4px solid var(--primary-color);">
                     <h5 style="color: var(--dark-color); margin-bottom: 0.5rem;">Cliente Seleccionado:</h5>
-                    <p id="infoCliente" style="margin: 0; color: var(--text-color);"></p>
+                    <p id="infoCliente" style="margin:0; color: var(--text-color);"></p>
                     <input type="hidden" id="idClienteSeleccionado" value="">
                 </div>
             </div>
 
-            <!-- Búsqueda de Productos -->
+            <!-- Productos -->
             <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); padding: 2rem;">
                 <h3 style="color: var(--dark-color); margin-bottom: 1.5rem; font-family: 'Playfair Display', serif; font-size: 1.5rem;">
                     <i class="fas fa-shopping-basket"></i> Agregar Productos
                 </h3>
 
                 <div style="margin-bottom: 1.5rem;">
-                    <label style="display: block; color: var(--dark-color); font-weight: 600; margin-bottom: 0.5rem;">
+                    <label style="display:block; color: var(--dark-color); font-weight:600; margin-bottom:0.5rem;">
                         Buscar Producto
                     </label>
-                    <input type="text"
-                           id="buscarProducto"
-                           placeholder="Buscar productos..."
-                           style="width: 100%; padding: 0.9rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem;">
-                    <div id="resultadosProducto" style="margin-top: 0.5rem; max-height: 300px; overflow-y: auto;"></div>
+                    <input type="text" id="buscarProducto" placeholder="Buscar productos..."
+                           style="width:100%; padding:0.9rem; border:2px solid var(--secondary-color); border-radius:10px; font-size:1rem;">
+                    <div id="resultadosProducto" style="margin-top:0.5rem; max-height:300px; overflow-y:auto;"></div>
                 </div>
 
                 <div id="productosAgregados">
                     <h4 style="color: var(--dark-color); margin-bottom: 1rem;">Productos en el Pedido:</h4>
                     <div id="listaProductos" style="min-height: 100px;">
-                        <p style="text-align: center; color: var(--text-color); padding: 2rem;">
-                            No hay productos agregados
-                        </p>
+                        <p style="text-align:center; color: var(--text-color); padding:2rem;">No hay productos agregados</p>
                     </div>
                 </div>
             </div>
+
         </div>
 
-        <!-- Columna derecha: Resumen -->
+        <!-- Derecha: resumen -->
         <div style="background: var(--white); border-radius: 15px; box-shadow: var(--shadow); padding: 2rem; position: sticky; top: 100px;">
             <h3 style="color: var(--dark-color); margin-bottom: 1.5rem; font-family: 'Playfair Display', serif; font-size: 1.5rem;">
                 Resumen del Pedido
             </h3>
 
-            <div style="margin-bottom: 2rem;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--secondary-color);">
-                    <span style="color: var(--text-color);">Subtotal:</span>
-                    <span id="resumenSubtotal" style="color: var(--dark-color); font-weight: 600;">₡0.00</span>
+            <!-- Descuento global -->
+            <div style="margin-bottom: 1.2rem; padding: 1rem; background: var(--light-color); border-radius: 12px;">
+                <div style="display:flex; justify-content: space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+                    <div>
+                        <div style="font-weight:700; color: var(--dark-color);">Descuento global (%)</div>
+                        <small style="color: var(--text-color);">Aplica al subtotal antes de impuesto</small>
+                    </div>
+
+                    @if (puedeAplicarDescuento)
+                    {
+                        <input type="number" id="descuentoGlobalPct"
+                               min="0" max="100" step="0.01" value="0"
+                               style="width: 120px; padding: .55rem .7rem; border: 2px solid var(--secondary-color); border-radius: 10px; text-align:right;">
+                    }
+                    else
+                    {
+                        <input type="number" id="descuentoGlobalPct"
+                               value="0" disabled
+                               style="width: 120px; padding: .55rem .7rem; border: 2px solid var(--secondary-color); border-radius: 10px; text-align:right; background:#f5f5f5;">
+                    }
                 </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--secondary-color);">
-                    <span style="color: var(--text-color);">Descuento:</span>
-                    <span id="resumenDescuento" style="color: #27ae60; font-weight: 600;">₡0.00</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid var(--secondary-color);">
-                    <span style="color: var(--text-color);">Impuesto (13%):</span>
-                    <span id="resumenImpuesto" style="color: var(--dark-color); font-weight: 600;">₡0.00</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
-                    <span style="color: var(--dark-color); font-weight: 700; font-size: 1.2rem;">Total:</span>
-                    <span id="resumenTotal" style="color: var(--primary-color); font-weight: 700; font-size: 1.5rem;">₡0.00</span>
+
+                <div style="margin-top:.6rem; color:#27ae60; font-weight:700;">
+                    Monto descuento: ₡<span id="descuentoGlobalMonto">0.00</span>
                 </div>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <button id="btnGuardarPedido" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+            <div style="margin-bottom: 2rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid var(--secondary-color);">
+                    <span style="color: var(--text-color);">Subtotal:</span>
+                    <span id="resumenSubtotal" style="color: var(--dark-color); font-weight:600;">₡0.00</span>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid var(--secondary-color);">
+                    <span style="color: var(--text-color);">Descuento:</span>
+                    <span id="resumenDescuento" style="color:#27ae60; font-weight:600;">₡0.00</span>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; margin-bottom:1rem; padding-bottom:1rem; border-bottom:2px solid var(--secondary-color);">
+                    <span style="color: var(--text-color);">Impuesto (13%):</span>
+                    <span id="resumenImpuesto" style="color: var(--dark-color); font-weight:600;">₡0.00</span>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; margin-bottom:2rem;">
+                    <span style="color: var(--dark-color); font-weight:700; font-size:1.2rem;">Total:</span>
+                    <span id="resumenTotal" style="color: var(--primary-color); font-weight:700; font-size:1.5rem;">₡0.00</span>
+                </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:1rem;">
+                <button id="btnGuardarPedido" class="btn btn-primary" style="width:100%; padding:1rem; font-size:1.1rem;">
                     <i class="fas fa-save"></i> Crear Pedido
                 </button>
-                <a href="@Url.Action("ListadoPedidos", "Pedido")" class="btn btn-secondary" style="width: 100%; padding: 1rem; font-size: 1.1rem; text-align: center; text-decoration: none;">
+                <a href="@Url.Action("ListadoPedidos", "Pedido")" class="btn btn-secondary"
+                   style="width:100%; padding:1rem; font-size:1.1rem; text-align:center; text-decoration:none;">
                     <i class="fas fa-arrow-left"></i> Cancelar
                 </a>
             </div>
         </div>
+
     </div>
 </div>
 
 @section Scripts {
+
+    <form id="tokenForm" style="display:none;">
+        @Html.AntiForgeryToken()
+    </form>
+
     <script>
         let productosEnPedido = [];
         let clienteSeleccionado = null;
 
-        // Buscar cliente
-        $('#buscarCliente').on('input', function() {
+        const puedeAplicarDescuento = @((puedeAplicarDescuento) ? "true" : "false");
+
+        const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+        const round2 = (n) => Math.round((Number(n || 0) + Number.EPSILON) * 100) / 100;
+
+        // Clientes
+        $('#buscarCliente').on('input', function () {
             const termino = $(this).val();
+            if (termino.length < 2) { $('#resultadosCliente').html(''); return; }
 
-            if (termino.length < 2) {
-                $('#resultadosCliente').html('');
-                return;
-            }
-
-            $.get('/Pedido/BuscarCliente', { termino: termino }, function(data) {
+            $.get('/Pedido/BuscarCliente', { termino: termino }, function (data) {
                 let html = '';
                 data.forEach(cliente => {
                     html += `
-                        <div class="cliente-item" data-id="${cliente.id}" style="padding: 0.8rem; border-bottom: 1px solid var(--secondary-color); cursor: pointer; transition: background 0.3s;">
+                        <div class="cliente-item" data-id="${cliente.id}"
+                             style="padding:.8rem; border-bottom:1px solid var(--secondary-color); cursor:pointer; transition: background .3s;">
                             <strong>${cliente.nombre}</strong><br>
                             <small>Cédula: ${cliente.cedula} | ${cliente.correo}</small>
                         </div>
                     `;
                 });
-                $('#resultadosCliente').html(html || '<p style="padding: 0.5rem; color: var(--text-color);">No se encontraron clientes</p>');
+
+                $('#resultadosCliente').html(html || '<p style="padding:.5rem; color: var(--text-color);">No se encontraron clientes</p>');
 
                 $('.cliente-item').hover(
-                    function() { $(this).css('background', 'var(--light-color)'); },
-                    function() { $(this).css('background', 'transparent'); }
+                    function(){ $(this).css('background','var(--light-color)'); },
+                    function(){ $(this).css('background','transparent'); }
                 );
 
-                $('.cliente-item').click(function() {
+                $('.cliente-item').click(function(){
                     const id = $(this).data('id');
                     const cliente = data.find(c => c.id === id);
                     seleccionarCliente(cliente);
@@ -146,72 +184,62 @@
         function seleccionarCliente(cliente) {
             clienteSeleccionado = cliente;
             $('#idClienteSeleccionado').val(cliente.id);
-            $('#infoCliente').html(`
-                <strong>${cliente.nombre}</strong><br>
-                Cédula: ${cliente.cedula}<br>
-                Correo: ${cliente.correo}
-            `);
+            $('#infoCliente').html(`<strong>${cliente.nombre}</strong><br>Cédula: ${cliente.cedula}<br>Correo: ${cliente.correo}`);
             $('#clienteSeleccionado').show();
             $('#buscarCliente').val('');
             $('#resultadosCliente').html('');
         }
 
-        // Buscar producto
-        $('#buscarProducto').on('input', function() {
+        // Productos
+        $('#buscarProducto').on('input', function () {
             const termino = $(this).val();
+            if (termino.length < 2) { $('#resultadosProducto').html(''); return; }
 
-            if (termino.length < 2) {
-                $('#resultadosProducto').html('');
-                return;
-            }
-
-            $.get('/api/pedidosapi/buscar-productos', { q: termino }, function(data) {
+            $.get('/api/pedidosapi/buscar-productos', { q: termino }, function (data) {
                 let html = '';
                 data.forEach(producto => {
                     html += `
-                        <div class="producto-item" data-producto='${JSON.stringify(producto)}' style="padding: 0.8rem; border-bottom: 1px solid var(--secondary-color); cursor: pointer; transition: background 0.3s; display: flex; justify-content: space-between; align-items: center;">
+                        <div class="producto-item" data-producto='${JSON.stringify(producto)}'
+                             style="padding:.8rem; border-bottom:1px solid var(--secondary-color); cursor:pointer; transition: background .3s; display:flex; justify-content:space-between; align-items:center;">
                             <div>
                                 <strong>${producto.nombre}</strong><br>
                                 <small>Precio: ₡${producto.precio.toFixed(2)} | Stock: ${producto.stock}</small>
                             </div>
-                            <button class="btn btn-sm btn-primary" style="padding: 0.4rem 0.8rem;">
+                            <button class="btn btn-sm btn-primary" style="padding:.4rem .8rem;">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
                     `;
                 });
-                $('#resultadosProducto').html(html || '<p style="padding: 0.5rem; color: var(--text-color);">No se encontraron productos</p>');
+
+                $('#resultadosProducto').html(html || '<p style="padding:.5rem; color: var(--text-color);">No se encontraron productos</p>');
 
                 $('.producto-item').hover(
-                    function() { $(this).css('background', 'var(--light-color)'); },
-                    function() { $(this).css('background', 'transparent'); }
+                    function(){ $(this).css('background','var(--light-color)'); },
+                    function(){ $(this).css('background','transparent'); }
                 );
 
-                $('.producto-item').click(function() {
+                $('.producto-item').click(function(){
                     const producto = $(this).data('producto');
                     agregarProducto(producto);
                 });
             });
         });
 
-        function agregarProducto(producto) {
+                function agregarProducto(producto) {
             const existe = productosEnPedido.find(p => p.id === producto.id);
             if (existe) {
-                if (existe.cantidad < producto.stock) {
-                    existe.cantidad++;
-                } else {
-                    Swal.fire('Stock máximo', `Solo hay ${producto.stock} unidades disponibles`, 'warning');
-                    return;
-                }
+                if (existe.cantidad < producto.stock) existe.cantidad++;
+                else { Swal.fire('Stock máximo', `Solo hay ${producto.stock} unidades disponibles`, 'warning'); return; }
             } else {
                 productosEnPedido.push({
                     id: producto.id,
                     nombre: producto.nombre,
                     precio: producto.precio,
                     cantidad: 1,
-                    descuento: 0,
                     impuesto: producto.impuesto,
-                    stock: producto.stock
+                    stock: producto.stock,
+                    porcentajeDescuento: producto.descuento || 0
                 });
             }
 
@@ -223,50 +251,50 @@
 
         function actualizarListaProductos() {
             if (productosEnPedido.length === 0) {
-                $('#listaProductos').html('<p style="text-align: center; color: var(--text-color); padding: 2rem;">No hay productos agregados</p>');
+                $('#listaProductos').html('<p style="text-align:center; color: var(--text-color); padding:2rem;">No hay productos agregados</p>');
                 return;
             }
 
             let html = '';
-            productosEnPedido.forEach((producto, index) => {
+            productosEnPedido.forEach((p, index) => {
+                const bruto = p.precio * p.cantidad;
+
                 html += `
-                    <div style="display: flex; gap: 1rem; padding: 1rem; border-bottom: 1px solid var(--secondary-color); align-items: center;">
-                        <div style="flex: 1;">
-                            <strong>${producto.nombre}</strong><br>
-                            <small>₡${producto.precio.toFixed(2)}</small>
+                    <div style="display:flex; gap:1rem; padding:1rem; border-bottom:1px solid var(--secondary-color); align-items:center; flex-wrap:wrap;">
+                        <div style="flex:1; min-width:220px;">
+                            <strong>${p.nombre}</strong><br>
+                            <small>₡${p.precio.toFixed(2)}</small>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <button onclick="cambiarCantidad(${index}, -1)" class="btn btn-sm" style="width: 30px; height: 30px; padding: 0; background: var(--secondary-color);">-</button>
-                            <span style="font-weight: 600; min-width: 30px; text-align: center;">${producto.cantidad}</span>
-                            <button onclick="cambiarCantidad(${index}, 1)" class="btn btn-sm" style="width: 30px; height: 30px; padding: 0; background: var(--secondary-color);">+</button>
+
+                        <div style="display:flex; align-items:center; gap:.5rem;">
+                            <button onclick="cambiarCantidad(${index}, -1)" class="btn btn-sm" style="width:30px; height:30px; padding:0; background: var(--secondary-color);">-</button>
+                            <span style="font-weight:600; min-width:30px; text-align:center;">${p.cantidad}</span>
+                            <button onclick="cambiarCantidad(${index}, 1)" class="btn btn-sm" style="width:30px; height:30px; padding:0; background: var(--secondary-color);">+</button>
                         </div>
-                        <div style="text-align: right; min-width: 80px;">
-                            <strong style="color: var(--primary-color);">₡${(producto.precio * producto.cantidad).toFixed(2)}</strong>
+
+                        <div style="text-align:right; min-width:170px;">
+                            <label style="display:block; font-size:.85rem; color: var(--text-color); margin-bottom:.25rem;">Subtotal bruto</label>
+                            <strong style="color: var(--dark-color);">₡${bruto.toFixed(2)}</strong>
                         </div>
-                        <button onclick="eliminarProducto(${index})" class="btn btn-sm" style="width: 35px; height: 35px; padding: 0; background: #e74c3c; color: white;">
+
+                        <button onclick="eliminarProducto(${index})" class="btn btn-sm" style="width:35px; height:35px; padding:0; background:#e74c3c; color:white;">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
                 `;
             });
+
             $('#listaProductos').html(html);
         }
 
         function cambiarCantidad(index, cambio) {
-            const producto = productosEnPedido[index];
-            const nuevaCantidad = producto.cantidad + cambio;
+            const p = productosEnPedido[index];
+            const nueva = p.cantidad + cambio;
 
-            if (nuevaCantidad < 1) {
-                eliminarProducto(index);
-                return;
-            }
+            if (nueva < 1) { eliminarProducto(index); return; }
+            if (nueva > p.stock) { Swal.fire('Stock máximo', `Solo hay ${p.stock} unidades disponibles`, 'warning'); return; }
 
-            if (nuevaCantidad > producto.stock) {
-                Swal.fire('Stock máximo', `Solo hay ${producto.stock} unidades disponibles`, 'warning');
-                return;
-            }
-
-            producto.cantidad = nuevaCantidad;
+            p.cantidad = nueva;
             actualizarListaProductos();
             calcularTotales();
         }
@@ -277,46 +305,135 @@
             calcularTotales();
         }
 
+        // Descuento Global + Totales
+        $('#descuentoGlobalPct').on('input', function () {
+            if (!puedeAplicarDescuento) return;
+            let pct = parseFloat($(this).val());
+            if (isNaN(pct)) pct = 0;
+            pct = clamp(pct, 0, 100);
+            $(this).val(pct.toFixed(2));
+            calcularTotales();
+        });
+
+        function getPctGlobal() {
+            if (!puedeAplicarDescuento) return 0;
+            let pct = parseFloat($('#descuentoGlobalPct').val());
+            if (isNaN(pct)) pct = 0;
+            return clamp(pct, 0, 100);
+        }
+
         function calcularTotales() {
-            let subtotal = 0;
-            let descuentoTotal = 0;
-            let impuestoTotal = 0;
+            let subtotalBruto = 0;
+            let descuentoProductosTotal = 0;
 
-            productosEnPedido.forEach(producto => {
-                const subtotalProducto = producto.precio * producto.cantidad;
-                subtotal += subtotalProducto;
-                descuentoTotal += producto.descuento;
+            // Calcular descuento de productos
+            productosEnPedido.forEach(p => {
+                const bruto = p.precio * p.cantidad;
+                const descuentoProd = bruto * ((p.porcentajeDescuento || 0) / 100);
 
-                const subtotalConDescuento = subtotalProducto - producto.descuento;
-                impuestoTotal += subtotalConDescuento * (producto.impuesto / 100);
+                subtotalBruto += bruto;
+                descuentoProductosTotal += descuentoProd;
             });
 
-            const total = subtotal - descuentoTotal + impuestoTotal;
+            const pct = getPctGlobal();
+            const baseConDescuentosProducto = subtotalBruto - descuentoProductosTotal;
+            const descuentoGlobal = round2(baseConDescuentosProducto * (pct / 100));
 
-            $('#resumenSubtotal').text('₡' + subtotal.toFixed(2));
-            $('#resumenDescuento').text('₡' + descuentoTotal.toFixed(2));
+            // Base imponible (descuento antes de impuesto)
+            const baseNeta = baseConDescuentosProducto - descuentoGlobal;
+
+            // Impuesto: prorrateado por producto
+            let impuestoTotal = 0;
+            if (baseConDescuentosProducto > 0) {
+                productosEnPedido.forEach(p => {
+                    const brutoLinea = p.precio * p.cantidad;
+                    const descuentoLinea = brutoLinea * ((p.porcentajeDescuento || 0) / 100);
+                    const netoLinea = brutoLinea - descuentoLinea;
+                    const proporcion = netoLinea / baseConDescuentosProducto;
+                    const baseLineaImponible = baseNeta * proporcion;
+                    impuestoTotal += baseLineaImponible * (p.impuesto / 100);
+                });
+            }
+
+            impuestoTotal = round2(impuestoTotal);
+            const descuentoTotalMostrar = descuentoProductosTotal + descuentoGlobal;
+            const total = round2(baseNeta + impuestoTotal);
+
+            $('#descuentoGlobalMonto').text(descuentoGlobal.toFixed(2));
+            $('#resumenSubtotal').text('₡' + subtotalBruto.toFixed(2));
+            $('#resumenDescuento').text('₡' + descuentoTotalMostrar.toFixed(2));
             $('#resumenImpuesto').text('₡' + impuestoTotal.toFixed(2));
             $('#resumenTotal').text('₡' + total.toFixed(2));
         }
 
-        // Guardar pedido
-        $('#btnGuardarPedido').click(function() {
+        // Prorratea el descuento global (monto) por línea para enviarlo al backend como monto por producto
+                function prorratearDescuentoPorLinea() {
+            const pctGlobal = getPctGlobal();
+
+            const lineas = productosEnPedido.map(p => {
+                const bruto = p.precio * p.cantidad;
+                const descuentoProd = bruto * ((p.porcentajeDescuento || 0) / 100);
+                const netoLinea = bruto - descuentoProd;
+
+                return {
+                    id: p.id,
+                    cantidad: p.cantidad,
+                    precio: p.precio,
+                    netoLinea: netoLinea,
+                    descuentoProducto: descuentoProd
+                };
+            });
+
+            const baseConDescuentosProducto = lineas.reduce((acc, x) => acc + x.netoLinea, 0);
+            const descuentoGlobal = round2(baseConDescuentosProducto * (pctGlobal / 100));
+
+            if (baseConDescuentosProducto <= 0 || descuentoGlobal <= 0) {
+                return lineas.map(x => ({
+                    ...x,
+                    descuentoMonto: 0,
+                    descuentoTotal: x.descuentoProducto
+                }));
+            }
+
+            let acumulado = 0;
+            const result = lineas.map((x, idx) => {
+                let d = round2(descuentoGlobal * (x.netoLinea / baseConDescuentosProducto));
+
+                if (idx === lineas.length - 1) {
+                    d = round2(descuentoGlobal - acumulado);
+                } else {
+                    acumulado = round2(acumulado + d);
+                }
+
+                if (d > x.netoLinea) d = x.netoLinea;
+                if (d < 0) d = 0;
+
+                // SUMAR descuento producto + descuento global
+                const descuentoTotal = round2(x.descuentoProducto + d);
+
+                return {
+                    ...x,
+                    descuentoMonto: d,
+                    descuentoTotal: descuentoTotal
+                };
+            });
+
+            return result;
+        }
+
+        // GUARDAR PEDIDO
+        $('#btnGuardarPedido').click(function () {
             const idCliente = $('#idClienteSeleccionado').val();
 
-            if (!idCliente) {
-                Swal.fire('Error', 'Debe seleccionar un cliente', 'error');
-                return;
-            }
+            if (!idCliente) { Swal.fire('Error', 'Debe seleccionar un cliente', 'error'); return; }
+            if (productosEnPedido.length === 0) { Swal.fire('Error', 'Debe agregar al menos un producto', 'error'); return; }
 
-            if (productosEnPedido.length === 0) {
-                Swal.fire('Error', 'Debe agregar al menos un producto', 'error');
-                return;
-            }
+            const lineasConDescuento = prorratearDescuentoPorLinea();
 
-            const productos = productosEnPedido.map(p => ({
-                IdProducto: p.id,
-                Cantidad: p.cantidad,
-                Descuento: p.descuento
+            const productos = lineasConDescuento.map(x => ({
+                IdProducto: x.id,
+                Cantidad: x.cantidad,
+                Descuento: Number((x.descuentoTotal || 0).toFixed(2))
             }));
 
             $.ajax({
@@ -325,29 +442,27 @@
                 data: {
                     idCliente: idCliente,
                     productosJson: JSON.stringify(productos),
-                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    __RequestVerificationToken: $('#tokenForm input[name="__RequestVerificationToken"]').val()
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.success) {
                         Swal.fire({
                             icon: 'success',
                             title: '¡Pedido creado!',
                             text: response.mensaje,
                             confirmButtonText: 'Ver Pedidos'
-                        }).then(() => {
-                            window.location.href = '/Pedido/ListadoPedidos';
-                        });
+                        }).then(() => window.location.href = '/Pedido/ListadoPedidos');
                     } else {
                         Swal.fire('Error', response.mensaje, 'error');
                     }
                 },
-                error: function() {
+                error: function () {
                     Swal.fire('Error', 'Error al procesar la solicitud', 'error');
                 }
             });
         });
+
+        // inicial
+        document.addEventListener('DOMContentLoaded', calcularTotales);
     </script>
-    <form id="tokenForm" style="display: none;">
-        @Html.AntiForgeryToken()
-    </form>
 }

@@ -78,82 +78,6 @@
     botonesDetalles.forEach(function (btn) {
         btn.addEventListener('click', function () {
             var pedidoId = this.getAttribute('data-id');
-            var cliente = this.getAttribute('data-cliente');
-            var usuario = this.getAttribute('data-usuario');
-            var fecha = this.getAttribute('data-fecha');
-            var subtotal = this.getAttribute('data-subtotal');
-            var descuento = this.getAttribute('data-descuento');
-            var impuesto = this.getAttribute('data-impuesto');
-            var total = this.getAttribute('data-total');
-            var estado = this.getAttribute('data-estado');
-
-            // Actualizar información básica primero
-            var detallesPedidoId = document.getElementById('detalles-pedido-id');
-            var detallesPedidoCliente = document.getElementById('detalles-pedido-cliente');
-            var detallesPedidoUsuario = document.getElementById('detalles-pedido-usuario');
-            var detallesPedidoUsuarioContainer = document.getElementById('detalles-pedido-usuario-container');
-            var detallesPedidoFecha = document.getElementById('detalles-pedido-fecha');
-            var detallesPedidoSubtotal = document.getElementById('detalles-pedido-subtotal');
-            var detallesPedidoDescuento = document.getElementById('detalles-pedido-descuento');
-            var detallesPedidoDescuentoRow = document.getElementById('detalles-pedido-descuento-row');
-            var detallesPedidoImpuesto = document.getElementById('detalles-pedido-impuesto');
-            var detallesPedidoTotal = document.getElementById('detalles-pedido-total');
-            var estadoBadge = document.getElementById('detalles-pedido-estado-badge');
-
-            if (detallesPedidoId) detallesPedidoId.textContent = pedidoId;
-            if (detallesPedidoCliente) detallesPedidoCliente.textContent = cliente;
-            if (detallesPedidoFecha) detallesPedidoFecha.textContent = fecha;
-
-            // Mostrar usuario si existe
-            if (usuario && usuario.trim() !== '') {
-                if (detallesPedidoUsuario) detallesPedidoUsuario.textContent = usuario;
-                if (detallesPedidoUsuarioContainer) detallesPedidoUsuarioContainer.style.display = 'block';
-            } else {
-                if (detallesPedidoUsuarioContainer) detallesPedidoUsuarioContainer.style.display = 'none';
-            }
-
-            // Formatear y mostrar totales
-            if (detallesPedidoSubtotal) {
-                detallesPedidoSubtotal.textContent = '₡' + formatearNumero(parseFloat(subtotal));
-            }
-
-            if (detallesPedidoImpuesto) {
-                detallesPedidoImpuesto.textContent = '₡' + formatearNumero(parseFloat(impuesto));
-            }
-
-            if (detallesPedidoTotal) {
-                detallesPedidoTotal.textContent = '₡' + formatearNumero(parseFloat(total));
-            }
-
-            // Mostrar/ocultar descuento
-            var descuentoNum = parseFloat(descuento);
-            if (descuentoNum > 0) {
-                if (detallesPedidoDescuento) {
-                    detallesPedidoDescuento.textContent = '-₡' + formatearNumero(descuentoNum);
-                }
-                if (detallesPedidoDescuentoRow) {
-                    detallesPedidoDescuentoRow.style.display = 'flex';
-                }
-            } else {
-                if (detallesPedidoDescuentoRow) {
-                    detallesPedidoDescuentoRow.style.display = 'none';
-                }
-            }
-
-            // Actualizar badge de estado
-            if (estadoBadge) {
-                var icono = obtenerIconoEstado(estado);
-                estadoBadge.innerHTML = '<i class="fas ' + icono + '"></i> ' + estado;
-                var estadoColor = obtenerColorEstado(estado);
-                estadoBadge.style.background = estadoColor;
-                estadoBadge.style.color = 'white';
-                estadoBadge.style.padding = '0.5rem 1rem';
-                estadoBadge.style.borderRadius = '20px';
-                estadoBadge.style.display = 'inline-block';
-                estadoBadge.style.fontWeight = '600';
-            }
-
-            // Cargar productos via AJAX
             cargarDetallesPedido(pedidoId);
         });
     });
@@ -167,9 +91,133 @@
         });
     });
 
+    // Función para cargar detalles del pedido via AJAX
+    function cargarDetallesPedido(pedidoId) {
+        var productosContainer = document.getElementById('detalles-pedido-productos');
+        if (productosContainer) {
+            productosContainer.innerHTML = '<div style="text-align: center; padding: 2rem;"><i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i><p style="margin-top: 1rem;">Cargando productos...</p></div>';
+        }
+
+        fetch('/Pedido/ObtenerDetalles/' + pedidoId)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al cargar detalles');
+                }
+                return response.json();
+            })
+            .then(data => {
+                actualizarModalDetalles(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                if (productosContainer) {
+                    productosContainer.innerHTML = '<div style="text-align: center; padding: 2rem; color: #e74c3c;"><i class="fas fa-exclamation-circle" style="font-size: 2rem;"></i><p style="margin-top: 1rem;">Error al cargar los productos</p></div>';
+                }
+            });
+    }
+
+    // Función para actualizar el modal con los datos del pedido (Admin/Empleado)
+    function actualizarModalDetalles(data) {
+        var pedido = data.pedido;
+        var productos = data.productos;
+
+        // Actualizar información básica
+        var detallesPedidoId = document.getElementById('detalles-pedido-id');
+        var detallesPedidoCliente = document.getElementById('detalles-pedido-cliente');
+        var detallesPedidoFecha = document.getElementById('detalles-pedido-fecha');
+        var detallesPedidoSubtotal = document.getElementById('detalles-pedido-subtotal');
+        var detallesPedidoDescuento = document.getElementById('detalles-pedido-descuento');
+        var detallesPedidoDescuentoRow = document.getElementById('detalles-pedido-descuento-row');
+        var detallesPedidoImpuesto = document.getElementById('detalles-pedido-impuesto');
+        var detallesPedidoTotal = document.getElementById('detalles-pedido-total');
+        var estadoBadge = document.getElementById('detalles-pedido-estado-badge');
+
+        if (detallesPedidoId) detallesPedidoId.textContent = pedido.id;
+        if (detallesPedidoCliente) detallesPedidoCliente.textContent = pedido.cliente;
+        if (detallesPedidoFecha) detallesPedidoFecha.textContent = pedido.fecha;
+
+        // Formatear y mostrar totales
+        if (detallesPedidoSubtotal) {
+            detallesPedidoSubtotal.textContent = '₡' + formatearNumero(pedido.subtotal);
+        }
+
+        if (detallesPedidoImpuesto) {
+            detallesPedidoImpuesto.textContent = '₡' + formatearNumero(pedido.impuesto);
+        }
+
+        if (detallesPedidoTotal) {
+            detallesPedidoTotal.textContent = '₡' + formatearNumero(pedido.total);
+        }
+
+        // Mostrar/ocultar descuento
+        if (pedido.descuento && pedido.descuento > 0) {
+            if (detallesPedidoDescuento) {
+                detallesPedidoDescuento.textContent = '₡' + formatearNumero(pedido.descuento);
+            }
+            if (detallesPedidoDescuentoRow) {
+                detallesPedidoDescuentoRow.style.display = 'flex';
+            }
+        } else {
+            if (detallesPedidoDescuentoRow) {
+                detallesPedidoDescuentoRow.style.display = 'none';
+            }
+        }
+
+        // Actualizar badge de estado
+        if (estadoBadge) {
+            var icono = obtenerIconoEstado(pedido.estado);
+            estadoBadge.innerHTML = '<i class="fas ' + icono + '"></i> ' + pedido.estado;
+            var estadoColor = obtenerColorEstado(pedido.estado);
+            estadoBadge.style.background = estadoColor;
+            estadoBadge.style.color = 'white';
+        }
+
+        // PRODUCTOS CON DESCUENTOS VISIBLES
+        var productosContainer = document.getElementById('detalles-pedido-productos');
+        if (productosContainer) {
+            if (productos && productos.length > 0) {
+                var productosHTML = productos.map(function (producto) {
+                    var bruto = producto.precio * producto.cantidad;
+                    var tieneDescuento = producto.descuento > 0;
+                    var subtotalNeto = producto.subtotal;
+
+                    return `
+                        <div style="padding: 1rem; border-bottom: 1px solid var(--secondary-color);">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                <div style="flex: 1;">
+                                    <strong style="color: var(--dark-color); display: block; margin-bottom: 0.25rem;">${producto.nombre}</strong>
+                                    <div style="display: flex; gap: 1rem; font-size: 0.9rem; color: var(--text-color);">
+                                        <span><i class="fas fa-tag"></i> ₡${formatearNumero(producto.precio)}</span>
+                                        <span><i class="fas fa-times"></i> ${producto.cantidad}</span>
+                                    </div>
+                                    ${tieneDescuento ? `
+                                    <div style="margin-top: 0.5rem;">
+                                        <small style="color: #27ae60; font-weight: 600;">
+                                            <i class="fas fa-percent"></i> Descuento aplicado: -₡${formatearNumero(producto.descuento)}
+                                        </small><br>
+                                        <small style="color: var(--text-color);">
+                                            Subtotal bruto: <span style="text-decoration: line-through;">₡${formatearNumero(bruto)}</span>
+                                        </small>
+                                    </div>
+                                    ` : ''}
+                                </div>
+                                <div style="text-align: right;">
+                                    ${tieneDescuento ? '<small style="display: block; color: var(--text-color); margin-bottom: 0.25rem;">Con descuento</small>' : ''}
+                                    <strong style="color: var(--primary-color); font-size: 1.1rem;">₡${formatearNumero(subtotalNeto)}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                productosContainer.innerHTML = productosHTML;
+            } else {
+                productosContainer.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-color);">No hay productos en este pedido</div>';
+            }
+        }
+    }
+
     // Función para cargar detalles del pedido via AJAX (para clientes)
     function cargarDetallesPedidoCliente(pedidoId) {
-        // Mostrar loading en el modal de cliente
         var productosContainer = document.getElementById('cliente-pedido-productos');
         if (productosContainer) {
             productosContainer.innerHTML = '<div style="text-align: center; padding: 2rem;"><i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i><p style="margin-top: 1rem;">Cargando tus productos...</p></div>';
@@ -206,7 +254,6 @@
         var clientePedidoDescuentoRow = document.getElementById('cliente-pedido-descuento-row');
         var clientePedidoImpuesto = document.getElementById('cliente-pedido-impuesto');
         var clientePedidoTotal = document.getElementById('cliente-pedido-total');
-        var clientePedidoTotalHeader = document.getElementById('cliente-pedido-total-header');
         var estadoBadge = document.getElementById('cliente-pedido-estado-badge');
 
         if (clientePedidoId) clientePedidoId.textContent = pedido.id;
@@ -225,14 +272,10 @@
             clientePedidoTotal.textContent = '₡' + formatearNumero(pedido.total);
         }
 
-        if (clientePedidoTotalHeader) {
-            clientePedidoTotalHeader.textContent = '₡' + formatearNumero(pedido.total);
-        }
-
         // Mostrar/ocultar descuento
         if (pedido.descuento && pedido.descuento > 0) {
             if (clientePedidoDescuento) {
-                clientePedidoDescuento.textContent = '-₡' + formatearNumero(pedido.descuento);
+                clientePedidoDescuento.textContent = '₡' + formatearNumero(pedido.descuento);
             }
             if (clientePedidoDescuentoRow) {
                 clientePedidoDescuentoRow.style.display = 'flex';
@@ -252,12 +295,15 @@
             estadoBadge.style.color = 'white';
         }
 
-        // Actualizar lista de productos
+        // PRODUCTOS CON DESCUENTOS VISIBLES PARA CLIENTES
         var productosContainer = document.getElementById('cliente-pedido-productos');
         if (productosContainer) {
             if (productos && productos.length > 0) {
                 var productosHTML = productos.map(function (producto, index) {
-                    var subtotalConDescuento = producto.subtotal - producto.descuento;
+                    var bruto = producto.precio * producto.cantidad;
+                    var tieneDescuento = producto.descuento > 0;
+                    var subtotalNeto = producto.subtotal;
+
                     return `
                         <div style="background: var(--white); padding: 1.25rem; border-radius: 8px; margin-bottom: 0.75rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: transform 0.2s;" onmouseover="this.style.transform='translateX(5px)'" onmouseout="this.style.transform='translateX(0)'">
                             <div style="display: flex; justify-content: space-between; align-items: start; gap: 1rem;">
@@ -275,78 +321,25 @@
                                             <div style="font-size: 0.75rem; color: var(--text-color); margin-bottom: 0.25rem;">Cantidad</div>
                                             <div style="font-weight: 600; color: var(--dark-color);">${producto.cantidad} ${producto.cantidad === 1 ? 'unidad' : 'unidades'}</div>
                                         </div>
-                                        ${producto.descuento > 0 ? `
+                                        ${tieneDescuento ? `
                                         <div style="background: #e8f5e9; padding: 0.5rem; border-radius: 5px;">
                                             <div style="font-size: 0.75rem; color: #2e7d32; margin-bottom: 0.25rem;">Descuento</div>
                                             <div style="font-weight: 600; color: #27ae60;">-₡${formatearNumero(producto.descuento)}</div>
                                         </div>
                                         ` : ''}
                                     </div>
+                                    ${tieneDescuento ? `
+                                    <div style="margin-top: 0.5rem;">
+                                        <small style="color: var(--text-color);">
+                                            Subtotal bruto: <span style="text-decoration: line-through;">₡${formatearNumero(bruto)}</span>
+                                        </small>
+                                    </div>
+                                    ` : ''}
                                 </div>
                                 <div style="text-align: right; min-width: 100px;">
-                                    <div style="font-size: 0.75rem; color: var(--text-color); margin-bottom: 0.25rem;">Subtotal</div>
-                                    <div style="color: var(--primary-color); font-weight: 700; font-size: 1.3rem;">₡${formatearNumero(subtotalConDescuento)}</div>
+                                    ${tieneDescuento ? '<div style="font-size: 0.75rem; color: var(--text-color); margin-bottom: 0.25rem;">Con descuento</div>' : '<div style="font-size: 0.75rem; color: var(--text-color); margin-bottom: 0.25rem;">Subtotal</div>'}
+                                    <div style="color: var(--primary-color); font-weight: 700; font-size: 1.3rem;">₡${formatearNumero(subtotalNeto)}</div>
                                 </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                productosContainer.innerHTML = productosHTML;
-            } else {
-                productosContainer.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-color);">No hay productos en este pedido</div>';
-            }
-        }
-    }
-
-    // Función para cargar detalles del pedido via AJAX
-    function cargarDetallesPedido(pedidoId) {
-        // Mostrar loading en el modal
-        var productosContainer = document.getElementById('detalles-pedido-productos');
-        if (productosContainer) {
-            productosContainer.innerHTML = '<div style="text-align: center; padding: 2rem;"><i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i><p style="margin-top: 1rem;">Cargando productos...</p></div>';
-        }
-
-        fetch('/Pedido/ObtenerDetalles/' + pedidoId)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error al cargar detalles');
-                }
-                return response.json();
-            })
-            .then(data => {
-                actualizarModalDetalles(data);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                if (productosContainer) {
-                    productosContainer.innerHTML = '<div style="text-align: center; padding: 2rem; color: #e74c3c;"><i class="fas fa-exclamation-circle" style="font-size: 2rem;"></i><p style="margin-top: 1rem;">Error al cargar los productos</p></div>';
-                }
-            });
-    }
-
-    // Función para actualizar el modal con los datos del pedido
-    function actualizarModalDetalles(data) {
-        var pedido = data.pedido;
-        var productos = data.productos;
-
-        // Actualizar lista de productos
-        var productosContainer = document.getElementById('detalles-pedido-productos');
-        if (productosContainer) {
-            if (productos && productos.length > 0) {
-                var productosHTML = productos.map(function (producto) {
-                    var subtotalConDescuento = producto.subtotal - producto.descuento;
-                    return `
-                        <div style="padding: 1rem; border-bottom: 1px solid var(--secondary-color); display: flex; justify-content: space-between; align-items: center;">
-                            <div style="flex: 1;">
-                                <strong style="color: var(--dark-color); display: block; margin-bottom: 0.25rem;">${producto.nombre}</strong>
-                                <div style="display: flex; gap: 1rem; font-size: 0.9rem; color: var(--text-color);">
-                                    <span><i class="fas fa-tag"></i> ₡${formatearNumero(producto.precio)}</span>
-                                    <span><i class="fas fa-times"></i> ${producto.cantidad}</span>
-                                    ${producto.descuento > 0 ? `<span style="color: #27ae60;"><i class="fas fa-percent"></i> -₡${formatearNumero(producto.descuento)}</span>` : ''}
-                                </div>
-                            </div>
-                            <div style="text-align: right;">
-                                <strong style="color: var(--primary-color); font-size: 1.1rem;">₡${formatearNumero(subtotalConDescuento)}</strong>
                             </div>
                         </div>
                     `;
@@ -402,7 +395,6 @@
     // Hover sobre las filas de la tabla
     var filasTabla = document.querySelectorAll('#laTablaDePedidos tbody tr');
     filasTabla.forEach(function (fila) {
-        // Solo aplicar hover si no es la fila de "no hay datos"
         if (!fila.querySelector('td[colspan]')) {
             fila.addEventListener('mouseenter', function () {
                 this.style.background = 'var(--light-color)';
@@ -416,42 +408,32 @@
 
 // Formatear los numeros
 function formatearNumero(numero) {
-    if (!numero) return '0.00';
-    return parseFloat(numero).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    if (numero === null || numero === undefined || numero === '') return '0.00';
+    var n = parseFloat(numero);
+    if (isNaN(n)) return '0.00';
+    return n.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
 }
 
 // Obtener color segun el estado
 function obtenerColorEstado(estado) {
     switch (estado) {
-        case 'Pendiente':
-            return '#f39c12';
-        case 'En Proceso':
-            return '#3498db';
-        case 'Completado':
-            return '#27ae60';
-        case 'Cancelado':
-            return '#e74c3c';
-        case 'Entregado':
-            return '#16a085';
-        default:
-            return '#95a5a6';
+        case 'Pendiente': return '#f39c12';
+        case 'En Proceso': return '#3498db';
+        case 'Completado': return '#27ae60';
+        case 'Cancelado': return '#e74c3c';
+        case 'Entregado': return '#16a085';
+        default: return '#95a5a6';
     }
 }
 
 // Obtener Icon segun el estado
 function obtenerIconoEstado(estado) {
     switch (estado) {
-        case 'Pendiente':
-            return 'fa-clock';
-        case 'En Proceso':
-            return 'fa-spinner';
-        case 'Completado':
-            return 'fa-check-circle';
-        case 'Cancelado':
-            return 'fa-times-circle';
-        case 'Entregado':
-            return 'fa-truck';
-        default:
-            return 'fa-question-circle';
+        case 'Pendiente': return 'fa-clock';
+        case 'En Proceso': return 'fa-spinner';
+        case 'Completado': return 'fa-check-circle';
+        case 'Cancelado': return 'fa-times-circle';
+        case 'Entregado': return 'fa-truck';
+        default: return 'fa-question-circle';
     }
 }

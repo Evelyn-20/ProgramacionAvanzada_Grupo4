@@ -27,6 +27,8 @@ namespace Pasteleria.Abstracciones.ModeloUI
 
         public decimal PorcentajeImpuesto { get; set; }
 
+        public decimal? PorcentajeDescuento { get; set; }
+
         // Propiedad calculada
         public decimal SubtotalConDescuento => Subtotal - Descuento;
     }

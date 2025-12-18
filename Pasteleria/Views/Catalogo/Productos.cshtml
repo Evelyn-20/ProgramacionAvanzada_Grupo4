@@ -48,7 +48,25 @@
                             <h3>@producto.NombreProducto</h3>
                             <p class="product-description">@producto.DescripcionProducto</p>
                             <div class="product-footer">
-                                <span class="price">₡@producto.Precio.ToString("N0")</span>
+                                @if (producto.TieneDescuento)
+                                {
+                                    <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+                                        <span class="price" style="font-size: 0.9rem; text-decoration: line-through; opacity: 0.6; color: var(--text-color);">
+                                            ₡@producto.Precio.ToString("N0")
+                                        </span>
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <span class="price" style="color: #27ae60; font-size: 1.5rem;">₡@producto.PrecioConDescuento.ToString("N0")</span>
+                                            <span style="background: #27ae60; color: white; padding: 0.2rem 0.5rem; border-radius: 10px; font-size: 0.75rem; font-weight: 700;">
+                                                -@producto.PorcentajeDescuento%
+                                            </span>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="price">₡@producto.Precio.ToString("N0")</span>
+                                }
+
                                 @if (producto.Cantidad > 0)
                                 {
                                     <a href="@Url.Action("DetalleProducto", "Catalogo", new { id = producto.IdProducto })" class="btn btn-primary">

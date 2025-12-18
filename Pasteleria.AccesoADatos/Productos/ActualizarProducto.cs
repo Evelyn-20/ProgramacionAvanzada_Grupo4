@@ -35,6 +35,7 @@ namespace Pasteleria.AccesoADatos.Productos
                 {
                     productoExistente.NombreProducto,
                     productoExistente.Precio,
+                    productoExistente.PorcentajeDescuento,
                     productoExistente.Cantidad,
                     productoExistente.Estado,
                     productoExistente.PorcentajeImpuesto,
@@ -47,6 +48,7 @@ namespace Pasteleria.AccesoADatos.Productos
                 productoExistente.DescripcionProducto = elProducto.DescripcionProducto;
                 productoExistente.Cantidad = elProducto.Cantidad;
                 productoExistente.Precio = elProducto.Precio;
+                productoExistente.PorcentajeDescuento = elProducto.PorcentajeDescuento;
                 productoExistente.PorcentajeImpuesto = elProducto.PorcentajeImpuesto;
                 productoExistente.Estado = elProducto.Estado;
                 productoExistente.FechaActualizacion = DateTime.Now;
@@ -72,6 +74,7 @@ namespace Pasteleria.AccesoADatos.Productos
                         {
                             productoExistente.NombreProducto,
                             productoExistente.Precio,
+                            productoExistente.PorcentajeDescuento,
                             productoExistente.Cantidad,
                             productoExistente.Estado,
                             productoExistente.PorcentajeImpuesto,

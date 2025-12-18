@@ -36,6 +36,11 @@ namespace Pasteleria.Abstracciones.ModeloUI
         [DisplayFormat(DataFormatString = "{0:C2}", ApplyFormatInEditMode = false)]
         public decimal Precio { get; set; }
 
+        [DisplayName("Descuento (%)")]
+        [Range(0, 100, ErrorMessage = "El descuento debe estar entre 0 y 100")]
+        [DisplayFormat(DataFormatString = "{0:N2}%", ApplyFormatInEditMode = false)]
+        public decimal? PorcentajeDescuento { get; set; }
+
         [DisplayName("Porcentaje de impuesto")]
         [Required(ErrorMessage = "El porcentaje de impuesto es requerido")]
         [Range(0, 100, ErrorMessage = "El porcentaje debe estar entre 0 y 100")]
@@ -56,8 +61,51 @@ namespace Pasteleria.Abstracciones.ModeloUI
         [DisplayName("Fecha de Actualización")]
         public DateTime FechaActualizacion { get; set; }
 
-        // Propiedades calculadas útiles para las vistas
-        [DisplayName("Precio con Impuesto")]
+        // Propiedades Calculadas
+
+        [DisplayName("Precio con Descuento")]
+        public decimal PrecioConDescuento
+        {
+            get
+            {
+                if (PorcentajeDescuento.HasValue && PorcentajeDescuento.Value > 0)
+                {
+                    decimal descuento = Precio * (PorcentajeDescuento.Value / 100);
+                    return Precio - descuento;
+                }
+                return Precio;
+            }
+        }
+
+        [DisplayName("Monto de Descuento")]
+        public decimal MontoDescuento
+        {
+            get
+            {
+                if (PorcentajeDescuento.HasValue && PorcentajeDescuento.Value > 0)
+                {
+                    return Precio * (PorcentajeDescuento.Value / 100);
+                }
+                return 0;
+            }
+        }
+
+        [DisplayName("Precio Final (con descuento e impuesto)")]
+        public decimal PrecioFinal
+        {
+            get
+            {
+                // Primero aplicamos el descuento
+                decimal precioConDescuento = PrecioConDescuento;
+
+                // Luego aplicamos el impuesto sobre el precio con descuento
+                decimal impuesto = precioConDescuento * (PorcentajeImpuesto / 100);
+
+                return precioConDescuento + impuesto;
+            }
+        }
+
+        [DisplayName("Precio con Impuesto (sin descuento)")]
         public decimal PrecioConImpuesto
         {
             get
@@ -90,6 +138,16 @@ namespace Pasteleria.Abstracciones.ModeloUI
             get
             {
                 return FechaActualizacion.ToString("dd/MM/yyyy HH:mm");
+            }
+        }
+
+        // Nueva propiedad para mostrar si tiene descuento activo
+        [DisplayName("Tiene Descuento")]
+        public bool TieneDescuento
+        {
+            get
+            {
+                return PorcentajeDescuento.HasValue && PorcentajeDescuento.Value > 0;
             }
         }
     }

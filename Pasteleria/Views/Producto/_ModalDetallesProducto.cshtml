@@ -45,12 +45,28 @@
                                 <p id="detalles-cantidad" style="color: var(--dark-color); font-size: 1.1rem; margin: 0;"></p>
                             </div>
 
-                            <!-- Precio -->
+                            <!-- Precio Original -->
                             <div>
                                 <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
-                                    <i class="fas fa-dollar-sign" style="color: var(--primary-color); margin-right: 0.5rem;"></i> Precio
+                                    <i class="fas fa-dollar-sign" style="color: var(--primary-color); margin-right: 0.5rem;"></i> Precio Original
                                 </label>
                                 <p id="detalles-precio" style="color: var(--primary-color); font-size: 1.3rem; font-weight: 700; margin: 0;"></p>
+                            </div>
+
+                            <!-- Descuento (si existe) -->
+                            <div id="detalles-descuento-container">
+                                <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
+                                    <i class="fas fa-percentage" style="color: var(--primary-color); margin-right: 0.5rem;"></i> Descuento
+                                </label>
+                                <p id="detalles-descuento" style="margin: 0;"></p>
+                            </div>
+
+                            <!-- Precio con Descuento -->
+                            <div id="detalles-precio-descuento-container">
+                                <label style="display: block; color: var(--text-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem; letter-spacing: 0.5px;">
+                                    <i class="fas fa-tag" style="color: var(--primary-color); margin-right: 0.5rem;"></i> Precio con Descuento
+                                </label>
+                                <p id="detalles-precio-descuento" style="color: #27ae60; font-size: 1.4rem; font-weight: 700; margin: 0;"></p>
                             </div>
 
                             <!-- Impuesto -->

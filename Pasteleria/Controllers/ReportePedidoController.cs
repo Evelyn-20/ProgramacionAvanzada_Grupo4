@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Pasteleria.Abstracciones.Logica.Pedido;
-using Rotativa.AspNetCore;
-using Pasteleria.Abstracciones.ModeloUI;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Pasteleria.Abstracciones.Logica.Pedido;
+using Pasteleria.Abstracciones.ModeloUI;
+using QuestPDF.Fluent;
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using Pasteleria.Reportes.PDF;
+using QuestPDF.Fluent;
+using Pasteleria.Reportes.PDF;
 
 namespace Pasteleria.Controllers
 {
@@ -146,138 +149,50 @@ namespace Pasteleria.Controllers
                 return RedirectToAction("GenerarReporte");
             }
         }
-
-        // GET: /ReportePedido/ExportarPDF
         public IActionResult ExportarPDF(string FechaInicio, string FechaFin, int? IdCliente, int? IdUsuario, string Estado)
         {
-            // Validar permisos
             if (!PuedeVerReportes())
+                return RedirectSinPermiso("No tiene permisos");
+
+            DateTime fi = DateTime.Parse(FechaInicio);
+            DateTime ff = DateTime.Parse(FechaFin);
+
+            var pedidos = _listarPedidos.ObtenerPorFecha(fi, ff.AddDays(1));
+
+            // Aplicar filtros
+            if (!string.IsNullOrWhiteSpace(Estado) && Estado != "Todos")
+                pedidos = pedidos.Where(p => p.Estado == Estado).ToList();
+
+            if (IdCliente.HasValue && IdCliente > 0)
+                pedidos = pedidos.Where(p => p.IdCliente == IdCliente).ToList();
+
+            if (IdUsuario.HasValue && IdUsuario > 0)
+                pedidos = pedidos.Where(p => p.IdUsuario == IdUsuario).ToList();
+
+            var reporte = new List<ReportePedidoDetalle>();
+
+            foreach (var p in pedidos)
             {
-                return RedirectSinPermiso("No tiene permisos para exportar reportes");
+                reporte.Add(new ReportePedidoDetalle
+                {
+                    Pedido = p,
+                    Detalles = _obtenerPedido.ObtenerDetalles(p.IdPedido)
+                });
             }
 
-            try
-            {
-                // Validar que se proporcionen fechas
-                if (string.IsNullOrWhiteSpace(FechaInicio) || string.IsNullOrWhiteSpace(FechaFin))
-                {
-                    TempData["Error"] = "Debe especificar un rango de fechas";
-                    return RedirectToAction("GenerarReporte");
-                }
+            var doc = new ReportePedidosPDF(
+                reporte,
+                fi.ToString("dd/MM/yyyy"),
+                ff.ToString("dd/MM/yyyy")
+            );
 
-                // Parsear las fechas con formato específico
-                DateTime fechaInicioDate;
-                DateTime fechaFinDate;
+            var pdf = doc.GeneratePdf();
 
-                // Intentar parsear con formato yyyy-MM-dd primero (que viene del formulario)
-                if (!DateTime.TryParseExact(FechaInicio, "yyyy-MM-dd",
-                    System.Globalization.CultureInfo.InvariantCulture,
-                    System.Globalization.DateTimeStyles.None,
-                    out fechaInicioDate))
-                {
-                    // Si falla, intentar parseo normal
-                    if (!DateTime.TryParse(FechaInicio, out fechaInicioDate))
-                    {
-                        TempData["Error"] = "La fecha de inicio no es válida";
-                        return RedirectToAction("GenerarReporte");
-                    }
-                }
-
-                if (!DateTime.TryParseExact(FechaFin, "yyyy-MM-dd",
-                    System.Globalization.CultureInfo.InvariantCulture,
-                    System.Globalization.DateTimeStyles.None,
-                    out fechaFinDate))
-                {
-                    // Si falla, intentar parseo normal
-                    if (!DateTime.TryParse(FechaFin, out fechaFinDate))
-                    {
-                        TempData["Error"] = "La fecha fin no es válida";
-                        return RedirectToAction("GenerarReporte");
-                    }
-                }
-
-                // Obtener todos los pedidos en el rango de fechas
-                var pedidos = _listarPedidos.ObtenerPorFecha(fechaInicioDate, fechaFinDate.AddDays(1));
-
-                // Aplicar filtros
-                if (!string.IsNullOrWhiteSpace(Estado) && Estado != "Todos")
-                {
-                    pedidos = pedidos.Where(p => p.Estado == Estado).ToList();
-                }
-
-                if (IdCliente.HasValue && IdCliente.Value > 0)
-                {
-                    pedidos = pedidos.Where(p => p.IdCliente == IdCliente.Value).ToList();
-                }
-
-                if (IdUsuario.HasValue && IdUsuario.Value > 0)
-                {
-                    pedidos = pedidos.Where(p => p.IdUsuario == IdUsuario.Value).ToList();
-                }
-
-                // Crear modelo para el PDF con detalles
-                var reporteCompleto = new List<ReportePedidoDetalle>();
-
-                foreach (var pedido in pedidos)
-                {
-                    var detalles = _obtenerPedido.ObtenerDetalles(pedido.IdPedido);
-
-                    reporteCompleto.Add(new ReportePedidoDetalle
-                    {
-                        Pedido = pedido,
-                        Detalles = detalles
-                    });
-                }
-
-                // Preparar ViewBag con estadísticas para el PDF
-                ViewBag.FechaInicio = fechaInicioDate.ToString("dd/MM/yyyy");
-                ViewBag.FechaFin = fechaFinDate.ToString("dd/MM/yyyy");
-                ViewBag.FechaGeneracion = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
-                ViewBag.TotalPedidos = reporteCompleto.Count;
-                ViewBag.TotalGeneral = reporteCompleto.Sum(r => r.Pedido.Total);
-                ViewBag.TotalProductos = reporteCompleto.Sum(r => r.Detalles.Sum(d => d.Cantidad));
-
-                // Filtros aplicados (para mostrar en la info del PDF)
-                ViewBag.FiltroEstado = Estado ?? "Todos";
-
-                // Obtener nombres de cliente y usuario si están filtrados
-                if (IdCliente.HasValue && IdCliente.Value > 0)
-                {
-                    var servicioClientes = new Pasteleria.LogicaDeNegocio.Clientes.ListarClientes();
-                    var cliente = servicioClientes.Obtener().FirstOrDefault(c => c.IdCliente == IdCliente.Value);
-                    ViewBag.FiltroCliente = cliente?.NombreCliente ?? "";
-                }
-                else
-                {
-                    ViewBag.FiltroCliente = "";
-                }
-
-                if (IdUsuario.HasValue && IdUsuario.Value > 0)
-                {
-                    var servicioUsuarios = new Pasteleria.LogicaDeNegocio.Usuarios.ListarUsuarios();
-                    var usuario = servicioUsuarios.Obtener().FirstOrDefault(u => u.IdUsuario == IdUsuario.Value);
-                    ViewBag.FiltroUsuario = usuario?.NombreUsuario ?? "";
-                }
-                else
-                {
-                    ViewBag.FiltroUsuario = "";
-                }
-
-                // Generar PDF
-                return new ViewAsPdf("ReportePDF", reporteCompleto)
-                {
-                    FileName = $"ReportePedidos_{fechaInicioDate:yyyyMMdd}_{fechaFinDate:yyyyMMdd}.pdf",
-                    PageSize = Rotativa.AspNetCore.Options.Size.A4,
-                    PageOrientation = Rotativa.AspNetCore.Options.Orientation.Portrait,
-                    PageMargins = new Rotativa.AspNetCore.Options.Margins(10, 10, 10, 10),
-                    CustomSwitches = "--disable-smart-shrinking --enable-local-file-access"
-                };
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = $"Error al exportar PDF: {ex.Message}";
-                return RedirectToAction("GenerarReporte");
-            }
+            return File(
+                pdf,
+                "application/pdf",
+                $"ReportePedidos_{fi:yyyyMMdd}_{ff:yyyyMMdd}.pdf"
+            );
         }
     }
 

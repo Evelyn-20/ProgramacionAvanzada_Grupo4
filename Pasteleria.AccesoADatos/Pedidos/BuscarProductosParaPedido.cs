@@ -27,7 +27,7 @@ namespace Pasteleria.AccesoADatos.Pedidos
                            (p.NombreProducto.Contains(termino) ||
                             p.DescripcionProducto.Contains(termino)))
                 .OrderBy(p => p.NombreProducto)
-                .Take(20) // Limitar a 20 resultados para mejor rendimiento
+                .Take(20)
                 .ToList();
 
             return productosAD.Select(p => ConvertirAProductoUI(p)).ToList();
@@ -67,6 +67,7 @@ namespace Pasteleria.AccesoADatos.Pedidos
                 DescripcionProducto = productoAD.DescripcionProducto,
                 Cantidad = productoAD.Cantidad,
                 Precio = productoAD.Precio,
+                PorcentajeDescuento = productoAD.PorcentajeDescuento,
                 PorcentajeImpuesto = productoAD.PorcentajeImpuesto,
                 Imagen = productoAD.Imagen,
                 Estado = productoAD.Estado,

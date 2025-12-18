@@ -98,10 +98,7 @@ namespace Pasteleria.Controllers
 
             var carrito = ObtenerCarrito();
 
-            // Calcular resumen en el controlador
             var resumen = _calcularTotales.CalcularResumen(carrito);
-
-            // Pasar ambos: items y resumen
             ViewBag.Resumen = resumen;
 
             return View(carrito);
@@ -114,7 +111,6 @@ namespace Pasteleria.Controllers
         {
             try
             {
-                // Verificar autenticación desde Claims
                 var clienteId = ObtenerClienteId();
 
                 if (clienteId == null)
@@ -122,14 +118,12 @@ namespace Pasteleria.Controllers
                     return Json(new { success = false, mensaje = "Debe iniciar sesión como cliente para agregar productos al carrito" });
                 }
 
-                // Obtener producto
                 var producto = _buscarProductos.ObtenerPorId(idProducto);
                 if (producto == null)
                 {
                     return Json(new { success = false, mensaje = "Producto no encontrado" });
                 }
 
-                // Validar stock
                 if (producto.Cantidad < cantidad)
                 {
                     return Json(new
@@ -139,15 +133,11 @@ namespace Pasteleria.Controllers
                     });
                 }
 
-                // Obtener carrito actual
                 var carrito = ObtenerCarrito();
-
-                // Verificar si el producto ya está en el carrito
                 var itemExistente = carrito.FirstOrDefault(c => c.IdProducto == idProducto);
 
                 if (itemExistente != null)
                 {
-                    // Actualizar cantidad si ya existe
                     var nuevaCantidad = itemExistente.Cantidad + cantidad;
 
                     if (nuevaCantidad > producto.Cantidad)
@@ -160,25 +150,43 @@ namespace Pasteleria.Controllers
                     }
 
                     itemExistente.Cantidad = nuevaCantidad;
-                    itemExistente.Subtotal = itemExistente.Precio * itemExistente.Cantidad;
+
+                    // RECALCULAR con descuento
+                    var bruto = producto.Precio * itemExistente.Cantidad;
+                    decimal descuentoProducto = 0;
+                    if (producto.PorcentajeDescuento.HasValue && producto.PorcentajeDescuento.Value > 0)
+                    {
+                        descuentoProducto = bruto * (producto.PorcentajeDescuento.Value / 100m);
+                    }
+
+                    itemExistente.Descuento = Math.Round(descuentoProducto, 2);
+                    itemExistente.Subtotal = Math.Round(bruto - descuentoProducto, 2);
+                    itemExistente.PorcentajeDescuento = producto.PorcentajeDescuento;
                 }
                 else
                 {
-                    // Agregar nuevo item
+                    // CALCULAR descuento para nuevo item
+                    var bruto = producto.Precio * cantidad;
+                    decimal descuentoProducto = 0;
+                    if (producto.PorcentajeDescuento.HasValue && producto.PorcentajeDescuento.Value > 0)
+                    {
+                        descuentoProducto = bruto * (producto.PorcentajeDescuento.Value / 100m);
+                    }
+
                     var nuevoItem = new CarritoItem
                     {
                         IdProducto = producto.IdProducto,
                         NombreProducto = producto.NombreProducto,
                         Cantidad = cantidad,
                         Precio = producto.Precio,
-                        Descuento = 0,
-                        Subtotal = producto.Precio * cantidad,
-                        PorcentajeImpuesto = producto.PorcentajeImpuesto
+                        Descuento = Math.Round(descuentoProducto, 2),
+                        Subtotal = Math.Round(bruto - descuentoProducto, 2),
+                        PorcentajeImpuesto = producto.PorcentajeImpuesto,
+                        PorcentajeDescuento = producto.PorcentajeDescuento
                     };
                     carrito.Add(nuevoItem);
                 }
 
-                // Guardar carrito actualizado
                 GuardarCarrito(carrito);
 
                 var cantidadTotal = carrito.Sum(c => c.Cantidad);
@@ -212,7 +220,6 @@ namespace Pasteleria.Controllers
                     return RedirectToAction("Carrito");
                 }
 
-                // Validar stock ACTUAL del producto
                 var producto = _buscarProductos.ObtenerPorId(idProducto);
                 if (producto == null || !producto.Estado)
                 {
@@ -222,7 +229,6 @@ namespace Pasteleria.Controllers
                     return RedirectToAction("Carrito");
                 }
 
-                // Actualizar cantidad según acción
                 if (accion == "aumentar")
                 {
                     if (item.Cantidad >= producto.Cantidad)
@@ -247,8 +253,17 @@ namespace Pasteleria.Controllers
                     }
                 }
 
-                // Recalcular subtotal
-                item.Subtotal = item.Precio * item.Cantidad;
+                // RECALCULAR con descuento
+                var bruto = producto.Precio * item.Cantidad;
+                decimal descuentoProducto = 0;
+                if (producto.PorcentajeDescuento.HasValue && producto.PorcentajeDescuento.Value > 0)
+                {
+                    descuentoProducto = bruto * (producto.PorcentajeDescuento.Value / 100m);
+                }
+
+                item.Descuento = Math.Round(descuentoProducto, 2);
+                item.Subtotal = Math.Round(bruto - descuentoProducto, 2);
+                item.PorcentajeDescuento = producto.PorcentajeDescuento;
 
                 GuardarCarrito(carrito);
                 TempData["Success"] = "Cantidad actualizada";

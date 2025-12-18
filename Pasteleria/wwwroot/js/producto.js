@@ -354,6 +354,37 @@
                     estadoBadge.style.background = '#e74c3c';
                 }
             }
+
+            var porcentajeDescuento = this.getAttribute('data-descuento');
+            var precioConDescuento = this.getAttribute('data-precio-descuento');
+
+            // Actualizar contenedores de descuento
+            var containerDescuento = document.getElementById('detalles-descuento-container');
+            var containerPrecioDescuento = document.getElementById('detalles-precio-descuento-container');
+            var detallesDescuento = document.getElementById('detalles-descuento');
+            var detallesPrecioDescuento = document.getElementById('detalles-precio-descuento');
+
+            if (porcentajeDescuento && parseFloat(porcentajeDescuento) > 0) {
+                // Tiene descuento
+                if (containerDescuento) containerDescuento.style.display = 'block';
+                if (containerPrecioDescuento) containerPrecioDescuento.style.display = 'block';
+
+                if (detallesDescuento) {
+                    detallesDescuento.innerHTML = `
+                <span style="background: #27ae60; color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 1.1rem; font-weight: 600; display: inline-block;">
+                    ${porcentajeDescuento}%
+                </span>
+            `;
+                }
+
+                if (detallesPrecioDescuento) {
+                    detallesPrecioDescuento.textContent = '₡' + precioConDescuento;
+                }
+            } else {
+                // No tiene descuento
+                if (containerDescuento) containerDescuento.style.display = 'none';
+                if (containerPrecioDescuento) containerPrecioDescuento.style.display = 'none';
+            }
         });
     });
 

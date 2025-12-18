@@ -17,8 +17,6 @@ namespace Pasteleria.Controllers
             ViewBag.UsuarioId = ObtenerUsuarioId();
         }
 
-        // ========== VERIFICACIÓN GENERAL ==========
-
         protected bool VerificarSesionActiva()
         {
             var nombreUsuario = User.Identity?.Name;
@@ -52,83 +50,60 @@ namespace Pasteleria.Controllers
             return false;
         }
 
-        // ========== PERMISOS POR FUNCIONALIDAD (SEGÚN DOCUMENTO) ==========
-
-        /// <summary>
-        /// Todos los usuarios autenticados pueden ver el catálogo
-        /// </summary>
+        // Todos los usuarios autenticados pueden ver el catálogo
         protected bool PuedeVerCatalogo()
         {
             return TieneRol("Administrador", "Ventas", "Operaciones", "Supervisor",
                            "Vendedor", "Operador", "Contador", "Cliente");
         }
 
-        /// <summary>
-        /// Gestionar Inventario: Admin y Operaciones
-        /// Operaciones solo puede ajustar stock, no eliminar productos
-        /// </summary>
+        // Gestionar Inventario: Admin y Operaciones
+        // Operaciones solo puede ajustar stock, no eliminar productos
         protected bool PuedeGestionarInventario()
         {
             return TieneRol("Administrador", "Operaciones", "Supervisor", "Operador");
         }
 
-        /// <summary>
-        /// Solo Admin puede eliminar productos
-        /// Según documento: "Ventas no elimina productos"
-        /// </summary>
+        // Solo Admin puede eliminar productos
         protected bool PuedeEliminarProductos()
         {
             return TieneRol("Administrador");
         }
 
-        /// <summary>
-        /// Gestionar pedidos (ver listado): Admin, Ventas y Operaciones
-        /// Todos pueden acceder al listado, pero con diferentes permisos
-        /// </summary>
+        // Gestionar pedidos (ver listado): Admin, Ventas y Operaciones
+        // Todos pueden acceder al listado, pero con diferentes permisos
         protected bool PuedeGestionarPedidos()
         {
             return TieneRol("Administrador", "Ventas", "Operaciones", "Supervisor", "Vendedor", "Operador");
         }
 
-        /// <summary>
-        /// Ver/Consultar pedidos: Admin, Ventas y Operaciones
-        /// Según documento: Operaciones "ve pedidos"
-        /// </summary>
+        // Ver/Consultar pedidos: Admin, Ventas y Operaciones
         protected bool PuedeVerPedidos()
         {
             return TieneRol("Administrador", "Ventas", "Operaciones", "Supervisor", "Vendedor", "Operador");
         }
 
-        /// <summary>
-        /// Crear/Editar pedidos: Admin y Ventas
-        /// Según documento: "Ventas crea/consulta pedidos"
-        /// Operaciones NO crea pedidos, solo los ve
-        /// </summary>
+        // Crear/Editar pedidos: Admin y Ventas
+        // Operaciones NO crea pedidos, solo los ve
         protected bool PuedeCrearPedidos()
         {
             return TieneRol("Administrador", "Ventas", "Supervisor", "Vendedor");
         }
 
-        /// <summary>
-        /// Cambiar estados de pedidos: Solo Admin y Ventas
-        /// Operaciones solo VE los pedidos, no los modifica
-        /// </summary>
+        //Cambiar estados de pedidos: Solo Admin y Ventas
+        // Operaciones solo VE los pedidos, no los modifica
         protected bool PuedeCambiarEstadoPedidos()
         {
             return TieneRol("Administrador", "Ventas", "Supervisor", "Vendedor");
         }
 
-        /// <summary>
-        /// Gestionar clientes: Admin y Ventas
-        /// </summary>
+        // Gestionar clientes: Admin y Ventas
         protected bool PuedeGestionarClientes()
         {
             return TieneRol("Administrador", "Ventas", "Supervisor", "Vendedor");
         }
 
-        /// <summary>
-        /// Solo Admin gestiona usuarios y roles
-        /// </summary>
+        // Solo Admin gestiona usuarios y roles
         protected bool PuedeGestionarUsuarios()
         {
             return TieneRol("Administrador");
@@ -159,7 +134,7 @@ namespace Pasteleria.Controllers
             return tipoUsuario == "Operaciones" || tipoUsuario == "Operador";
         }
 
-        // ========== VERIFICACIONES DE ROL ESPECÍFICO ==========
+        // Validación del rol
 
         protected bool EsAdministrador()
         {
@@ -209,7 +184,7 @@ namespace Pasteleria.Controllers
             return tipoUsuario == "Cliente";
         }
 
-        // ========== OBTENER INFORMACIÓN DEL USUARIO ==========
+        // Obtener información del usuario
 
         protected int? ObtenerUsuarioId()
         {

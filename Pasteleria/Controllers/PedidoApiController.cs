@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Pasteleria.Controllers.Api
 {
-    [Authorize] // Solo usuarios autenticados
+    [Authorize]
     [ApiController]
     [Route("api/pedidosapi")]
     public class PedidoApiController : ControllerBase
@@ -43,7 +43,8 @@ namespace Pasteleria.Controllers.Api
                     descripcion = p.DescripcionProducto,
                     precio = p.Precio,
                     impuesto = p.PorcentajeImpuesto,
-                    stock = p.Cantidad
+                    stock = p.Cantidad,
+                    descuento = p.PorcentajeDescuento ?? 0
                 }).ToList();
 
                 return Ok(resultado);
@@ -65,7 +66,6 @@ namespace Pasteleria.Controllers.Api
                     return BadRequest(new { error = "Debe enviar al menos un item" });
                 }
 
-                // Convertir a CarritoItem con datos de productos
                 var carritoItems = new List<CarritoItem>();
 
                 foreach (var item in items)
@@ -82,21 +82,36 @@ namespace Pasteleria.Controllers.Api
                         return BadRequest(new { error = $"Stock insuficiente para {producto.NombreProducto}. Disponible: {producto.Cantidad}" });
                     }
 
+                    var bruto = producto.Precio * item.Cantidad;
+
+                    // Calcular descuento del producto
+                    decimal descuentoProducto = 0;
+                    if (producto.PorcentajeDescuento.HasValue && producto.PorcentajeDescuento.Value > 0)
+                    {
+                        descuentoProducto = bruto * (producto.PorcentajeDescuento.Value / 100m);
+                    }
+
+                    // Sumar descuento del producto + descuento adicional
+                    var descuentoTotal = descuentoProducto + item.Descuento;
+                    if (descuentoTotal > bruto) descuentoTotal = bruto;
+
+                    var subtotalConDescuento = bruto - descuentoTotal;
+
                     var carritoItem = new CarritoItem
                     {
                         IdProducto = producto.IdProducto,
                         NombreProducto = producto.NombreProducto,
                         Cantidad = item.Cantidad,
                         Precio = producto.Precio,
-                        Descuento = item.Descuento,
-                        Subtotal = producto.Precio * item.Cantidad,
-                        PorcentajeImpuesto = producto.PorcentajeImpuesto
+                        Descuento = Math.Round(descuentoTotal, 2),
+                        Subtotal = Math.Round(subtotalConDescuento, 2),
+                        PorcentajeImpuesto = producto.PorcentajeImpuesto,
+                        PorcentajeDescuento = producto.PorcentajeDescuento
                     };
 
                     carritoItems.Add(carritoItem);
                 }
 
-                // Calcular totales
                 var resumen = _calcularTotales.CalcularResumen(carritoItems);
 
                 return Ok(new
@@ -123,7 +138,6 @@ namespace Pasteleria.Controllers.Api
             }
         }
 
-        // GET /api/pedidosapi/validar-stock/{productoId}
         [HttpGet("validar-stock/{productoId}")]
         public IActionResult ValidarStock(int productoId, [FromQuery] int cantidad = 1)
         {
@@ -155,7 +169,6 @@ namespace Pasteleria.Controllers.Api
         }
     }
 
-    // DTO para recibir items en el cálculo
     public class ItemCalculoRequest
     {
         public int ProductoId { get; set; }

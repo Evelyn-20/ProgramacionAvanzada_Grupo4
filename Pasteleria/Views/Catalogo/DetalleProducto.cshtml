@@ -69,12 +69,46 @@
 
                     <!-- Precio -->
                     <div style="background: var(--light-color); padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem;">
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <span style="color: var(--text-color); font-size: 1rem;">Precio:</span>
-                            <span style="font-size: 2.5rem; font-weight: 700; color: var(--primary-color); font-family: 'Playfair Display', serif;">
-                                ₡@Model.Precio.ToString("N0")
-                            </span>
-                        </div>
+                        @if (Model.TieneDescuento)
+                        {
+                            <!-- Con descuento -->
+                            <div>
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                                    <span style="color: var(--text-color); font-size: 1rem;">Precio original:</span>
+                                    <span style="font-size: 1.5rem; color: var(--text-color); text-decoration: line-through; opacity: 0.6; font-family: 'Playfair Display', serif;">
+                                        ₡@Model.Precio.ToString("N0")
+                                    </span>
+                                </div>
+
+                                <div style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: white; border-radius: 8px; margin-bottom: 0.5rem;">
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <span style="color: var(--text-color); font-size: 1rem;">Precio con descuento:</span>
+                                        <span style="background: #27ae60; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.9rem; font-weight: 700;">
+                                            -@Model.PorcentajeDescuento%
+                                        </span>
+                                    </div>
+                                    <span style="font-size: 2.5rem; font-weight: 700; color: #27ae60; font-family: 'Playfair Display', serif;">
+                                        ₡@Model.PrecioConDescuento.ToString("N0")
+                                    </span>
+                                </div>
+
+                                <div style="text-align: right; margin-top: 0.5rem;">
+                                    <small style="color: var(--text-color); font-size: 0.85rem;">
+                                        Ahorras: <strong style="color: #27ae60;">₡@Model.MontoDescuento.ToString("N0")</strong>
+                                    </small>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- Sin descuento -->
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="color: var(--text-color); font-size: 1rem;">Precio:</span>
+                                <span style="font-size: 2.5rem; font-weight: 700; color: var(--primary-color); font-family: 'Playfair Display', serif;">
+                                    ₡@Model.Precio.ToString("N0")
+                                </span>
+                            </div>
+                        }
                     </div>
 
                     <!-- Disponibilidad -->

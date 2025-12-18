@@ -155,20 +155,39 @@
                         </div>
                     </div>
 
-                    <!-- Porcentaje de Impuesto -->
-                    <div style="margin-bottom: 1.5rem;">
-                        @Html.LabelFor(model => model.PorcentajeImpuesto, new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
-                        <input type="text"
-                               name="PorcentajeImpuestoStr"
-                               id="PorcentajeImpuesto"
-                               value="@Model.PorcentajeImpuesto.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
-                               class="form-control"
-                               placeholder="13.00"
-                               style="width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" />
-                        @Html.ValidationMessageFor(model => model.PorcentajeImpuesto, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
-                        <small style="color: var(--text-color); font-size: 0.85rem; margin-top: 0.3rem; display: block;">
-                            <i class="fas fa-info-circle" style="color: var(--primary-color);"></i> Ingresa el porcentaje (ej: 13 para 13%)
-                        </small>
+                    <!-- Descuento e Impuesto -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <!-- Porcentaje de Descuento (OPCIONAL) -->
+                        <div>
+                            @Html.LabelFor(model => model.PorcentajeDescuento, "Descuento (%)", new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
+                            <input type="text"
+                                   name="PorcentajeDescuentoStr"
+                                   id="PorcentajeDescuento"
+                                   value="@(Model.PorcentajeDescuento.HasValue? Model.PorcentajeDescuento.Value.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) : "")"
+                                   class="form-control"
+                                   placeholder="0.00"
+                                   style="width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" />
+                            @Html.ValidationMessageFor(model => model.PorcentajeDescuento, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
+                            <small style="color: var(--text-color); font-size: 0.85rem; margin-top: 0.3rem; display: block;">
+                                <i class="fas fa-info-circle" style="color: var(--primary-color);"></i> Opcional. Dejar vacío o en 0 si no aplica.
+                            </small>
+                        </div>
+
+                        <!-- Porcentaje de Impuesto -->
+                        <div>
+                            @Html.LabelFor(model => model.PorcentajeImpuesto, "Impuesto (%)", new { @class = "form-label", style = "display: block; margin-bottom: 0.5rem; color: var(--dark-color); font-weight: 500;" })
+                            <input type="text"
+                                   name="PorcentajeImpuestoStr"
+                                   id="PorcentajeImpuesto"
+                                   value="@Model.PorcentajeImpuesto.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
+                                   class="form-control"
+                                   placeholder="13.00"
+                                   style="width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--secondary-color); border-radius: 10px; font-size: 1rem; transition: all 0.3s;" />
+                            @Html.ValidationMessageFor(model => model.PorcentajeImpuesto, "", new { @class = "text-danger", style = "color: #c33; font-size: 0.9rem; margin-top: 0.3rem; display: block;" })
+                            <small style="color: var(--text-color); font-size: 0.85rem; margin-top: 0.3rem; display: block;">
+                                <i class="fas fa-info-circle" style="color: var(--primary-color);"></i> Ej: 13 para 13%
+                            </small>
+                        </div>
                     </div>
 
                     <!-- Imagen del Producto -->

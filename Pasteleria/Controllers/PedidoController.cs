@@ -296,21 +296,62 @@ namespace Pasteleria.Controllers
                         });
                     }
 
+                    // Calcular precio bruto
+                    var bruto = producto.Precio * item.Cantidad;
+
+                    // 1. Calcular descuento del PRODUCTO (porcentaje configurado)
+                    decimal descuentoProducto = 0;
+                    if (producto.PorcentajeDescuento.HasValue && producto.PorcentajeDescuento.Value > 0)
+                    {
+                        descuentoProducto = bruto * (producto.PorcentajeDescuento.Value / 100m);
+                    }
+
+                    // 2. Agregar descuento ADICIONAL del pedido (si existe en el DTO)
+                    //    Solo si item.Descuento > 0 Y es diferente al descuento del producto
+                    decimal descuentoAdicional = 0;
+                    if (item.Descuento > 0)
+                    {
+                        // Si quieres que item.Descuento sea ADICIONAL al del producto:
+                        descuentoAdicional = item.Descuento;
+
+                        // O si item.Descuento es el TOTAL (reemplaza el del producto):
+                        // descuentoAdicional = 0;
+                        // descuentoProducto = item.Descuento;
+                    }
+
+                    // Total de descuentos
+                    var descuentoTotal = descuentoProducto + descuentoAdicional;
+
+                    // Validar que el descuento no supere el bruto
+                    if (descuentoTotal > bruto)
+                    {
+                        descuentoTotal = bruto;
+                    }
+
+                    // Subtotal NETO (después de descuentos)
+                    var subtotalNeto = bruto - descuentoTotal;
+
                     var carritoItem = new CarritoItem
                     {
                         IdProducto = producto.IdProducto,
                         NombreProducto = producto.NombreProducto,
                         Cantidad = item.Cantidad,
                         Precio = producto.Precio,
-                        Descuento = item.Descuento,
-                        Subtotal = producto.Precio * item.Cantidad,
-                        PorcentajeImpuesto = producto.PorcentajeImpuesto
+
+                        // Descuento TOTAL aplicado
+                        Descuento = Math.Round(descuentoTotal, 2),
+
+                        // Subtotal NETO (bruto - descuentos)
+                        Subtotal = Math.Round(subtotalNeto, 2),
+
+                        PorcentajeImpuesto = producto.PorcentajeImpuesto,
+                        PorcentajeDescuento = producto.PorcentajeDescuento
                     };
 
                     carritoItems.Add(carritoItem);
                 }
 
-                // Calcular totales
+                // Calcular totales con CalcularTotales
                 var resumen = _calcularTotales.CalcularResumen(carritoItems);
 
                 // Obtener ID del usuario administrador/empleado
