@@ -30,7 +30,7 @@ public class Contexto : DbContext
             // Leer la cadena de conexión de Azure o usar la local
             string connectionString = Environment.GetEnvironmentVariable("SQLAZURECONNSTR_Contexto")
                 ?? Environment.GetEnvironmentVariable("SQLCONNSTR_Contexto")
-                ?? "Data Source=EVELYN\\SQLEXPRESS;Initial Catalog=PASTELERIA;Integrated Security=True;TrustServerCertificate=True";
+                ?? "Data Source=localhost\\SQLEXPRESS;Initial Catalog=PASTELERIA;Integrated Security=True;TrustServerCertificate=True";
 
             optionsBuilder.UseSqlServer(
                 connectionString,
